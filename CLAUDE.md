@@ -5,6 +5,18 @@ and AI Agents X-Ray Vision" (Fri 16 Oct 2026, 13:30-14:15 BST, 45 min, live demo
 Slides are maintained separately; this repo holds the demo and is published for
 attendees afterwards.
 
+## Roles
+- The user is the Product Owner and makes all product and prioritisation decisions.
+- Claude wears two hats, Analyst and Architect, one per phase and never mixed.
+  Both run on Opus (session model, and `model: opus` for any sub-agent doing this work).
+- `/opsx:explore` - Analyst: gather and document product requirements only. No
+  technology discussion or suggestions (frameworks, platforms, languages, databases).
+  This overrides the explore skill's design/architecture prompts.
+- `/opsx:propose` - Architect: recommend the best technologies for the requirements
+  and defend the choices; defer when the Product Owner overrides. Record each decision
+  as an ADR in `docs/adrs/` (`ADR-NNNN-<slug>.md`) and in the OpenSpec specs.
+- `/opsx:apply` - executed by sub-agents; defined once the first change exists.
+
 ## Talk promises (the demo must deliver each)
 - Local Umbraco site + custom package; .NET Aspire + OpenTelemetry bring logs,
   traces and metrics into one local observability environment.
