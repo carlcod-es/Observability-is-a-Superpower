@@ -6,12 +6,32 @@ reference in CLAUDE.md, before the talk.
 Rule: no demo answers here (planted problems, their causes or fixes). CLAUDE.md
 references this file, so the on-stage agent may read it.
 
-## Next question (discovery paused here, 2026-09-25)
-- [ ] Demo site look: (a) blank Umbraco + minimal template, (b) community starter
-  kit (e.g. Clean; v17 support unknown, adds trace noise), (c) small custom site
-  (home + contact page, simple CSS). Recommended: (c) - readable traces, full control.
+## Next step
+- [ ] `/opsx:propose`: product requirements below become the proposal and specs; Architect
+  decisions (proposals, open technical decisions, spikes) become design and ADRs.
 
-## Proposed, awaiting confirmation
+## Product requirements confirmed in explore (2026-10-06)
+- Site: fictional pottery studio (working name Slipcast Studio). Pages: Home, Classes, Contact.
+- Forms (two):
+  - Contact: Name, Email, Message, "Reply by phone?" checkbox. Owner notification only.
+  - Book a class: Name, Email (sends confirmation), Class (select: Wheel throwing, Hand
+    building, Glazing), Experience notes (optional), "Join mailing list" checkbox.
+    Owner notification + submitter confirmation. A booking is a plain submission: no
+    places, availability or payment.
+- Select field type stays.
+- Stored submission: field values, form, page, UTC timestamp. No IP or browser info.
+- Agent never accesses the database; demo personal data is in telemetry only.
+- Name, Message and Experience notes are never recorded in telemetry.
+- Prod data: scripted submissions over the days before the talk (repeat submitters,
+  validation failures, both forms, all classes), plus attendees submitting live via QR code.
+- Prod attendee handling: notice on both forms (live demo, deleted within 7 days, made-up
+  email allowed); delete prod submissions within 7 days of 16 Oct; per-visitor submission
+  limit; presenter switch to close forms; real confirmation emails sent.
+- Prod owner mailbox: presenter-owned demo alias (prod settings only, never in the repo).
+- Package name `Superpower.Forms` is final; not planned for release.
+- Act 4 split: resolved (presenter-only notes).
+
+## Architect proposals (deferred to /opsx:propose; not for explore)
 - [ ] Repo layout:
   `src/Superpower.AppHost`, `src/Superpower.ServiceDefaults`, `src/Superpower.Web`
   (thin Umbraco site), `src/Superpower.Forms` (package, single RCL project),
@@ -24,13 +44,12 @@ references this file, so the on-stage agent may read it.
   validation failures per form/field become a metric - "useful telemetry" example.
 
 ## Open decisions
-- [ ] IP / client info storage policy: store, truncate, hash or omit.
-- [ ] Keep or drop the Select field type (only type needing extra config).
-- [ ] Final package name (placeholder `Superpower.Forms`).
 - [ ] Repo layout: AppHost, ServiceDefaults, demo site, package, tests.
-- [ ] Act 4 split between agent-driven work and presenter/slide content (parked; question held in Claude memory).
-- [ ] Demo content in prod: create manually after first deploy, or uSync.
+- [ ] Site content (pages, forms) in prod: create manually after first deploy, or uSync.
 - [ ] Media on Azure Container Apps: media-free site, Azure Files mount or Blob provider.
+- [ ] Prod site after the talk (PO decides later): take it down once attendee submissions
+  are deleted (7 days after 16 Oct; closes the public form, stops cost), or keep it running
+  as a live reference (abuse surface stays open).
 
 ## Unknowns to spike
 - [ ] Current Aspire version at talk date; dashboard MCP server tool set (traces, logs, metrics, resource commands?).
@@ -45,9 +64,12 @@ references this file, so the on-stage agent may read it.
 - [ ] Azure Monitor exporter switch in ServiceDefaults when APPLICATIONINSIGHTS_CONNECTION_STRING is set.
 
 ## Todos
+- [ ] First /opsx:propose: re-run the existing technology decisions (CLAUDE.md, Decision rationale below)
+  through the Architect phase as ADRs. Talk technology is a prerequisite; check it for gaps.
 - [ ] Capture confirmed decisions as an OpenSpec change (proposal, design, specs, tasks).
 - [ ] Build the forms package and demo site.
-- [ ] Create `demo/act-N-*` fallback branches.
+- [ ] Plan and create `demo/act-N-*` fallback branches. Keep `docs/research/` and any OpenSpec
+  artifacts that describe later-act fixes off earlier demo branches.
 - [ ] Commit Claude Code config for attendees: `.mcp.json`, `.claude/settings.json` (read-only MCP tools allowlisted).
 - [ ] Demo-specific CLAUDE.md for stage: agent instructions to diagnose and verify via telemetry.
 - [ ] Script and rehearse agent prompts; rehearse with `/fast`.

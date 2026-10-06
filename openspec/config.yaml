@@ -1,32 +1,28 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Shown to AI when creating artifacts. CLAUDE.md holds the full constraints and
+# confirmed decisions; keep this in sync with it.
+context: |
+  Demo repo for the conference talk "Observability is a Superpower" (16 Oct 2026,
+  45 min, live demo). Published for attendees afterwards.
+  Fixed talk constraints: .NET 10, Umbraco 17 LTS, .NET Aspire, OpenTelemetry,
+  Claude Code CLI with MCP (Aspire MCP locally, Azure MCP Server read-only for prod),
+  Azure (Container Apps, Azure SQL, Application Insights).
+  Demo package: Superpower.Forms (never "Umbraco Forms"; not planned for release).
+  Code must stay portable across Windows, macOS and Linux.
+  Roles: the user is Product Owner. Proposals and designs are Architect work;
+  every technology decision gets a Nygard ADR in docs/adrs/ (ADR-NNNN-<slug>.md).
+  Cite numbered items with their source (e.g. ADR-0004, `<change>` task 5.3).
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
-
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+rules:
+  proposal:
+    - Product requirements only; no technology choices (those belong in design).
+    - Treat the fixed talk constraints as given, not as decisions to justify.
+  specs:
+    - Requirements state observable behaviour; reference ADRs for technology decisions.
+  design:
+    - Each technology decision references its ADR in docs/adrs/; create or update the ADR
+      in the same step (Nygard format - Title, Status, Context, Decision, Consequences).
+    - For each decision state the alternatives considered and why they lost.
+    - Fixed talk constraints are prerequisites; record them as context, and still check
+      them for gaps (missing decisions they imply).

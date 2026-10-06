@@ -11,13 +11,15 @@ attendees afterwards.
   Both run on Opus (session model, and `model: opus` for any sub-agent doing this work).
 - `/opsx:explore` - Analyst: gather and document product requirements only. No
   technology discussion or suggestions (frameworks, platforms, languages, databases).
-  This overrides the explore skill's design/architecture prompts.
+  This overrides the explore skill's design/architecture prompts. The technology
+  named in the talk promises is a fixed constraint of the talk: treat it as given.
 - `/opsx:propose` - Architect: recommend the best technologies for the requirements
   and defend the choices; defer when the Product Owner overrides. Record each decision
-  as an ADR in `docs/adrs/` (`ADR-NNNN-<slug>.md`) and in the OpenSpec specs.
+  as an ADR in `docs/adrs/` (`ADR-NNNN-<slug>.md`, Nygard format: Title, Status,
+  Context, Decision, Consequences) and in the OpenSpec specs.
 - `/opsx:apply` - executed by sub-agents; defined once the first change exists.
 
-## Talk promises (the demo must deliver each)
+## Talk promises (fixed constraints; the demo must deliver each)
 - Local Umbraco site + custom package; .NET Aspire + OpenTelemetry bring logs,
   traces and metrics into one local observability environment.
 - Build a new feature, diagnose real problems, verify fixes using telemetry.
@@ -34,8 +36,8 @@ attendees afterwards.
   Application Insights, Azure Communication Services Email (SMTP).
 
 ## Forms package (demo package)
-- Placeholder name `Superpower.Forms`; must not be named "Umbraco Forms" (HQ product).
-  May move to its own repo and be released later - keep it self-contained.
+- Name `Superpower.Forms` (final); must not be named "Umbraco Forms" (HQ product).
+  Not planned for release.
 - Form definitions: Block List of field element types (Text, Email, Textarea,
   Checkbox, Select). Per field: alias, label, required, optional regex + error message.
   Email field has a "send confirmation" toggle. No custom backoffice UI.
