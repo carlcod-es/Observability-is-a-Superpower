@@ -36,7 +36,7 @@ attendees afterwards.
   Application Insights, Azure Communication Services Email (SMTP).
 
 ## Forms package (demo package)
-- Name `Superpower.Forms` (final); must not be named "Umbraco Forms" (HQ product).
+- Name `SuperPower.Forms` (final); must not be named "Umbraco Forms" (HQ product).
   Not planned for release.
 - Form definitions: Block List of field element types (Text, Email, Textarea,
   Checkbox, Select). Per field: alias, label, required, optional regex + error message.

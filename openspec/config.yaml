@@ -8,7 +8,7 @@ context: |
   Fixed talk constraints: .NET 10, Umbraco 17 LTS, .NET Aspire, OpenTelemetry,
   Claude Code CLI with MCP (Aspire MCP locally, Azure MCP Server read-only for prod),
   Azure (Container Apps, Azure SQL, Application Insights).
-  Demo package: Superpower.Forms (never "Umbraco Forms"; not planned for release).
+  Demo package: SuperPower.Forms (never "Umbraco Forms"; not planned for release).
   Code must stay portable across Windows, macOS and Linux.
   Roles: the user is Product Owner. Proposals and designs are Architect work;
   every technology decision gets a Nygard ADR in docs/adrs/ (ADR-NNNN-<slug>.md).

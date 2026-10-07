@@ -28,24 +28,31 @@ references this file, so the on-stage agent may read it.
   email allowed); delete prod submissions within 7 days of 16 Oct; per-visitor submission
   limit; presenter switch to close forms; real confirmation emails sent.
 - Prod owner mailbox: presenter-owned demo alias (prod settings only, never in the repo).
-- Package name `Superpower.Forms` is final; not planned for release.
+- Package name `SuperPower.Forms` is final; not planned for release.
 - Act 4 split: resolved (presenter-only notes).
 
 ## Architect proposals (deferred to /opsx:propose; not for explore)
 - [ ] Repo layout:
-  `src/Superpower.AppHost`, `src/Superpower.ServiceDefaults`, `src/Superpower.Web`
-  (thin Umbraco site), `src/Superpower.Forms` (package, single RCL project),
-  `tests/Superpower.Forms.Tests` (xUnit), `infra/` (only if `aspire deploy` is not enough),
-  `Superpower.slnx`.
+  `src/SuperPower.AppHost`, `src/SuperPower.ServiceDefaults`, `src/SuperPower.Web`
+  (thin Umbraco site), `src/SuperPower.Forms` (package, single RCL project),
+  `tests/SuperPower.Forms.Tests` (xUnit), `infra/` (only if `aspire deploy` is not enough),
+  `SuperPower.slnx`.
 - [ ] Package telemetry depends only on BCL (`ActivitySource`, `Meter`, `ILogger`), no
-  OpenTelemetry package references; host opts in via `AddSource`/`AddMeter("Superpower.Forms")`.
+  OpenTelemetry package references; host opts in via `AddSource`/`AddMeter("SuperPower.Forms")`.
   Rationale: zero cost for consumers, releasable later, Act 1 talking point.
 - [ ] Server-side validation only (no client JS): every submission reaches the server,
   validation failures per form/field become a metric - "useful telemetry" example.
 
+## Architect decisions confirmed by PO (ADRs to be written in /opsx:propose)
+- Site content and templates: uSync files committed in the site project, imported on first
+  boot of an empty database (local SQL container, SQLite, first Azure deploy). Database stays
+  out of source control. Forms package keeps its own package migration (element types with
+  fixed keys, submissions table); it must not depend on uSync. Considered: Clean starter kit's
+  embedded package.zip + PackageMigrationPlan + publish handler - rejected: opaque, needs a
+  new migration step per content change.
+
 ## Open decisions
 - [ ] Repo layout: AppHost, ServiceDefaults, demo site, package, tests.
-- [ ] Site content (pages, forms) in prod: create manually after first deploy, or uSync.
 - [ ] Media on Azure Container Apps: media-free site, Azure Files mount or Blob provider.
 - [ ] Prod site after the talk (PO decides later): take it down once attendee submissions
   are deleted (7 days after 16 Oct; closes the public form, stops cost), or keep it running
