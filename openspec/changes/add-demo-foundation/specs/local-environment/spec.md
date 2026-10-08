@@ -16,7 +16,7 @@ fault hop with one command, and the dashboard SHALL show each as a resource with
 
 #### Scenario: Fresh database on start
 - **WHEN** the environment starts without existing database data
-- **THEN** the site populates itself as defined by the studio-site capability
+- **THEN** the site populates itself as defined by the agency-site capability
 
 ### Requirement: Telemetry in one place
 Structured logs, traces and metrics from the site SHALL appear in the dashboard, correlated by

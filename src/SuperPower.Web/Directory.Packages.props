@@ -1,4 +1,4 @@
-<Project>
+/o<Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageFloatingVersionsEnabled>true</CentralPackageFloatingVersionsEnabled>

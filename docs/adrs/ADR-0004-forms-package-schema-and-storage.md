@@ -19,14 +19,16 @@ with fixed keys (`ContentTypeCreateModel.Key`).
      properties: alias, label, required, pattern, pattern error message. Select adds options.
   2. Block List data type (fixed key) allowing the five element types.
   3. Document type `superPowerForm` (fixed key, element-free, no template) with a `fields`
-     property using that data type.
+     property using that data type and a `successMessage` text property (shown after a valid
+     submission; revised 2026-10-08).
   4. Table `superPowerFormSubmission`: Id (int identity PK), FormKey (guid, indexed), PageKey
      (guid), SubmittedUtc (datetime), FieldsJson (`NVARCHARMAX`). No IP or client columns.
 - Steps check for existence by key/table name before creating.
 - Data access uses NPoco `Sql<ISqlContext>` builders through Umbraco's scope provider; no raw
   SQL strings.
-- The site owns where forms live: a "Forms" folder and the two form nodes are site content
-  (ADR-0003); pages reference a form through a content picker.
+- The site owns where forms live: a "Forms" folder and the three form nodes (Contact, Service
+  enquiry, Event booking) are site content (ADR-0003); pages reference a form through a content
+  picker (ADR-0014).
 - uSync may export the package's types; fixed keys keep the export and the migration aligned.
 
 Alternatives considered:
@@ -41,3 +43,5 @@ Alternatives considered:
 - Changing a type after first install requires a new migration step with a new key.
 - Email notification settings (owner email, subjects, bodies, send-confirmation toggle) are
   added to the form document type by a later step in change `add-form-emails`.
+- Event bookings are stored by the site in its own table, not by the package (ADR-0015); the
+  package exposes submission handlers for that (ADR-0013).

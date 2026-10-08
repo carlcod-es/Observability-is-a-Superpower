@@ -16,9 +16,13 @@ refresh.
 - Validation: a pure validator in the package (required, email address, pattern with
   timeout, select option membership). No `required`/`pattern` HTML attributes; inputs use
   `novalidate` so the browser never blocks a post.
+- Submission handlers (ADR-0013, added 2026-10-08): `Prepare` runs on render and before
+  validation on post; a closed form shows its message instead of fields and rejects posts;
+  fixed fields are not rendered and must not be overridden by the post. `OnStored` runs in the
+  same scope as the submission insert.
 - Failure: return the current page with ModelState errors and entered values.
 - Success: store, set a TempData flag, redirect to the current page (post/redirect/get); the
-  view shows the confirmation message when the flag is present.
+  view shows the form's `successMessage` (ADR-0004) when the flag is present.
 
 Alternatives considered:
 - Client-side plus server-side validation: better UX, but invalid attempts would never reach

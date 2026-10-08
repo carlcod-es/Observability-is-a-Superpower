@@ -2,7 +2,10 @@
 
 See proposal.md for motivation. Current state: `src/SuperPower.Web` is an unmodified Umbraco
 17.7.1 site (SQLite, unattended install, uSync 17.4.3 referenced, database git-ignored) with
-`src/SuperPower.slnx`. No AppHost, package or tests exist. Installed Aspire CLI is
+`src/SuperPower.slnx`. Content started on branch `sample-site` (uSync): document types `home`
+and `page` (composition `compPage`: `pageTitle`, `summary`, `mainContent` Block List with title,
+text and image blocks), pages Home, About us, Contact us, an empty media folder. No AppHost,
+package or tests exist. Installed Aspire CLI is
 9.3.1-preview; current is 13.6.0.
 
 Fixed by the talk (ADR-0001): .NET 10, Umbraco 17 LTS, Aspire, OpenTelemetry, Claude Code
@@ -35,6 +38,8 @@ bypasses the OpenTelemetry logging provider (ADR-0007); Umbraco emits no spans i
 - Package spans and metrics, MailKit instrumentation, emails (change `add-form-emails`).
 - Azure deployment, App Insights verification, prod agent access (change
   `add-production-environment`).
+- Booking workflow: confirmation link, allocation, waiting list, places left (change
+  `add-event-bookings`).
 - Demo branch creation (separate planning topic).
 
 ## Decisions
@@ -42,15 +47,18 @@ bypasses the OpenTelemetry logging provider (ADR-0007); Umbraco emits no spans i
 1. **Versions and freeze** - Aspire 13.6.0, Umbraco 17.7.1, uSync 17.4.3, central pinning,
    freeze from 13 Oct. ADR-0001.
 2. **Layout** - solution and central package props at repo root; AppHost, ServiceDefaults,
-   Web, Forms under `src/`; tests under `tests/`. ADR-0002.
+   Web, Forms under `src/`; `SuperPower.Forms.Tests` and `SuperPower.Web.Tests` under
+   `tests/`. ADR-0002.
 3. **Content seeding** - uSync files committed, `ImportOnFirstBoot` on; views as source files.
    Rejected: embedded package.zip migration, content-in-code, committed DB. ADR-0003.
 4. **Package schema and storage** - one idempotent async package migration plan creating
-   element types, a Block List data type and a form document type with fixed keys, plus the
-   submissions table (NPoco, `NVARCHARMAX` JSON, no client info). Site content owns form nodes;
-   pages pick a form. Rejected: EF Core, custom editor UI, per-page block forms. ADR-0004.
+   element types, a Block List data type and a form document type (`fields`, `successMessage`) with fixed
+   keys, plus the submissions table (NPoco, `NVARCHARMAX` JSON, no client info). Site content
+   owns the three form nodes; pages pick a form. Rejected: EF Core, custom editor UI, per-page block forms. ADR-0004.
 5. **Rendering and validation** - ViewComponent + SurfaceController, antiforgery,
-   server-side-only validation with `novalidate`, regex timeout, post/redirect/get. Rejected:
+   server-side-only validation with `novalidate`, regex timeout, post/redirect/get; the form's
+   `successMessage` is shown after redirect; submission handlers (decision 13) run on render
+   and post. Rejected:
    client validation, JS fetch endpoint. ADR-0005.
 6. **Package telemetry dependency** - BCL `ActivitySource`/`Meter`/`ILogger` named
    `SuperPower.Forms`, host opts in. Rejected: OTel API package reference. ADR-0006.
@@ -68,17 +76,44 @@ bypasses the OpenTelemetry logging provider (ADR-0007); Umbraco emits no spans i
     (reset). Rejected: MailPit, .NET Toxiproxy client, timeout toxic. ADR-0010.
 11. **Agent access** - committed `.mcp.json` (`aspire agent mcp`), read-only tools allowed,
     `execute_resource_command` prompts, no DB access, no CLI skills. ADR-0011.
-12. **Testing** - xUnit v3 for package logic; scripted smoke checks for startup and
-    end-to-end. ADR-0012.
+12. **Testing** - xUnit v3 for package logic and for site booking logic (fake
+    `TimeProvider`); scripted smoke checks for startup and end-to-end. ADR-0012.
+13. **Submission handlers** - package interface `IFormSubmissionHandler`, implemented by the
+    site, selected per form and page. `Prepare` (render and post) may close the form with a
+    message or fix a field's value: a fixed field is not rendered and a different posted value
+    fails validation; a closed form renders its message only and rejects posts. `OnStored`
+    runs in the same scope as the submission insert; a failure rolls both back. Keeps event
+    rules out of the package; reusable for a later switch that closes every form. Rejected:
+    booking logic in the package, Umbraco notifications (no veto before validation), a
+    separate booking controller (duplicates rendering and validation). ADR-0013.
+14. **Event content model** - composition `eventBase` (`compPage` + `startDate`, Date Time with
+    time zone, Europe/London only) and document types `eventInPerson` (+ `capacity`, Numeric,
+    required, min 1) and `eventOnline`. The format is the document type, so online events have
+    no capacity setting without custom UI. An event is past when `startDate` <= UTC now.
+    Rejected: one type with a format dropdown (capacity shown for online events). ADR-0014.
+15. **Booking storage** - site-owned table `acmeEventBooking`: Id (int identity PK), EventKey
+    (guid, indexed), SubmissionId (int, indexed, no FK), Places (int), Status (`NVARCHAR(16)`,
+    `Pending`), CreatedUtc (datetime). Created by a site `MigrationPlan` run through `Upgrader`
+    on `UmbracoApplicationStartingNotification` at runtime level Run; NPoco `Sql<ISqlContext>`
+    builders. Written by the site's `EventBookingHandler.OnStored`. Rejected: table in the
+    package (package stays generic), bookings only in submission JSON (`add-event-bookings`
+    needs indexed event and status queries), FK to the submission table (no ordering
+    guarantee across migration plans). Columns for `add-event-bookings` are added there by
+    new migration steps. ADR-0015.
 
-Site structure (content, via uSync):
+Site structure (content, via uSync; `compPage` gains an optional `form` picker limited to
+`superPowerForm`):
 ```
-Home (home)            template Home      introduction, upcoming classes
-+-- Classes (classes)  template Classes   static class list + form picker -> Book a class
-+-- Contact (contact)  template Contact   form picker -> Contact
+Home (home)                      template Home      introduction, next upcoming events
++-- About us (page)              template Page
++-- Events (events)              template Events    upcoming events by date; form -> Event booking
+|   +-- <event> (eventInPerson)  template Event     details; parent's form (closed when past)
+|   +-- <event> (eventOnline)    template Event     details; parent's form, Places fixed to 1
++-- Services (services)          template Services  service list; form -> Service enquiry
+|   +-- <service> (service)      template Service   description; parent's form
++-- Contact us (page)            template Page      form -> Contact
 Forms (formsFolder, root, no template)
-+-- Contact            (superPowerForm)
-+-- Book a class       (superPowerForm)
++-- Contact / Service enquiry / Event booking   (superPowerForm)
 ```
 Pages share a layout with navigation and one small stylesheet; no media items.
 
@@ -100,6 +135,13 @@ Pages share a layout with navigation and one small stylesheet; no media items.
   on a removed volume before cutting any demo branch.
 - [Port 2525 or the Aspire dashboard port in use on the stage machine] → check during
   rehearsal.
+- [Upgrader runs before unattended install completes on a fresh database] → verify the booking
+  table exists after first boot on SQLite and SQL Server (task 5.1); fallback: package
+  migration plan in the site assembly.
+- [`compPage` image block uses the media library, against spec `agency-site` "No media library
+  dependency"] → remove the block and the empty media folder (task 6.2); imagery as static assets.
+- [Date Time with time zone stored value shape unverified for 17.7.1] → read one stored value
+  before writing the past-event check (task 5.2).
 - [Block List data type configuration shape unverified for 17.7.1] → create it once in the
   backoffice, read the stored configuration, mirror it in the migration (task 3.3).
 

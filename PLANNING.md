@@ -7,86 +7,94 @@ Rule: no demo answers here (planted problems, their causes or fixes). CLAUDE.md
 references this file, so the on-stage agent may read it.
 
 ## Next step
-- [ ] `/opsx:propose`: product requirements below become the proposal and specs; Architect
-  decisions (proposals, open technical decisions, spikes) become design and ADRs.
+- [ ] PO: decide how `/opsx:apply` sub-agents work (see "Open decisions").
+- [ ] `/opsx:apply add-demo-foundation`: planning complete 2026-10-08 (ADR-0001..0015).
+- [ ] Architect: design and tasks for `add-event-bookings`; may run alongside the build
+  (ADR-0015 keeps its columns out of `add-demo-foundation`).
 
-## Product requirements confirmed in explore (2026-10-06)
-- Site: fictional pottery studio (working name Slipcast Studio). Pages: Home, Classes, Contact.
-- Forms (two):
+## Product requirements confirmed in explore (2026-10-06, revised 2026-10-08)
+- Site: fictional marketing agency, Acme Agency (replaces the pottery studio). Pages: Home,
+  About us, Contact us, Events list, event pages, Services list, service pages.
+- Services (e.g. Umbraco upgrade, SEO audit, AdWords audit): no capacity; Service enquiry form.
+- Events (e.g. "How to get the most out of your CMS"): free; in person (capacity set by the
+  editor) or online (no capacity). Past events show "This event has ended", no form. No payment.
+- Forms (three; the event or service comes from the page, not a field):
   - Contact: Name, Email, Message, "Reply by phone?" checkbox. Owner notification only.
-  - Book a class: Name, Email (sends confirmation), Class (select: Wheel throwing, Hand
-    building, Glazing), Experience notes (optional), "Join mailing list" checkbox.
-    Owner notification + submitter confirmation. A booking is a plain submission: no
-    places, availability or payment.
-- Select field type stays.
+  - Service enquiry: Name, Email, Company (optional), Website (optional), Message. Owner
+    notification + submitter confirmation.
+  - Event booking: Name, Email, Places 1-4 (in person only; online is always 1), Notes
+    (optional), "Join mailing list" checkbox. No per-guest names.
+- Booking workflow: submitting stores a pending booking. A personal link (emailed) confirms it;
+  places are allocated when the link is opened, all or nothing, else waiting list. Online events
+  always confirm. Links never expire; opening again shows current status. Waiting list is final:
+  no promotion, no cancellation. One booking per email per event. Places left counted from
+  confirmed bookings, shown on in-person event pages.
+- Emails: booking received (click to confirm), confirmed (online: joining link), waitlisted;
+  enquiry owner + confirmation; contact owner. Owner notified of bookings on confirm/waitlist.
 - Stored submission: field values, form, page, UTC timestamp. No IP or browser info.
 - Agent never accesses the database; demo personal data is in telemetry only.
-- Name, Message and Experience notes are never recorded in telemetry.
-- Prod data: scripted submissions over the days before the talk (repeat submitters,
-  validation failures, both forms, all classes), plus attendees submitting live via QR code.
-- Prod attendee handling: notice on both forms (live demo, deleted within 7 days, made-up
-  email allowed); delete prod submissions within 7 days of 16 Oct; per-visitor submission
-  limit; presenter switch to close forms; real confirmation emails sent.
+- Never recorded in telemetry: Name, Message, Notes, Company, Website, email address, the
+  confirmation link. Fine: form, event or service, places, outcome.
+- Owner dashboard of bookings: stretch goal.
+- Prod data: scripted submissions over the days before the talk (repeat submitters, validation
+  failures, all forms, bookings across events incl. some never confirmed, one in-person event
+  nearly full at talk time), plus attendees submitting live via QR code.
+- Prod attendee handling: notice on all forms (live demo, deleted within 7 days); bookings need a
+  real email, contact and enquiry may use a made-up one; delete prod submissions and bookings
+  within 7 days of 16 Oct; one booking per email per event; one presenter switch closes every
+  form; real emails sent.
 - Prod owner mailbox: presenter-owned demo alias (prod settings only, never in the repo).
 - Package name `SuperPower.Forms` is final; not planned for release.
 - Act 4 split: resolved (presenter-only notes).
 
-## Architect proposals (deferred to /opsx:propose; not for explore)
-- [ ] Repo layout:
-  `src/SuperPower.AppHost`, `src/SuperPower.ServiceDefaults`, `src/SuperPower.Web`
-  (thin Umbraco site), `src/SuperPower.Forms` (package, single RCL project),
-  `tests/SuperPower.Forms.Tests` (xUnit), `infra/` (only if `aspire deploy` is not enough),
-  `SuperPower.slnx`.
-- [ ] Package telemetry depends only on BCL (`ActivitySource`, `Meter`, `ILogger`), no
-  OpenTelemetry package references; host opts in via `AddSource`/`AddMeter("SuperPower.Forms")`.
-  Rationale: zero cost for consumers, releasable later, Act 1 talking point.
-- [ ] Server-side validation only (no client JS): every submission reaches the server,
-  validation failures per form/field become a metric - "useful telemetry" example.
+## Change order (2026-10-08)
+1. `add-demo-foundation`: agency site, events and services, three forms, booking storage
+   (bookings stay pending).
+2. `add-event-bookings`: confirmation link, allocation, waiting list, places left.
+3. `add-form-emails`: all emails, including the one carrying the link.
+4. `add-production-environment`.
 
-## Architect decisions confirmed by PO (ADRs to be written in /opsx:propose)
-- Site content and templates: uSync files committed in the site project, imported on first
-  boot of an empty database (local SQL container, SQLite, first Azure deploy). Database stays
-  out of source control. Forms package keeps its own package migration (element types with
-  fixed keys, submissions table); it must not depend on uSync. Considered: Clean starter kit's
-  embedded package.zip + PackageMigrationPlan + publish handler - rejected: opaque, needs a
-  new migration step per content change.
+## Architect follow-ups from the 2026-10-08 pivot
+- [ ] `add-event-bookings`: design.md, ADR(s) and tasks (allocation under concurrent link opens;
+  new booking columns via new migration steps, ADR-0015).
 
 ## Open decisions
-- [ ] Repo layout: AppHost, ServiceDefaults, demo site, package, tests.
-- [ ] Media on Azure Container Apps: media-free site, Azure Files mount or Blob provider.
+- [ ] `/opsx:apply` sub-agents: granularity (per tasks.md section or whole change), model,
+  review between sections. PO decides before the first apply.
 - [ ] Prod site after the talk (PO decides later): take it down once attendee submissions
   are deleted (7 days after 16 Oct; closes the public form, stops cost), or keep it running
   as a live reference (abuse surface stays open).
 
 ## Unknowns to spike
-- [ ] Current Aspire version at talk date; dashboard MCP server tool set (traces, logs, metrics, resource commands?).
-- [ ] Aspire CLI command for agent/MCP config (`aspire mcp init` vs `aspire agent init`).
-- [ ] Umbraco 17 logging (Serilog) -> OTLP: bridge vs ILogger provider; how logs appear in the dashboard.
-- [ ] SqlClient instrumentation spans for Umbraco's NPoco queries.
-- [ ] smtp4dev container in AppHost: ports, endpoints, UI.
-- [ ] Toxiproxy container in AppHost: proxy setup at startup, dashboard resource commands (`WithCommand`).
+Decided in ADRs; verified by `add-demo-foundation` tasks:
+- [ ] Umbraco 17 Serilog -> OTLP via forwarding sink (ADR-0007): task 1.3.
+- [ ] SqlClient spans for Umbraco's NPoco queries; background span volume (ADR-0008): task 1.4.
+- [ ] smtp4dev and Toxiproxy in the AppHost, Slow/Break/Heal commands (ADR-0010): tasks 2.2, 2.3.
+- [ ] Booking table migration timing on a fresh unattended install (ADR-0015): task 5.1.
+- [ ] Date Time with time zone stored value shape (ADR-0014): task 5.2.
+- [ ] Aspire MCP tool set and `aspire agent init --mcp` (ADR-0011): task 7.1.
+For `add-production-environment`:
 - [ ] Azure MCP Server: read-only mode, Monitor/App Insights query tools, running under a limited identity (Monitoring Reader + Log Analytics Reader).
 - [ ] Azure Communication Services Email via SMTP from Umbraco IEmailSender.
 - [ ] Umbraco 17 on Azure Container Apps: deploy via azd / `aspire deploy`, cold start, Examine/temp on local disk.
-- [ ] Azure Monitor exporter switch in ServiceDefaults when APPLICATIONINSIGHTS_CONNECTION_STRING is set.
+- [ ] Azure Monitor exporter switch (ADR-0008; code in task 1.4) verified against Application Insights.
 
 ## Todos
-- [ ] First /opsx:propose: re-run the existing technology decisions (CLAUDE.md, Decision rationale below)
-  through the Architect phase as ADRs. Talk technology is a prerequisite; check it for gaps.
-- [ ] Capture confirmed decisions as an OpenSpec change (proposal, design, specs, tasks).
-- [ ] Build the forms package and demo site.
 - [ ] Plan and create `demo/act-N-*` fallback branches. Keep `docs/research/` and any OpenSpec
   artifacts that describe later-act fixes off earlier demo branches.
-- [ ] Commit Claude Code config for attendees: `.mcp.json`, `.claude/settings.json` (read-only MCP tools allowlisted).
 - [ ] Demo-specific CLAUDE.md for stage: agent instructions to diagnose and verify via telemetry.
 - [ ] Script and rehearse agent prompts; rehearse with `/fast`.
 - [ ] Record fallback videos of agent segments.
 - [ ] Deploy to Azure the day before; smoke test the morning of; min replicas 1.
 - [ ] Stage layout: VSCodium + Claude CLI terminal, browser tabs (dashboard, smtp4dev, site).
 - [ ] Venue network plan: everything local except the LLM.
-- [ ] Attendee README: how to run, MCP setup, SQLite note (no DB spans on SQLite).
 - [ ] Before the talk: remove demo-plan entries from Claude memory, or run the demo
   from a different clone path (memory is keyed to the folder path and loads on stage).
+
+Resolved 2026-10-08 and removed: repo layout (ADR-0002), media (spec `agency-site`, no media
+library), Architect proposals (ADR-0002, ADR-0005, ADR-0006), uSync seeding (ADR-0003), Aspire
+version and MCP command (ADR-0001, ADR-0011), first `/opsx:propose` and OpenSpec change, attendee
+agent config (task 7.1), attendee README (task 8.1), build (`add-demo-foundation`).
 
 ## Decision rationale (confirmed decisions in CLAUDE.md)
 - Block List field definitions: Umbraco 17 backoffice is Lit/TS; custom UI would be

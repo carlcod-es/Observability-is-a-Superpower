@@ -1,7 +1,8 @@
 ## Purpose
 
 Lets editors define a form in the CMS from a list of field blocks, without custom back-office
-screens, so that the site's Contact and Book a class forms are content, not code.
+screens, so that the site's Contact, Service enquiry and Event booking forms are content, not
+code.
 
 ## ADDED Requirements
 
@@ -43,13 +44,21 @@ independently of how the site populates its content.
   be stored
 
 ### Requirement: Site form definitions
-The site SHALL define two forms:
+The site SHALL define three forms:
 - Contact: Name (Text, required), Email (Email, required), Message (Textarea, required),
   Reply by phone? (Checkbox).
-- Book a class: Name (Text, required), Email (Email, required), Class (Select, required;
-  Wheel throwing, Hand building, Glazing), Experience notes (Textarea, optional), Join mailing
-  list (Checkbox).
+- Service enquiry: Name (Text, required), Email (Email, required), Company (Text, optional),
+  Website (Text, optional), Message (Textarea, required).
+- Event booking: Name (Text, required), Email (Email, required), Places (Select, required;
+  1, 2, 3, 4), Notes (Textarea, optional), Join mailing list (Checkbox).
+
+The service or event a submission is about SHALL come from the page the form is on, not from
+a field the visitor fills in.
 
 #### Scenario: Forms exist after first start
 - **WHEN** the site has been populated on first start
-- **THEN** both forms exist with exactly these fields, types and required flags
+- **THEN** all three forms exist with exactly these fields, types and required flags
+
+#### Scenario: Booking an online event
+- **WHEN** a visitor opens the Event booking form on an online event's page
+- **THEN** the Places field is not shown and the booking is for one place

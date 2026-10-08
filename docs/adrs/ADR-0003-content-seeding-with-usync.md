@@ -17,7 +17,7 @@ first-boot import.
 
 ## Decision
 - Commit `src/SuperPower.Web/uSync/v17/` (document types, data types, templates metadata,
-  content including the Forms folder and both form definitions).
+  content including the Forms folder and the three form definitions).
 - Set `ImportOnFirstBoot: true` in the site's base `appsettings.json` from the first commit
   that boots against a new database.
 - View files (`Views/*.cshtml`) are ordinary source files in the site project.

@@ -40,13 +40,22 @@ attendees afterwards.
   Not planned for release.
 - Form definitions: Block List of field element types (Text, Email, Textarea,
   Checkbox, Select). Per field: alias, label, required, optional regex + error message.
-  Email field has a "send confirmation" toggle. No custom backoffice UI.
-- Form settings: owner email + subject, confirmation subject + body.
+  No custom backoffice UI. Form setting: success message.
 - Submissions: custom table via NPoco + PackageMigrationPlan (the same plan creates
-  the element types). Stores form key, page key, UTC timestamp, fields JSON, basic
-  client info (IP storage policy undecided).
-- Emails: owner notification + submitter confirmation via Umbraco IEmailSender.
+  the element types). Stores form key, page key, UTC timestamp, fields JSON. No IP or
+  browser info.
 - Rendering: ViewComponent; POST via SurfaceController with antiforgery.
+- Site hooks: `IFormSubmissionHandler` (close a form, fix field values, act on a stored
+  submission in the same scope). ADR-0013.
+- Later (change `add-form-emails`): Email field "send confirmation" toggle; form settings
+  owner email + subject, confirmation subject + body; owner notification + submitter
+  confirmation via Umbraco IEmailSender.
+
+## Demo site
+- Acme Agency (fictional marketing agency): pages, events (`eventInPerson` with capacity,
+  `eventOnline`), services; Contact, Service enquiry and Event booking forms. Spec
+  `agency-site`, ADR-0014.
+- Event bookings: site-owned table `acmeEventBooking` via a site migration plan. ADR-0015.
 - Must work on SQLite and SQL Server: no raw SQL, NPoco Sql<ISqlContext> builders,
   NVARCHARMAX for JSON columns. Demo uses SQL Server container via Aspire.
 

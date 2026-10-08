@@ -29,7 +29,7 @@ Select value is not one of its options.
 - **THEN** the form is shown again with that field's configured error message
 
 #### Scenario: Tampered select value
-- **WHEN** a submission contains a Class value that is not one of the options
+- **WHEN** a submission contains a Places value that is not one of the options
 - **THEN** the submission fails validation and is not stored
 
 ### Requirement: Forgery protection
@@ -45,7 +45,7 @@ time of submission, and the submitted field values keyed by field alias. It SHAL
 visitor's IP address or browser details.
 
 #### Scenario: Valid submission
-- **WHEN** a visitor submits a valid Book a class form
+- **WHEN** a visitor submits a valid Contact form
 - **THEN** one submission is stored with form, page, UTC timestamp and all field values, and
   no IP address or browser details
 
@@ -53,9 +53,33 @@ visitor's IP address or browser details.
 - **WHEN** a submission fails validation
 - **THEN** nothing is stored
 
+### Requirement: Storing an Event booking
+A valid Event booking submission SHALL also be stored as a booking for the event whose page it
+was submitted from, with the number of places requested and the status pending. An Event
+booking on an online event SHALL be for exactly one place. No action in this change moves a
+booking out of pending; the confirmation workflow is change `add-event-bookings`.
+
+#### Scenario: Booking an in-person event
+- **WHEN** a visitor submits a valid Event booking for 3 places on an in-person event
+- **THEN** one submission is stored, and one pending booking for that event and 3 places
+
+#### Scenario: Booking an online event
+- **WHEN** a visitor submits a valid Event booking on an online event
+- **THEN** one pending booking for that event and 1 place is stored
+
+#### Scenario: Places sent for an online event
+- **WHEN** an Event booking for an online event arrives with a Places value other than 1
+- **THEN** the submission fails validation and nothing is stored
+
+#### Scenario: Booking a past event
+- **WHEN** an Event booking arrives for an event whose start time has passed
+- **THEN** the submission is rejected, nothing is stored, and the visitor sees "This event has
+  ended"
+
 ### Requirement: Confirmation after submit
 After a valid submission the visitor SHALL see a confirmation message, and refreshing the page
-SHALL NOT submit the form again.
+SHALL NOT submit the form again. After a valid Event booking the message SHALL be "Booking
+received".
 
 #### Scenario: Refresh after submit
 - **WHEN** a visitor refreshes the page after a successful submission

@@ -19,6 +19,7 @@ src/SuperPower.ServiceDefaults   (Aspire ServiceDefaults)
 src/SuperPower.Web               (Umbraco site; uSync files; views)
 src/SuperPower.Forms             (Razor class library: package)
 tests/SuperPower.Forms.Tests     (xUnit)
+tests/SuperPower.Web.Tests       (xUnit; site logic, added 2026-10-08, ADR-0012)
 docs/adrs, docs/research
 ```
 Casing is `SuperPower.*` for all identifiers.
