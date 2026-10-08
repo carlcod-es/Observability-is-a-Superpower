@@ -25,7 +25,7 @@ replies per message), so a downstream latency toxic multiplies per message.
 - Site SMTP settings come from AppHost environment variables pointing at the Toxiproxy
   endpoint, `SecureSocketOptions=None`.
 
-Alternatives considered:
+## Alternatives
 - MailPit (has an Aspire toolkit integration and its own chaos features): presenter knows
   smtp4dev; Toxiproxy gives one fault mechanism for any TCP dependency; rejected.
 - A .NET Toxiproxy client: main client unmaintained since 2018; four HTTP calls do not need a

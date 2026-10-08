@@ -4,6 +4,8 @@ Lets editors define a form in the CMS from a list of field blocks, without custo
 screens, so that the site's Contact, Service enquiry and Event booking forms are content, not
 code.
 
+Decisions: ADR-0004 (schema and storage), ADR-0013 (submission handlers); in `docs/adrs/`.
+
 ## ADDED Requirements
 
 ### Requirement: Field types

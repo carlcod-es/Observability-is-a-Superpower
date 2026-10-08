@@ -4,6 +4,10 @@ Starts the whole demo locally with one command and brings logs, traces and metri
 site and its dependencies into one observability dashboard, with controls to degrade the mail
 path on demand.
 
+Decisions: ADR-0001 (platform and versions), ADR-0007 (logs), ADR-0008 (traces, metrics,
+exporters), ADR-0009 (local database), ADR-0010 (mail path and fault injection); in
+`docs/adrs/`.
+
 ## ADDED Requirements
 
 ### Requirement: One-command start

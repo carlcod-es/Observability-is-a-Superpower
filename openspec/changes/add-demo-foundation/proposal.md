@@ -52,11 +52,11 @@ Out of scope (later changes):
 
 ## Impact
 
-- New projects under `src/` (site exists as an empty Umbraco site; package, environment host and
-  shared defaults are new) and a test project under `tests/`.
-- New repo files: agent MCP configuration, attendee README, ADRs under `docs/adrs/`.
-- Committed site content files; the database stays out of source control.
-- Two custom tables: form submissions (created by the package) and event bookings (created by
-  the site).
-- Developer prerequisites: .NET 10 SDK, a container runtime for the full environment, current
-  Aspire CLI (installed version 9.3.1-preview is outdated).
+- The existing empty site gains its content, the forms package and the local environment;
+  automated tests cover the package and booking logic.
+- Repo gains the attendee agent configuration and README; site content is kept in source
+  control, the database is not.
+- New stored data: form submissions (owned by the package) and event bookings (owned by the
+  site).
+- Presenters and attendees need the talk's toolchain (see design), plus a container runtime
+  for the full environment; the file-based mode needs only the SDK.

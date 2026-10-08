@@ -18,7 +18,7 @@ container runtime. Umbraco reads `ConnectionStrings:umbracoDbDSN` and
   AppHost's environment variables override it.
 - Reset: README documents removing the data volume to get a fresh, re-seeded database.
 
-Alternatives considered:
+## Alternatives
 - `AddSqlServer` only: simpler locally but does not map to Azure SQL on deploy; rejected.
 - Session lifetime without a volume (fresh DB every start): deterministic but adds install and
   seeding time to every start on stage; rejected in favour of an explicit reset.

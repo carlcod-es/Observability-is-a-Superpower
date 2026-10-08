@@ -42,6 +42,23 @@ bypasses the OpenTelemetry logging provider (ADR-0007); Umbraco emits no spans i
   `add-event-bookings`).
 - Demo branch creation (separate planning topic).
 
+## Bar and test strategy
+
+Bar: **prototype** (PO, 2026-10-08). Demo code shown on stage and published for attendees;
+correct on the specified scenarios, readable, not hardened for production load or long-term
+maintenance.
+
+Test strategy that follows (ADR-0012):
+- Unit tests (xUnit v3) for logic that needs no Umbraco runtime: package validation, alias
+  checks, posted-value mapping, submission handlers; site booking rules with a fake
+  `TimeProvider`.
+- Scripted smoke checks in `tests/smoke/` for startup, seeding and end-to-end behaviour on the
+  AppHost and the standalone SQLite site; run before cutting each demo branch.
+- Human observation for dashboard, agent and backoffice behaviour, recorded in the task.
+- No coverage target; every spec scenario maps to a unit test, a smoke check or a recorded
+  observation in `tasks.md`.
+- No Umbraco integration-test harness or Aspire testing in this change.
+
 ## Decisions
 
 1. **Versions and freeze** - Aspire 13.6.0, Umbraco 17.7.1, uSync 17.4.3, central pinning,
@@ -77,7 +94,8 @@ bypasses the OpenTelemetry logging provider (ADR-0007); Umbraco emits no spans i
 11. **Agent access** - committed `.mcp.json` (`aspire agent mcp`), read-only tools allowed,
     `execute_resource_command` prompts, no DB access, no CLI skills. ADR-0011.
 12. **Testing** - xUnit v3 for package logic and for site booking logic (fake
-    `TimeProvider`); scripted smoke checks for startup and end-to-end. ADR-0012.
+    `TimeProvider`); scripted smoke checks in `tests/smoke/` for startup and end-to-end. See
+    "Bar and test strategy". ADR-0012.
 13. **Submission handlers** - package interface `IFormSubmissionHandler`, implemented by the
     site, selected per form and page. `Prepare` (render and post) may close the form with a
     message or fix a field's value: a fixed field is not rendered and a different posted value
@@ -121,7 +139,7 @@ Pages share a layout with navigation and one small stylesheet; no media items.
 
 - [Log forwarding sink does not work as inferred] → spike first (task 1.3); fallback to
   Serilog.Sinks.OpenTelemetry for local, revisit prod route in `add-production-environment`.
-- [Umbraco background jobs flood traces with database spans] → measure (task 1.4); drop
+- [Umbraco background jobs flood traces with database spans] → measure (task 2.4); drop
   parentless database spans.
 - [uSync first boot skipped because a database booted once with the flag off] → flag set
   before seeding work; README reset steps; smoke check on a fresh volume.

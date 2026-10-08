@@ -23,7 +23,7 @@ first-boot import.
 - View files (`Views/*.cshtml`) are ordinary source files in the site project.
 - Content is authored in the backoffice; uSync exports on save; changes are committed.
 
-Alternatives considered:
+## Alternatives
 - Clean starter kit pattern (embedded `package.zip` + `PackageMigrationPlan` + publish
   handler): proven, but opaque in diffs and needs a new migration step per content change;
   rejected.

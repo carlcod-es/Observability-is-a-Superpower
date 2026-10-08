@@ -19,7 +19,7 @@ and adds MCP with `--mcp`. The talk promises agent access via MCP and controlled
   `execute_resource_command` is not allowed, so it prompts each time.
 - No database MCP server or connection string is configured for the agent.
 
-Alternatives considered:
+## Alternatives
 - CLI skills only: works, but access control is then about shell permissions, not MCP tools;
   rejected for the talk's narrative.
 - Standalone dashboard + API key: needed only without an AppHost; rejected.

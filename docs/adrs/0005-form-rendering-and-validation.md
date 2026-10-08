@@ -24,7 +24,7 @@ refresh.
 - Success: store, set a TempData flag, redirect to the current page (post/redirect/get); the
   view shows the form's `successMessage` (ADR-0004) when the flag is present.
 
-Alternatives considered:
+## Alternatives
 - Client-side plus server-side validation: better UX, but invalid attempts would never reach
   the server and could not be observed; rejected (validation outcomes are useful telemetry
   in a later change).

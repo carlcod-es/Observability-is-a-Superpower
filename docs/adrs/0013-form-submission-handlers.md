@@ -29,7 +29,7 @@ switch that closes every form.
   from several handlers combine: any closed wins; fixed values merge.
 - Handlers get the current time from `TimeProvider` so date rules are testable.
 
-Alternatives considered:
+## Alternatives
 - Booking logic inside the package: couples a generic forms package to the site's events;
   rejected.
 - Umbraco notifications (`INotificationHandler<...>`): run after the fact; no clean way to veto

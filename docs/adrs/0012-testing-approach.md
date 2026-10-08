@@ -18,7 +18,7 @@ the riskiest integration is startup (install, migrations, seeding) on two databa
   submission), recorded as tasks, not automated test suites.
 - No Umbraco integration-test harness in this change.
 
-Alternatives considered:
+## Alternatives
 - Umbraco integration tests (`Umbraco.Cms.Tests.Integration`): high setup cost for the time
   available; rejected for now.
 - Aspire testing (`Aspire.Hosting.Testing`) for an automated end-to-end check: valuable, but

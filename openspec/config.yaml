@@ -11,18 +11,26 @@ context: |
   Demo package: SuperPower.Forms (never "Umbraco Forms"; not planned for release).
   Code must stay portable across Windows, macOS and Linux.
   Roles: the user is Product Owner. Proposals and designs are Architect work;
-  every technology decision gets a Nygard ADR in docs/adrs/ (ADR-NNNN-<slug>.md).
+  every technology decision gets an ADR in docs/adrs/ (NNNN-<slug>.md, cited as ADR-NNNN).
   Cite numbered items with their source (e.g. ADR-0004, `<change>` task 5.3).
 
 rules:
   proposal:
-    - Product requirements only; no technology choices (those belong in design).
+    - Product requirements only; no technology choices or implementation detail (projects,
+      paths, packages, versions, tables); those belong in design.
     - Treat the fixed talk constraints as given, not as decisions to justify.
   specs:
     - Requirements state observable behaviour; reference ADRs for technology decisions.
+    - Every requirement has at least one `#### Scenario:` with WHEN/THEN.
   design:
     - Each technology decision references its ADR in docs/adrs/; create or update the ADR
-      in the same step (Nygard format - Title, Status, Context, Decision, Consequences).
+      in the same step (Title, Status, Context, Decision, Alternatives, Consequences).
     - For each decision state the alternatives considered and why they lost.
     - Fixed talk constraints are prerequisites; record them as context, and still check
       them for gaps (missing decisions they imply).
+    - Name the bar (throwaway / prototype / production) and the test strategy that follows
+      from it.
+  tasks:
+    - One section per component boundary with a single owner (see CLAUDE.md "Apply-phase
+      team"); state each section's dependencies on other sections.
+    - Each task ends with "verify ..." naming an automated check or a human observation.

@@ -22,7 +22,7 @@ pipeline. CLAUDE.md requires identical instrumentation code locally (OTLP) and i
   and trace correlation.
 - Serilog `MinimumLevel` and overrides are the only log-level filter; documented in the README.
 
-Alternatives considered:
+## Alternatives
 - Serilog.Sinks.OpenTelemetry 4.2.0: proven on Umbraco 17, reads Aspire's OTLP variables, but
   exports OTLP only, so prod would need a different route; kept as fallback if the spike fails.
 - Replace Umbraco's logger factory: fights the CMS's own configuration; rejected.

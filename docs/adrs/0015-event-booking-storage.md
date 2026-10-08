@@ -24,7 +24,7 @@ portability"). The forms package stays generic (ADR-0013).
 - Columns needed by `add-event-bookings` (confirmation token, email identity, confirmed time)
   are added there by new migration steps; this change creates only the columns above.
 
-Alternatives considered:
+## Alternatives
 - Table in the forms package: puts event concepts into the package; rejected.
 - Bookings only as submission JSON: allocation and places left need indexed queries by event
   and status; rejected.

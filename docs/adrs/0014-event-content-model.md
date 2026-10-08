@@ -23,7 +23,7 @@ Verified in the site's uSync files: Umbraco 17.7.1 ships a Date Time with time z
 - Event and service pages host the form picked on their parent list node (`events`,
   `services`); `compPage` gains an optional `form` picker limited to `superPowerForm`.
 
-Alternatives considered:
+## Alternatives
 - One `event` type with a format dropdown and a capacity field: online events would show a
   capacity field; hiding it needs custom UI; rejected.
 - Plain Date Time picker interpreted as Europe/London: works, but the stored value carries no

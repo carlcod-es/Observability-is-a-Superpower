@@ -20,6 +20,12 @@ management. The installed Aspire CLI is 9.3.1-preview; current stable Aspire is 
 - Pin all versions centrally; no floating versions. Freeze package updates from 13 Oct 2026
   until after the talk.
 
+## Alternatives
+- Platform: none; fixed by the talk.
+- Floating or per-project versions: less maintenance, but an unplanned update can break a
+  rehearsed demo; rejected.
+- Stay on Aspire CLI 9.3.1-preview: predates the CLI-hosted MCP server (ADR-0011); rejected.
+
 ## Consequences
 - The MCP setup follows the 13.6 CLI model (ADR-0011), not the older dashboard MCP.
 - Version freeze avoids surprise breaks during rehearsal; security updates are applied only

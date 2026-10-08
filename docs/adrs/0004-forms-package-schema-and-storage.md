@@ -31,7 +31,7 @@ with fixed keys (`ContentTypeCreateModel.Key`).
   picker (ADR-0014).
 - uSync may export the package's types; fixed keys keep the export and the migration aligned.
 
-Alternatives considered:
+## Alternatives
 - EF Core for submissions: needs per-provider migration sets; Umbraco's own migrations are
   provider-agnostic from one definition; rejected.
 - Field definitions stored as JSON on the form node with a custom editor: needs backoffice

@@ -16,7 +16,7 @@ the package references OpenTelemetry packages.
 - This change creates the names and registration only; spans and instruments are added in
   change `add-form-emails`.
 
-Alternatives considered:
+## Alternatives
 - Reference OpenTelemetry API packages in the package: no capability gained over the BCL
   types; adds dependencies for consumers; rejected.
 

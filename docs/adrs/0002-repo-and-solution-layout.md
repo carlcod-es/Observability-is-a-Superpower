@@ -24,7 +24,7 @@ docs/adrs, docs/research
 ```
 Casing is `SuperPower.*` for all identifiers.
 
-Alternatives considered:
+## Alternatives
 - Keep the solution and props under `src/`: tests outside `src/` would not inherit central
   versions; rejected.
 - File-based AppHost (`apphost.cs`): fewer files, but a solution already exists and a project

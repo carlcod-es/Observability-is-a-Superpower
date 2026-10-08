@@ -26,7 +26,7 @@ instrumentation code.
   `add-form-emails`.
 - No `Aspire.Microsoft.Data.SqlClient` client integration: Umbraco manages connections.
 
-Alternatives considered:
+## Alternatives
 - Rely on SqlClient's own diagnostics without the instrumentation package: no OTel spans;
   rejected.
 - OTLP everywhere including prod via a collector: extra component to run; rejected for a

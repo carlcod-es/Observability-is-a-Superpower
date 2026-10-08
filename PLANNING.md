@@ -7,7 +7,6 @@ Rule: no demo answers here (planted problems, their causes or fixes). CLAUDE.md
 references this file, so the on-stage agent may read it.
 
 ## Next step
-- [ ] PO: decide how `/opsx:apply` sub-agents work (see "Open decisions").
 - [ ] `/opsx:apply add-demo-foundation`: planning complete 2026-10-08 (ADR-0001..0015).
 - [ ] Architect: design and tasks for `add-event-bookings`; may run alongside the build
   (ADR-0015 keeps its columns out of `add-demo-foundation`).
@@ -59,8 +58,6 @@ references this file, so the on-stage agent may read it.
   new booking columns via new migration steps, ADR-0015).
 
 ## Open decisions
-- [ ] `/opsx:apply` sub-agents: granularity (per tasks.md section or whole change), model,
-  review between sections. PO decides before the first apply.
 - [ ] Prod site after the talk (PO decides later): take it down once attendee submissions
   are deleted (7 days after 16 Oct; closes the public form, stops cost), or keep it running
   as a live reference (abuse surface stays open).
@@ -68,21 +65,23 @@ references this file, so the on-stage agent may read it.
 ## Unknowns to spike
 Decided in ADRs; verified by `add-demo-foundation` tasks:
 - [ ] Umbraco 17 Serilog -> OTLP via forwarding sink (ADR-0007): task 1.3.
-- [ ] SqlClient spans for Umbraco's NPoco queries; background span volume (ADR-0008): task 1.4.
+- [ ] SqlClient spans for Umbraco's NPoco queries; background span volume (ADR-0008): task 2.4.
 - [ ] smtp4dev and Toxiproxy in the AppHost, Slow/Break/Heal commands (ADR-0010): tasks 2.2, 2.3.
 - [ ] Booking table migration timing on a fresh unattended install (ADR-0015): task 5.1.
 - [ ] Date Time with time zone stored value shape (ADR-0014): task 5.2.
-- [ ] Aspire MCP tool set and `aspire agent init --mcp` (ADR-0011): task 7.1.
+- [ ] Aspire MCP tool set and `aspire agent init --mcp` (ADR-0011): task 8.1.
 For `add-production-environment`:
 - [ ] Azure MCP Server: read-only mode, Monitor/App Insights query tools, running under a limited identity (Monitoring Reader + Log Analytics Reader).
 - [ ] Azure Communication Services Email via SMTP from Umbraco IEmailSender.
 - [ ] Umbraco 17 on Azure Container Apps: deploy via azd / `aspire deploy`, cold start, Examine/temp on local disk.
-- [ ] Azure Monitor exporter switch (ADR-0008; code in task 1.4) verified against Application Insights.
+- [ ] Azure Monitor exporter switch (ADR-0008; code in task 2.4) verified against Application Insights.
 
 ## Todos
 - [ ] Plan and create `demo/act-N-*` fallback branches. Keep `docs/research/` and any OpenSpec
   artifacts that describe later-act fixes off earlier demo branches.
 - [ ] Demo-specific CLAUDE.md for stage: agent instructions to diagnose and verify via telemetry.
+  Decide whether the Roles and "Apply-phase team" sections and `.claude/agents/` stay on
+  `demo/act-N-*` branches and in the published repo.
 - [ ] Script and rehearse agent prompts; rehearse with `/fast`.
 - [ ] Record fallback videos of agent segments.
 - [ ] Deploy to Azure the day before; smoke test the morning of; min replicas 1.
@@ -94,7 +93,9 @@ For `add-production-environment`:
 Resolved 2026-10-08 and removed: repo layout (ADR-0002), media (spec `agency-site`, no media
 library), Architect proposals (ADR-0002, ADR-0005, ADR-0006), uSync seeding (ADR-0003), Aspire
 version and MCP command (ADR-0001, ADR-0011), first `/opsx:propose` and OpenSpec change, attendee
-agent config (task 7.1), attendee README (task 8.1), build (`add-demo-foundation`).
+agent config (task 8.1), attendee README (task 9.1), build (`add-demo-foundation`), apply-phase
+team (CLAUDE.md "Apply-phase team", `.claude/agents/`), ADR file naming (`NNNN-<slug>.md`),
+`add-demo-foundation` bar (prototype).
 
 ## Decision rationale (confirmed decisions in CLAUDE.md)
 - Block List field definitions: Umbraco 17 backoffice is Lit/TS; custom UI would be

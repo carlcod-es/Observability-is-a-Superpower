@@ -3,6 +3,8 @@
 Gives the coding agent read access to the local environment's telemetry and resource state, so
 it can identify failures and verify changes from evidence rather than guesswork.
 
+Decisions: ADR-0011 (agent access to local telemetry); in `docs/adrs/`.
+
 ## ADDED Requirements
 
 ### Requirement: Agent reads local telemetry

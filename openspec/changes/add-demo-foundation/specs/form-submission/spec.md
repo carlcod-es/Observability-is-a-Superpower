@@ -3,6 +3,9 @@
 Renders a defined form on a page, validates submissions on the server and stores valid
 submissions, so that every submission attempt reaches the server and is observable.
 
+Decisions: ADR-0004 (schema and storage), ADR-0005 (rendering and validation), ADR-0013
+(submission handlers), ADR-0015 (event booking storage); in `docs/adrs/`.
+
 ## ADDED Requirements
 
 ### Requirement: Rendering
