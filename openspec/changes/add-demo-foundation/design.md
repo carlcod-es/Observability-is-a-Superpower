@@ -82,7 +82,7 @@ Test strategy that follows (ADR-0012):
 7. **Logs** - forward Umbraco's Serilog events to ServiceDefaults' logger providers via a DI
    sink; call `AddServiceDefaults()` after `CreateUmbracoBuilder()`; no Async wrapper.
    Fallback: Serilog.Sinks.OpenTelemetry. ADR-0007.
-8. **Traces, metrics, exporters** - ASP.NET Core, HttpClient, SqlClient 1.19.0
+8. **Traces, metrics, exporters** - ASP.NET Core, HttpClient, SqlClient 1.17.0
    instrumentation; health/static requests filtered; OTLP or Azure Monitor chosen by
    environment variables. ADR-0008.
 9. **Local database** - Azure SQL resource run as a persistent container with data volume,

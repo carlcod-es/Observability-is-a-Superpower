@@ -11,8 +11,11 @@ builder.CreateUmbracoBuilder()
     .AddComposers()
     .Build();
 
+builder.AddServiceDefaults();
+
 WebApplication app = builder.Build();
 
+app.MapDefaultEndpoints();
 
 await app.BootUmbracoAsync();
 

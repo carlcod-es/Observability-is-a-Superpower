@@ -1,8 +1,9 @@
 # ADR-0007: Route Umbraco's Serilog logs into the OpenTelemetry logging pipeline
 
 ## Status
-Accepted, pending spike (2026-10-07). Revisit if the spike in `add-demo-foundation` task 1.3
-fails.
+Accepted (2026-10-07). Spike passed 2026-10-08 (`add-demo-foundation` task 1.3): forwarding
+sink verified with OTLP; fallback not needed. Azure Monitor path to be verified in
+`add-production-environment`.
 
 ## Context
 Umbraco 17.7.1 owns logging: `CreateUmbracoBuilder()` clears logging providers and registers
@@ -14,8 +15,7 @@ pipeline. CLAUDE.md requires identical instrumentation code locally (OTLP) and i
 
 ## Decision
 - ServiceDefaults registers a Serilog `ILogEventSink` in DI that forwards events to the
-  `ILoggerProvider`s configured by ServiceDefaults (Serilog.Extensions.Logging provider
-  collection), so Umbraco and app logs flow through the OpenTelemetry logging provider and
+  OpenTelemetry `ILoggerProvider` configured by ServiceDefaults (resolved from DI), so Umbraco and app logs flow through the OpenTelemetry logging provider and
   whichever exporter ServiceDefaults selected.
 - `AddServiceDefaults()` is called after `CreateUmbracoBuilder()`.
 - The forwarding sink is not wrapped in Serilog's `Async` sink, to keep `Activity.Current`
@@ -29,5 +29,11 @@ pipeline. CLAUDE.md requires identical instrumentation code locally (OTLP) and i
 
 ## Consequences
 - One logging path; no duplicate entries.
-- Unverified end to end until the spike runs; it is the first build task because Act 1 depends
-  on logs in the dashboard.
+- Implemented as `SerilogForwardingSink` in ServiceDefaults: forwards only to
+  `OpenTelemetryLoggerProvider`; drops events whose `RequestPath` is excluded by
+  `TelemetryPaths` (the same paths the trace filter excludes, ADR-0008); renders the message template itself so string values are not
+  quoted; only `Serilog` 4.4.0 referenced (the version Umbraco resolves; direct reference
+  approved by the PO 2026-10-09). The pin moves with Umbraco's Serilog version.
+- A page request logs nothing at Information by default (`Microsoft` overridden to Warning).
+  The site's Development config sets `Microsoft.AspNetCore.Hosting.Diagnostics` to
+  Information, so each page trace has linked Request starting/finished entries.

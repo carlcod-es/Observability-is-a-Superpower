@@ -12,16 +12,19 @@ instrumentation code.
 
 ## Decision
 - ServiceDefaults (Aspire template) plus:
-  - `OpenTelemetry.Instrumentation.SqlClient` 1.19.0 (`AddSqlClientInstrumentation`). Query
+  - `OpenTelemetry.Instrumentation.SqlClient` 1.17.0 (`AddSqlClientInstrumentation`; revised
+    2026-10-09 from 1.19.0, which requires the OpenTelemetry 1.19 core while the Aspire 13.6.0
+    ServiceDefaults template pins 1.17.0; each SqlClient version requires the core of its own
+    version; PO approved 1.17.0 over bumping the whole OpenTelemetry set, 2026-10-09). Query
     parameter capture stays off (default).
   - `AddSource("SuperPower.Forms")`, `AddMeter("SuperPower.Forms")` (ADR-0006).
 - Exporters: OTLP when `OTEL_EXPORTER_OTLP_ENDPOINT` is set; Azure Monitor
-  (`Azure.Monitor.OpenTelemetry.AspNetCore`) when `APPLICATIONINSIGHTS_CONNECTION_STRING`
+  (`Azure.Monitor.OpenTelemetry.AspNetCore` 1.6.0, compatible with the 1.17.0 set) when `APPLICATIONINSIGHTS_CONNECTION_STRING`
   is set. Verified in prod by change `add-production-environment`.
 - Exclude health and static asset requests (`/health`, `/alive`, `/umbraco/backoffice` assets,
   `/css`, `/js`) from request tracing to keep page traces readable.
-- Measure background-job database span noise (distributed locks, cache instructions) in task
-  1.4; if it hides page traces, drop database spans that have no parent activity.
+- Measure background-job database span noise (distributed locks, cache instructions) in `add-demo-foundation`
+  task 2.4; if it hides page traces, drop database spans that have no parent activity.
 - MailKit's built-in ActivitySource and meters are not enabled here; decided in change
   `add-form-emails`.
 - No `Aspire.Microsoft.Data.SqlClient` client integration: Umbraco manages connections.
@@ -31,6 +34,21 @@ instrumentation code.
   rejected.
 - OTLP everywhere including prod via a collector: extra component to run; rejected for a
   one-replica demo.
+
+## Outcome of `add-demo-foundation` task 2.4 (2026-10-09)
+- Exporters are exclusive: Azure Monitor when `APPLICATIONINSIGHTS_CONNECTION_STRING` is set,
+  else OTLP when `OTEL_EXPORTER_OTLP_ENDPOINT` is set. Instrumentation code is identical.
+- Excluded request paths live in `TelemetryPaths` (`/health`, `/alive`, `/umbraco/backoffice`,
+  `/css`, `/js`), shared by the ASP.NET Core trace filter and the log forwarding sink
+  (ADR-0007). Backoffice page loads (`/umbraco`, `/umbraco/login`) and
+  `/umbraco/management/api` calls are still traced.
+- Background database spans measured at ~76 per minute with the site idle (distributed jobs,
+  cache instructions, locks, webhooks), so they are filtered: a SqlClient span is kept only when
+  its parent activity is recorded. Root SQL spans and SQL under filtered requests are dropped;
+  SQL under page requests, form posts and recorded package spans is kept.
+- Unverified until `add-production-environment`: whether `UseAzureMonitor()` adds its own
+  ASP.NET Core / SqlClient instrumentation or a second logger provider that bypasses these
+  filters or duplicates telemetry.
 
 ## Consequences
 - SQLite produces no database spans; attendees on SQLite see request spans only (README).

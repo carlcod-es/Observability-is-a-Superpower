@@ -64,7 +64,7 @@ references this file, so the on-stage agent may read it.
 
 ## Unknowns to spike
 Decided in ADRs; verified by `add-demo-foundation` tasks:
-- [ ] Umbraco 17 Serilog -> OTLP via forwarding sink (ADR-0007): task 1.3.
+- [x] Umbraco 17 Serilog -> OTLP via forwarding sink (ADR-0007): task 1.3, passed 2026-10-08.
 - [ ] SqlClient spans for Umbraco's NPoco queries; background span volume (ADR-0008): task 2.4.
 - [ ] smtp4dev and Toxiproxy in the AppHost, Slow/Break/Heal commands (ADR-0010): tasks 2.2, 2.3.
 - [ ] Booking table migration timing on a fresh unattended install (ADR-0015): task 5.1.

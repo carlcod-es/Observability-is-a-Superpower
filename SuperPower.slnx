@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SuperPower.Forms/SuperPower.Forms.csproj" />
+    <Project Path="src/SuperPower.AppHost/SuperPower.AppHost.csproj" />
+    <Project Path="src/SuperPower.ServiceDefaults/SuperPower.ServiceDefaults.csproj" />
+    <Project Path="src/SuperPower.Web/SuperPower.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SuperPower.Forms.Tests/SuperPower.Forms.Tests.csproj" />
+  </Folder>
+</Solution>

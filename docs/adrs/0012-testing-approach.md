@@ -17,6 +17,11 @@ the riskiest integration is startup (install, migrations, seeding) on two databa
   AppHost and the standalone SQLite site (HTTP requests for pages, a valid and an invalid
   submission), recorded as tasks, not automated test suites.
 - No Umbraco integration-test harness in this change.
+- Runner (added 2026-10-08, `add-demo-foundation` task 3.9): xunit.v3 4.x on
+  Microsoft.Testing.Platform, opted in by a root `global.json`
+  (`"test": { "runner": "Microsoft.Testing.Platform" }`, no SDK pin). The .NET 10 SDK's
+  `dotnet test` no longer runs MTP projects in VSTest mode. Only `xunit.v3` is referenced;
+  `Microsoft.NET.Test.Sdk` and `xunit.runner.visualstudio` (VSTest only) are not.
 
 ## Alternatives
 - Umbraco integration tests (`Umbraco.Cms.Tests.Integration`): high setup cost for the time

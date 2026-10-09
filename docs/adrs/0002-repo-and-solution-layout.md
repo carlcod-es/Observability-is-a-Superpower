@@ -13,7 +13,7 @@ from the site (it owns its schema and has no site dependencies).
 ```
 SuperPower.slnx                  (moved from src/)
 Directory.Packages.props         (moved from src/SuperPower.Web/; central versions)
-Directory.Build.props            (net10.0, nullable, implicit usings, warnings)
+Directory.Build.props            (net10.0, nullable, implicit usings)
 src/SuperPower.AppHost           (Aspire AppHost, project-based)
 src/SuperPower.ServiceDefaults   (Aspire ServiceDefaults)
 src/SuperPower.Web               (Umbraco site; uSync files; views)

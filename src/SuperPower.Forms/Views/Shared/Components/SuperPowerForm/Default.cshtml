@@ -1,0 +1,75 @@
+@using Umbraco.Cms.Web.Website.Controllers
+@using Umbraco.Extensions
+@model SuperPower.Forms.SuperPowerFormViewModel
+@*
+    Default view of the SuperPowerForm ViewComponent (ADR-0005). Only one SuperPowerForm per page:
+    post-back state (ModelState keyed by field alias) is not scoped per form.
+    Validation is server-side only: no required/pattern attributes, no scripts (form has novalidate).
+    Antiforgery token: emitted by BeginUmbracoForm (not added again here).
+    Styling: none here; the site stylesheet styles the sp-form* classes.
+*@
+@if (Model.ClosedMessage is not null)
+{
+    <p class="sp-form__message sp-form__message--closed">@Model.ClosedMessage</p>
+}
+else if (Model.SuccessMessage is not null)
+{
+    <p class="sp-form__message sp-form__message--success" role="status">@Model.SuccessMessage</p>
+}
+else
+{
+    using (Html.BeginUmbracoForm(Model.ActionName, Model.ControllerName, new { formKey = Model.FormKey }, new { @class = "sp-form", novalidate = "novalidate" }, FormMethod.Post))
+    {
+        foreach (var field in Model.Fields)
+        {
+            var id = "sp-" + field.Alias;
+            var errorId = id + "-error";
+            var hasError = !string.IsNullOrEmpty(field.Error);
+
+            <div class="sp-form__field sp-form__field--@field.Type.ToString().ToLowerInvariant()">
+                @if (field.Type == SuperPower.Forms.FormFieldType.Checkbox)
+                {
+                    <input type="checkbox" id="@id" name="@field.Alias" value="true" checked="@(field.Value == "true")"
+                           aria-invalid="@(hasError ? "true" : null)" aria-describedby="@(hasError ? errorId : null)" />
+                    <label class="sp-form__label" for="@id">@field.Label@if (field.Required)
+                    {
+                        <span aria-hidden="true"> *</span><span class="sp-form__sr-only"> (required)</span>
+                    }</label>
+                }
+                else
+                {
+                    <label class="sp-form__label" for="@id">@field.Label@if (field.Required)
+                    {
+                        <span aria-hidden="true"> *</span><span class="sp-form__sr-only"> (required)</span>
+                    }</label>
+                    switch (field.Type)
+                    {
+                        case SuperPower.Forms.FormFieldType.Textarea:
+                            <textarea id="@id" name="@field.Alias" rows="5"
+                                      aria-invalid="@(hasError ? "true" : null)" aria-describedby="@(hasError ? errorId : null)">@field.Value</textarea>
+                            break;
+                        case SuperPower.Forms.FormFieldType.Select:
+                            <select id="@id" name="@field.Alias"
+                                    aria-invalid="@(hasError ? "true" : null)" aria-describedby="@(hasError ? errorId : null)">
+                                <option value="">Choose…</option>
+                                @foreach (var option in field.Options)
+                                {
+                                    <option value="@option" selected="@(option == field.Value)">@option</option>
+                                }
+                            </select>
+                            break;
+                        default:
+                            <input type="@(field.Type == SuperPower.Forms.FormFieldType.Email ? "email" : "text")" id="@id" name="@field.Alias" value="@field.Value"
+                                   aria-invalid="@(hasError ? "true" : null)" aria-describedby="@(hasError ? errorId : null)" />
+                            break;
+                    }
+                }
+                @if (hasError)
+                {
+                    <span class="sp-form__error" id="@errorId">@field.Error</span>
+                }
+            </div>
+        }
+        <button type="submit" class="sp-form__submit">Send</button>
+    }
+}
