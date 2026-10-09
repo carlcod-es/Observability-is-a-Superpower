@@ -24,6 +24,9 @@ with fixed keys (`ContentTypeCreateModel.Key`).
   4. Table `superPowerFormSubmission`: Id (int identity PK), FormKey (guid, indexed), PageKey
      (guid), SubmittedUtc (datetime), FieldsJson (`NVARCHARMAX`). No IP or client columns.
 - Steps check for existence by key/table name before creating.
+- Added 2026-10-09 (PO request, `add-demo-foundation` task 3.2 follow-up): a later step creates a
+  document type folder "SuperPower Forms" (fixed key) and moves the five element types and
+  `superPowerForm` into it, on fresh and existing databases.
 - Data access uses NPoco `Sql<ISqlContext>` builders through Umbraco's scope provider; no raw
   SQL strings.
 - The site owns where forms live: a "Forms" folder and the three form nodes (Contact, Service

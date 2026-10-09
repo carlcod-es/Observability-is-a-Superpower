@@ -55,3 +55,5 @@ strategy"). Evidence comes from the block reviews; the reviewer ran each check i
   (worker 4 min, reviewer 2.5 min). `/health`, `/alive`, `/css`, `/umbraco/backoffice`: no
   traces, no Request logs. Exporter switch: code only (Azure Monitor path in
   `add-production-environment`).
+- `add-demo-foundation` task 6.1, 2026-10-09 (PO): fresh SQLite install standalone; package types
+  present; sample-site content imported.
