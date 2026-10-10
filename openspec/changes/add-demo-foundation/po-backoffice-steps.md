@@ -25,7 +25,7 @@ the uSync files (task 9.2).
 
 ## 6.2 Document types and templates (ADR-0014, design.md "Site structure")
 
-- [ ] `compPage`: add property **`form`**: a picker for one document, allowed type Form
+- [x] `compPage`: add property **`form`**: a picker for one document, allowed type Form
       (`superPowerForm`) only, optional. If the plain Document Picker cannot restrict the
       type, use a Multinode Treepicker (max 1 item, allowed type `superPowerForm`).
 - [ ] `compPage`: remove the image block from the `mainContent` Block List. Delete the empty

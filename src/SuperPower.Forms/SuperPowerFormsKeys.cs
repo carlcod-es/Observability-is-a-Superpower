@@ -29,6 +29,13 @@ public static class SuperPowerFormsKeys
         public const string FieldsName = "SuperPower Forms - Fields";
     }
 
+    public static class Containers
+    {
+        public static readonly Guid DocumentTypes = new("5c1f4b7a-0d6e-4c1b-9a53-1e2b7f0a5001");
+
+        public const string DocumentTypesName = "SuperPower Forms";
+    }
+
     public static class DocumentTypes
     {
         public static readonly Guid Form = new("5c1f4b7a-0d6e-4c1b-9a53-1e2b7f0a3001");
@@ -50,4 +57,5 @@ public static class SuperPowerFormsKeys
 
     public static readonly Guid StepCreateSchema = new("5c1f4b7a-0d6e-4c1b-9a53-1e2b7f0a4001");
     public static readonly Guid StepCreateSubmissionTable = new("5c1f4b7a-0d6e-4c1b-9a53-1e2b7f0a4002");
+    public static readonly Guid StepMoveTypesToFolder = new("5c1f4b7a-0d6e-4c1b-9a53-1e2b7f0a4003");
 }

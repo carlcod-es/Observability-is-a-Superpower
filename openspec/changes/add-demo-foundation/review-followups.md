@@ -59,3 +59,4 @@ Minor and nit findings from block and section reviews. Read at the start of ever
 - [ ] nit (block 5A) `EventBookingRepository.cs:14`: `cancellationToken` unused (same as the Forms repository).
 - [ ] nit (block 5A) `EventBookingRepository.cs:21`: `DateTimeKind.Unspecified` treated as local by `ToUniversalTime()`; callers pass UTC.
 - [ ] Architect (block 5A) Pending before ticking 5.1: fresh SQLite (scratch DSN) and fresh SQL volume — "Running migration plan Acme.EventBookings" on the FIRST boot, `acmeEventBooking` with both indexes and `Status` NVARCHAR(16); second start changes nothing; booking round-trip (via task 5.2's handler or a throwaway scope check).
+- [ ] nit (block 3H, folder step) `src/SuperPower.Forms/Migrations/MoveTypesToFolderStep.cs`: a missing type logs a warning and continues; throw if the plan should be strict. Partial-failure re-run checked by reading only.

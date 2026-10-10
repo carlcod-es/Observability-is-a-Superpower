@@ -8,5 +8,6 @@ public class SuperPowerFormsMigrationPlan : PackageMigrationPlan
 
     protected override void DefinePlan() =>
         To<CreateSchemaStep>(SuperPowerFormsKeys.StepCreateSchema)
-            .To<CreateSubmissionTableStep>(SuperPowerFormsKeys.StepCreateSubmissionTable);
+            .To<CreateSubmissionTableStep>(SuperPowerFormsKeys.StepCreateSubmissionTable)
+            .To<MoveTypesToFolderStep>(SuperPowerFormsKeys.StepMoveTypesToFolder);
 }
