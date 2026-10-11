@@ -18,6 +18,11 @@ every page.
 - **THEN** the page shows the agency's introduction and upcoming events, and the navigation
   links to About us, Events, Services and Contact us
 
+### Requirement: Forms by page
+The page type SHALL decide which form a page shows: Contact us shows the Contact form, each
+upcoming event shows the Event booking form, and each service shows the Service enquiry form.
+Editors SHALL NOT choose or change a page's form.
+
 #### Scenario: Contact page shows the contact form
 - **WHEN** a visitor opens the Contact us page
 - **THEN** it shows the Contact form
@@ -61,13 +66,14 @@ upgrade, SEO audit and AdWords audit. Services have no capacity.
 
 ### Requirement: Content is populated on first start
 When the site starts against an empty database, it SHALL install itself and create all
-document types, templates, pages, events, services and form definitions without manual steps.
-Content SHALL be kept in source control; the database SHALL NOT be.
+document types, templates, pages, events and services without manual steps. Forms are part of
+the site, not content (spec `form-submission` "Site forms"). Content SHALL be kept in source
+control; the database SHALL NOT be.
 
 #### Scenario: Fresh database
 - **WHEN** the site starts with an empty database
-- **THEN** all pages, events, services and the three forms are available and published once
-  start-up completes
+- **THEN** all pages, events and services are published once start-up completes, and the
+  Contact us, upcoming event and service pages show their forms
 
 #### Scenario: Existing database
 - **WHEN** the site starts with a database that already holds the content

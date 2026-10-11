@@ -12,14 +12,15 @@ stable before any feature, fault or fix is built on top of it. Nothing is built 
   out of your CMS"), in person or online. Pages: Home, About us, Contact us, Events list, event
   pages, Services list, service pages. Populated automatically when the site starts against an
   empty database.
-- A forms package (`SuperPower.Forms`) that lets editors define forms from field blocks and
-  renders, validates and stores submissions. Three forms on the site: Contact, Service enquiry
-  and Event booking.
+- Three fixed forms built into the site: Contact, Service enquiry and Event booking. The site
+  renders, validates and stores submissions. Editors cannot define forms, fields or form text;
+  the page type decides which form a page shows. There is no separate forms package (PO
+  decision 2026-10-10; the talk no longer promises a custom package).
 - Storage for event bookings: a valid Event booking is kept as a booking for that event, with
   its number of places and the status pending. Nothing moves a booking out of pending yet.
 - A local environment the presenter starts with one command: site, database, mail catcher and
   a fault-injection hop on the mail path, all visible in one observability dashboard.
-- Baseline telemetry from the site and its database calls, without any package-specific
+- Baseline telemetry from the site and its database calls, without any form-specific
   instrumentation.
 - Agent access to local telemetry over MCP, with the configuration committed for attendees.
 - A file-based database mode so attendees can run the site without a container runtime.
@@ -28,21 +29,21 @@ stable before any feature, fault or fix is built on top of it. Nothing is built 
 Out of scope (later changes):
 - Booking workflow: confirmation link, place allocation, waiting list, places left, one booking
   per email per event (change `add-event-bookings`).
-- All emails, including the booking confirmation link, and the package's own spans and metrics
+- All emails, including the booking confirmation link, and the forms' own spans and metrics
   (change `add-form-emails`).
 - Production environment, production agent access, attendee safeguards, history generation.
 - Protection of personal data in telemetry beyond what the baseline records.
 - Owner dashboard of bookings (stretch goal, no change planned yet).
+- Editor-defined forms, form fields or form text.
 
 ## Capabilities
 
 ### New Capabilities
 - `agency-site`: the Acme Agency site, its pages, events and services, and how it is populated
   on first start.
-- `form-definitions`: how editors define a form and its fields (types, alias, label, required,
-  pattern with error message), and the site's three forms.
-- `form-submission`: rendering a form, server-side validation, error display, forgery
-  protection, storing a submission, and storing an Event booking as a pending booking.
+- `form-submission`: the site's three fixed forms and their fields, rendering, server-side
+  validation, error display, forgery protection, storing a submission, and storing an Event
+  booking as a pending booking.
 - `local-environment`: one-command start of all components, the observability dashboard, the
   mail catcher, mail-path fault controls, and the file-based database mode.
 - `agent-telemetry-access`: the coding agent reading local telemetry and resource state over MCP.
@@ -52,11 +53,10 @@ Out of scope (later changes):
 
 ## Impact
 
-- The existing empty site gains its content, the forms package and the local environment;
-  automated tests cover the package and booking logic.
+- The existing empty site gains its content, its forms and the local environment; automated
+  tests cover form and booking logic.
 - Repo gains the attendee agent configuration and README; site content is kept in source
   control, the database is not.
-- New stored data: form submissions (owned by the package) and event bookings (owned by the
-  site).
+- New stored data: form submissions and event bookings, both owned by the site.
 - Presenters and attendees need the talk's toolchain (see design), plus a container runtime
   for the full environment; the file-based mode needs only the SDK.

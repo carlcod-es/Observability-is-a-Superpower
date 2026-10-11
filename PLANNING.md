@@ -43,7 +43,11 @@ references this file, so the on-stage agent may read it.
   within 7 days of 16 Oct; one booking per email per event; one presenter switch closes every
   form; real emails sent.
 - Prod owner mailbox: presenter-owned demo alias (prod settings only, never in the repo).
-- Package name `SuperPower.Forms` is final; not planned for release.
+- Forms simplified (2026-10-10): no separate forms package; the talk no longer promises a
+  custom package. Three fixed forms in the site; the page type decides the form. No editor-
+  defined forms, fields or form text. No format rules beyond Email and Places 1-4.
+- Email settings (`add-form-emails`): owner address is an environment setting; subjects and
+  bodies are fixed text. No backoffice settings.
 - Act 4 split: resolved (presenter-only notes).
 
 ## Change order (2026-10-08)
@@ -56,6 +60,16 @@ references this file, so the on-stage agent may read it.
 ## Architect follow-ups from the 2026-10-08 pivot
 - [ ] `add-event-bookings`: design.md, ADR(s) and tasks (allocation under concurrent link opens;
   new booking columns via new migration steps, ADR-0015).
+
+## Architect follow-ups from the 2026-10-10 forms simplification
+- [ ] `/opsx:update add-demo-foundation`: design.md; revise ADR-0002, ADR-0004, ADR-0005,
+  ADR-0006, ADR-0013 (no package, no field element types or form document type);
+  re-plan `tasks.md` sections 3, 4 and 6 (ticked 3.2, 3.5, 3.7 and code for 3.8, 4.1 rework);
+  `review-followups.md` entries that no longer apply.
+- [ ] CLAUDE.md "Talk promises", "Forms package", "Telemetry", "Apply-phase team" ownership;
+  `openspec/config.yaml` context (names the demo package).
+- [ ] PO: reset local SQLite and SQL databases once the package code is removed (field element
+  types are still in both).
 
 ## Open decisions
 - [ ] Prod site after the talk (PO decides later): take it down once attendee submissions
@@ -98,8 +112,8 @@ team (CLAUDE.md "Apply-phase team", `.claude/agents/`), ADR file naming (`NNNN-<
 `add-demo-foundation` bar (prototype).
 
 ## Decision rationale (confirmed decisions in CLAUDE.md)
-- Block List field definitions: Umbraco 17 backoffice is Lit/TS; custom UI would be
-  most of the build and adds nothing to the talk.
+- Fixed forms in the site (2026-10-10, replaces Block List field definitions): editor-defined
+  forms added build and backoffice work without adding to the observability story.
 - NPoco + PackageMigrationPlan over EF Core: provider-agnostic from one migration;
   EF Core needs per-provider migration sets. SqlClient instrumentation gives DB spans on
   SQL Server (including Umbraco's own queries); SQLite gets none.
