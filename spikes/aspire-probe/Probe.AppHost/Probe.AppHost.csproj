@@ -1,0 +1,15 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.6.0">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <UserSecretsId>7b2f6c1e-3d4a-4e58-9a0b-5c8d1f2e6a47</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Azure.Sql" />
+    <ProjectReference Include="..\Probe.Api\Probe.Api.csproj" />
+    <ProjectReference Include="..\Probe.Web\Probe.Web.csproj" />
+  </ItemGroup>
+
+</Project>

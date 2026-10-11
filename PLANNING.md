@@ -7,6 +7,10 @@ Rule: no demo answers here (planted problems, their causes or fixes). CLAUDE.md
 references this file, so the on-stage agent may read it.
 
 ## Next step
+- [x] `spike-aspire-probe` (2026-10-11): signed off by the PO 2026-10-11. Findings in
+  `openspec/changes/spike-aspire-probe/findings.md`: ADR-0011 confirmed (no metrics over MCP).
+  Open for `add-demo-foundation` (ADR-0008): SqlClient metrics in ServiceDefaults; RecordException.
+  `add-demo-foundation` can resume; ADR-0016 proposal still awaits PO approval.
 - [ ] `/opsx:apply add-demo-foundation`: planning complete 2026-10-08 (ADR-0001..0015).
 - [ ] Architect: design and tasks for `add-event-bookings`; may run alongside the build
   (ADR-0015 keeps its columns out of `add-demo-foundation`).
@@ -91,6 +95,10 @@ For `add-production-environment`:
 - [ ] Azure Monitor exporter switch (ADR-0008; code in task 2.4) verified against Application Insights.
 
 ## Todos
+- [ ] `spike-aspire-probe` task 3.4 (PO deferred 2026-10-11, keep the probe until closer to the
+  talk): delete `spikes/aspire-probe/`, remove `Microsoft.Data.SqlClient` from
+  `Directory.Packages.props`, root build; then archive the change. Keep `spikes/` off
+  `demo/act-N-*` branches and out of the published repo.
 - [ ] Plan and create `demo/act-N-*` fallback branches. Keep `docs/research/` and any OpenSpec
   artifacts that describe later-act fixes off earlier demo branches.
 - [ ] Demo-specific CLAUDE.md for stage: agent instructions to diagnose and verify via telemetry.
