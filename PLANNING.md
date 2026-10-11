@@ -11,6 +11,11 @@ references this file, so the on-stage agent may read it.
   `openspec/changes/spike-aspire-probe/findings.md`: ADR-0011 confirmed (no metrics over MCP).
   Open for `add-demo-foundation` (ADR-0008): SqlClient metrics in ServiceDefaults; RecordException.
   `add-demo-foundation` can resume; ADR-0016 proposal still awaits PO approval.
+- [ ] `spike-metrics-mcp` (proposed 2026-10-11): agent access to metrics over MCP (Prometheus
+  + community MCP vs Grafana LGTM + Grafana MCP, via a Collector in the AppHost). Package and
+  images (`design.md` D1-D3) approved by the PO 2026-10-11. Apply parked 2026-10-12 at 7/14:
+  resume from `openspec/changes/spike-metrics-mcp/resume.md`. Reuses the probe, so
+  `spike-aspire-probe` task 3.4 waits for it.
 - [ ] `/opsx:apply add-demo-foundation`: planning complete 2026-10-08 (ADR-0001..0015).
 - [ ] Architect: design and tasks for `add-event-bookings`; may run alongside the build
   (ADR-0015 keeps its columns out of `add-demo-foundation`).

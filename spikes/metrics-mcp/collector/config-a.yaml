@@ -1,0 +1,11 @@
+# Candidate A: metrics also go to Prometheus' OTLP receiver. PROMETHEUS_OTLP_URL is set by the AppHost.
+exporters:
+  otlphttp/prometheus:
+    metrics_endpoint: ${env:PROMETHEUS_OTLP_URL}/api/v1/otlp/v1/metrics
+
+service:
+  pipelines:
+    metrics/prometheus:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/prometheus]

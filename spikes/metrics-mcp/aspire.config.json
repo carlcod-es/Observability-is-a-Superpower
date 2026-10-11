@@ -1,0 +1,5 @@
+{
+  "appHost": {
+    "path": "Metrics.AppHost/Metrics.AppHost.csproj"
+  }
+}

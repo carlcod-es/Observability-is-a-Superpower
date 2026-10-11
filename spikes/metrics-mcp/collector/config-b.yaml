@@ -1,0 +1,19 @@
+# Candidate B: all signals also go to the LGTM container's OTLP/HTTP port. LGTM_OTLP_URL is set by the AppHost.
+exporters:
+  otlphttp/lgtm:
+    endpoint: ${env:LGTM_OTLP_URL}
+
+service:
+  pipelines:
+    traces/lgtm:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/lgtm]
+    metrics/lgtm:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/lgtm]
+    logs/lgtm:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/lgtm]
