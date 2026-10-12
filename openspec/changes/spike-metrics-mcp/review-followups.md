@@ -40,3 +40,13 @@ Minors and nits from block reviews. Read at the start of every apply session.
   `http://localhost:5172`, the 45 expected probe-api requests (retries), and "stack must be running".
 - Nit `README.md:38`: mention `aspire start` as the detached variant.
 - Nit `README.md:25-35`: env-var / PowerShell commands untested; comment the `Remove-Item` line.
+
+## Block 4 (task 1.7), reviewer APPROVED 2026-10-12
+- Nit `spikes/metrics-mcp/README.md:23`: `Spike:Candidates` is case-insensitive (`ToLowerInvariant`); the error shows the lowercased value. Optionally say so.
+- Reviewer ran nothing; build (0 errors) and clean state (`aspire ps`, `docker ps` empty) re-checked by the Architect. Mode `none`/`b` resource lists, mode `a` failure and `claude mcp list` rely on the worker's report.
+
+## Section 1 supervisor, 2026-10-12: CHANGES REQUESTED, then fixed
+- Majors fixed by the Architect: `findings.md` evidence for tasks 1.2, 1.7, 3.1; `agent-asks.md` no longer pastes the `load.mjs` "Expected" line.
+- README minors/nits fixed by a worker (grafana_api_request wording, Windows prerequisites, port 3000 note, intro, untested marks, case-insensitive switch). The Block 4 case-insensitive nit is closed.
+- Closed: Block 1 collector-registry and task 1.2 items; Block 2 Prometheus MCP, grafana_api_request and D4 items; all Block 3 items.
+- Open for task 3.2: re-confirm metric names via `list_prometheus_metric_names`; check the transcript for `mcp__aspire__*` calls.

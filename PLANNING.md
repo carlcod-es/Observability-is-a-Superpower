@@ -11,11 +11,14 @@ references this file, so the on-stage agent may read it.
   `openspec/changes/spike-aspire-probe/findings.md`: ADR-0011 confirmed (no metrics over MCP).
   Open for `add-demo-foundation` (ADR-0008): SqlClient metrics in ServiceDefaults; RecordException.
   `add-demo-foundation` can resume; ADR-0016 proposal still awaits PO approval.
-- [ ] `spike-metrics-mcp` (proposed 2026-10-11): agent access to metrics over MCP (Prometheus
-  + community MCP vs Grafana LGTM + Grafana MCP, via a Collector in the AppHost). Package and
-  images (`design.md` D1-D3) approved by the PO 2026-10-11. Apply parked 2026-10-12 at 7/14:
-  resume from `openspec/changes/spike-metrics-mcp/resume.md`. Reuses the probe, so
-  `spike-aspire-probe` task 3.4 waits for it.
+- [x] `spike-metrics-mcp` (2026-10-11..13): PO signed off 2026-10-13 on recommendation "adopt B alongside
+  the Aspire MCP": Grafana LGTM + Grafana MCP (`--disable-write --enabled-tools
+  prometheus,loki,tempo,datasource`, 22 tools) next to the Aspire MCP (ADR-0011 kept). Findings in
+  `openspec/changes/spike-metrics-mcp/findings.md`. Open: task 3.6 (delete `spikes/metrics-mcp/`, remove toolkit
+  package, archive) waits for `spike-aspire-probe` task 3.4 (shared probe projects).
+- [ ] Architect: new ADR for B (Collector, LGTM, Grafana MCP, allow-list, prompt hints on which MCP to use for what)
+  and fold it into `add-demo-foundation` (package `CommunityToolkit.Aspire.Hosting.OpenTelemetryCollector`,
+  images, `.mcp.json`, `.claude/settings.json`, attendee pre-pull, Windows run). Via `/opsx:propose` or `/opsx:update`.
 - [ ] `/opsx:apply add-demo-foundation`: planning complete 2026-10-08 (ADR-0001..0015).
 - [ ] Architect: design and tasks for `add-event-bookings`; may run alongside the build
   (ADR-0015 keeps its columns out of `add-demo-foundation`).

@@ -16,8 +16,9 @@
 **Goals:**
 - Get telemetry to a second, local, queryable metrics store without changing app code or
   ServiceDefaults, and keep the Aspire dashboard complete.
-- Compare two candidate stacks: a minimal one (metrics only) and a full one (metrics, logs and
-  traces behind one MCP server).
+- Evaluate one candidate stack, B: metrics, logs and traces behind one MCP server (PO
+  decision 2026-10-12: a single MCP server is preferred; the metrics-only candidate A is
+  dropped).
 - Everything starts with `aspire run`. No separate `docker compose`.
 
 **Non-Goals:**
@@ -47,7 +48,10 @@ Images in D1-D3 (`otel/opentelemetry-collector-contrib`, `prom/prometheus`,
 `ghcr.io/pab1it0/prometheus-mcp-server`, `grafana/otel-lgtm`, `grafana/mcp-grafana`): PO approved
 2026-10-11. The worker pins exact tags and records them in the findings.
 
-### D2. Candidate A: Prometheus + Prometheus MCP server
+### D2. Candidate A: Prometheus + Prometheus MCP server (dropped 2026-10-12)
+Dropped by the PO: it covers metrics only, so logs and traces would need two more backends and
+MCP servers; a single MCP server is preferred. It was built and verified (tasks 1.3, 1.5;
+`findings.md`); its code is removed from the spike (task 1.7). Kept here as a record.
 - `prom/prometheus` (pinned 3.x tag) with `--web.enable-otlp-receiver`. The Collector sends
   metrics only to `/api/v1/otlp` (`otlphttp` exporter). Host port 9090.
 - `ghcr.io/pab1it0/prometheus-mcp-server` (pinned tag): PromQL instant/range queries, metric
@@ -55,7 +59,7 @@ Images in D1-D3 (`otel/opentelemetry-collector-contrib`, `prom/prometheus`,
   maintainer in the findings.
 - Why: smallest footprint, plain PromQL, widely documented. Metrics only.
 
-### D3. Candidate B: Grafana LGTM + Grafana MCP server
+### D3. Candidate B: Grafana LGTM + Grafana MCP server (the only candidate)
 - `grafana/otel-lgtm` (pinned tag): one container with an OTel Collector, Prometheus, Loki,
   Tempo and Grafana. The Collector sends all three signals to it over OTLP. Grafana on host
   port 3000.
@@ -65,6 +69,10 @@ Images in D1-D3 (`otel/opentelemetry-collector-contrib`, `prom/prometheus`,
   service-account token.
 - Why: official vendor MCP server, a read-only switch, and one server for all signals. It
   also shows whether the agent could work from it alone. Heaviest option.
+- Tool surface: 62 tools under `--disable-write`, and `grafana_api_request` still allows any
+  Grafana GET (`findings.md`). Task 3.2 asks run with the default surface; task 3.5 records
+  whether `--disable-api` and category flags (to verify in 2.0.2) narrow it to the Prometheus,
+  Loki and Tempo tools (proposal question 6).
 
 Candidates considered and rejected:
 - Application Insights from local dev + Azure MCP Server: cloud dependency, minutes of
@@ -79,7 +87,7 @@ Candidates considered and rejected:
 
 ### D4. MCP servers run as Aspire container resources over HTTP
 Each MCP server is an AppHost container resource with streamable-HTTP transport on a fixed
-host port (Prometheus MCP 8090, Grafana MCP 8091). It reaches its backend by Aspire
+host port (Grafana MCP 8091; the dropped Prometheus MCP used 8090). It reaches its backend by Aspire
 resource name on the container network. `.mcp.json` lists them as `http` servers next to
 `aspire` (stdio).
 
@@ -101,24 +109,24 @@ resource name on the container network. `.mcp.json` lists them as `http` servers
   findings). No `latest`.
 
 ### D7. Candidate switch in the AppHost
-One AppHost, one folder. The configuration key `Spike:Candidates` takes `none`, `a`, `b` or
-`both` (default `both`; any other value fails start-up with a message listing the valid
-values). The value is read from `builder.Configuration` while the model is built, and the
-AppHost adds only the selected backends, their MCP servers and their Collector exporters.
-`none` still runs the Collector, so the baseline differs from a candidate run only by that
-candidate.
+One AppHost, one folder. The configuration key `Spike:Candidates` takes `none` or `b`
+(default `b`; any other value, including the removed `a` and `both`, fails start-up with a
+message listing the valid values). The value is read from `builder.Configuration` while the
+model is built, and the AppHost adds the backend, its MCP server and its Collector exporters
+only for `b`. `none` still runs the Collector, so the baseline differs from a `b` run only by
+the candidate.
 
-- Set on the command line: `aspire run -- --Spike:Candidates=a` (or `aspire start -- ...`).
+- Set on the command line: `aspire run -- --Spike:Candidates=none` (or `aspire start -- ...`).
   Arguments after `--` go to the AppHost (aspire.dev `aspire run` reference), and
   `DistributedApplication.CreateBuilder(args)` adds them to `builder.Configuration`. Verified
-  2026-10-11 with Aspire CLI 13.6.1 and a throwaway AppHost: `aspire run -- --Spike:Candidates=a`
-  gave `a`, `aspire start -- --Spike:Candidates=both` gave `both`, and the environment variable
-  `Spike__Candidates=b` gave `b`. The command-line form is primary (same on every OS); the
+  2026-10-11 with Aspire CLI 13.6.1 and a throwaway AppHost (values then `a`, `both`, `b`):
+  the command-line argument and the environment variable `Spike__Candidates` both reached
+  the AppHost's configuration. The command-line form is primary (same on every OS); the
   README mentions the environment variable as an alternative.
 - `spikes/metrics-mcp/README.md` explains how to run each mode: the commands (bash/zsh and
   PowerShell for the environment-variable form), which resources and ports start in each
-  mode, the URLs (dashboard, Prometheus, Grafana), the default credentials, and the fact
-  that `.mcp.json` servers of a candidate that is not running show as failed in Claude Code.
+  mode, the URLs (dashboard, Grafana), the default credentials, and the fact
+  that the `grafana` server in `.mcp.json` shows as failed in Claude Code in mode `none`.
   PO request 2026-10-11; this replaces the "no README" part of the throwaway bar for this
   spike.
 - Alternatives: two folders, each with its own AppHost, which duplicates the AppHost and
@@ -127,10 +135,10 @@ candidate.
 
 ### D6. Investigation method
 Same as `spike-aspire-probe`. A load script sends a fixed mix of normal, slow (`slow=2000`)
-and failing requests. A fresh Claude Code session per candidate gets fixed asks, with only
-that candidate's MCP server allowed. The PO captures transcripts. The Architect cross-checks
-the numbers against the dashboard Metrics page and the backend UI (Prometheus / Grafana
-Explore).
+and failing requests. A fresh Claude Code session gets fixed asks (metrics, logs, traces; see
+`agent-asks.md`), with only the Grafana MCP server allowed for telemetry. The PO captures
+transcripts. The Architect cross-checks the numbers against the dashboard (Metrics, Structured
+logs, Traces pages) and Grafana Explore.
 
 ### Bar and ADRs
 - Bar: throwaway. No tests; every task is verified by observation and recorded in
@@ -153,8 +161,6 @@ Explore).
   Aspire sets a short export interval in development; the Collector adds its batch delay.
 - [Memory: LGTM is heavy next to SQL Server; Umbraco adds more in the demo] → Measured with
   `docker stats` (proposal question 3).
-- [Community MCP server (candidate A) trust and maintenance] → Licence, maintainer and last
-  release recorded. The PO weighs it in the recommendation.
 - [Fixed host ports clash with local services] → Spike only. Change the ports if needed and
   record it.
 - [Grafana MCP auth with LGTM defaults] → Basic auth from defaults. A service-account token
@@ -162,5 +168,7 @@ Explore).
 
 ## Open Questions
 
-- Does `pab1it0/prometheus-mcp-server` support streamable HTTP in its current release? If
-  not, use the stdio fallback (D4). Answered in task 1.5; the task breakdown stays the same.
+- Closed: `pab1it0/prometheus-mcp-server` supports streamable HTTP (task 1.5); candidate A
+  is dropped anyway.
+- Do the Grafana MCP category flags in 2.0.2 narrow the surface to Prometheus, Loki and
+  Tempo? Answered under proposal question 6 (task 3.5).

@@ -23,7 +23,7 @@ exporters:
 
 service:
   pipelines:
-    # Candidate pipelines live in config-a.yaml / config-b.yaml (extra pipeline keys merge, lists do not).
+    # Candidate B pipelines live in config-b.yaml (extra pipeline keys merge, lists do not).
     traces:
       receivers: [otlp]
       processors: [batch]

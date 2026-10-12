@@ -1,6 +1,6 @@
 # metrics-mcp spike
 
-Throwaway spike: can a coding agent read metrics from a local, queryable store? Aspire MCP has no metrics tool. The AppHost runs the `../aspire-probe` projects (`Probe.Api`, `Probe.Web`, SQL Server container, unchanged) and fans telemetry out through an OpenTelemetry Collector to the Aspire dashboard plus two candidate backends, each with an MCP server. Scope and questions: [`proposal.md`](../../openspec/changes/spike-metrics-mcp/proposal.md); design: [`design.md`](../../openspec/changes/spike-metrics-mcp/design.md).
+Throwaway spike: can a coding agent read logs, traces and metrics through one MCP server? Aspire MCP has no metrics tool. The AppHost runs the `../aspire-probe` projects (`Probe.Api`, `Probe.Web`, SQL Server container, unchanged) and fans telemetry out through an OpenTelemetry Collector to the Aspire dashboard plus one candidate backend (Grafana LGTM) queried through one MCP server (Grafana MCP) for logs, traces and metrics. Scope and questions: [`proposal.md`](../../openspec/changes/spike-metrics-mcp/proposal.md); design: [`design.md`](../../openspec/changes/spike-metrics-mcp/design.md).
 
 ## Prerequisites
 
@@ -8,30 +8,32 @@ Throwaway spike: can a coding agent read metrics from a local, queryable store? 
 - Aspire CLI 13.6.1
 - .NET 10 SDK
 - Node.js 20+ (load script only)
+- Windows (untested): Docker Desktop must use Linux containers; trust the HTTPS dev certificate (`dotnet dev-certs https --trust`).
 
 ## Run
 
-From `spikes/metrics-mcp/`. The `Spike:Candidates` key selects the backends; `both` is the default.
+From `spikes/metrics-mcp/`. The `Spike:Candidates` key selects the backend; `b` is the default. The value is case-insensitive.
 
 | Mode | Command | Starts |
 |---|---|---|
 | `none` | `aspire run -- --Spike:Candidates=none` | probe + Collector (baseline) |
-| `a` | `aspire run -- --Spike:Candidates=a` | + Prometheus, Prometheus MCP |
-| `b` | `aspire run -- --Spike:Candidates=b` | + Grafana LGTM, Grafana MCP |
-| `both` | `aspire run` (or `-- --Spike:Candidates=both`) | all of the above |
+| `b` | `aspire run` (or `-- --Spike:Candidates=b`) | + Grafana LGTM, Grafana MCP |
 
-Any other value stops start-up with `Invalid Spike:Candidates value '<x>'. Valid values: none, a, b, both.`
+`aspire start` takes the same arguments and runs the stack detached (stop with `aspire stop`).
 
-Environment variable instead of the argument:
+Any other value (including the removed `a` and `both`) stops start-up with `Invalid Spike:Candidates value '<x>'. Valid values: none, b.`
+
+Environment variable instead of the argument (untested on Windows):
 
 ```sh
 # bash / zsh
-Spike__Candidates=a aspire run
+Spike__Candidates=none aspire run
 ```
 
 ```powershell
 # PowerShell
-$env:Spike__Candidates = 'a'; aspire run
+$env:Spike__Candidates = 'none'; aspire run
+# Clear the variable afterwards, or it stays set in this shell session
 Remove-Item Env:Spike__Candidates
 ```
 
@@ -39,34 +41,32 @@ Remove-Item Env:Spike__Candidates
 
 ## Resources per mode
 
-| Resource | Image:tag | Host port | URL | none | a | b | both |
-|---|---|---|---|---|---|---|---|
-| `sql` (+ database `probe`) | `mcr.microsoft.com/mssql/server:2022-latest` | dynamic | - | x | x | x | x |
-| `probe-api` | project | 5171 (http), 7171 (https) | `https://localhost:7171` | x | x | x | x |
-| `probe-web` | project | 5172 (http), 7172 (https) | `https://localhost:7172` | x | x | x | x |
-| `collector` | `ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.162.0` | dynamic | - (OTLP receiver; apps are re-pointed to it) | x | x | x | x |
-| `prometheus` | `prom/prometheus:v3.15.0` | 9090 | `http://localhost:9090` | | x | | x |
-| `prometheus-mcp` | `ghcr.io/pab1it0/prometheus-mcp-server:1.6.2` | 8090 | `http://localhost:8090/mcp` | | x | | x |
-| `lgtm` | `grafana/otel-lgtm:0.36.0` | 3000 (Grafana); OTLP/HTTP dynamic (used container-to-container only) | `http://localhost:3000` | | | x | x |
-| `grafana-mcp` | `grafana/mcp-grafana:2.0.2` | 8091 | `http://localhost:8091/mcp` | | | x | x |
+| Resource | Image:tag | Host port | URL | none | b |
+|---|---|---|---|---|---|
+| `sql` (+ database `probe`) | `mcr.microsoft.com/mssql/server:2022-latest` | dynamic | - | x | x |
+| `probe-api` | project | 5171 (http), 7171 (https) | `https://localhost:7171` | x | x |
+| `probe-web` | project | 5172 (http), 7172 (https) | `https://localhost:7172` | x | x |
+| `collector` | `ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.162.0` | dynamic | - (OTLP receiver; apps are re-pointed to it) | x | x |
+| `lgtm` | `grafana/otel-lgtm:0.36.0` | 3000 (Grafana); OTLP/HTTP dynamic (used container-to-container only) | `http://localhost:3000` | | x |
+| `grafana-mcp` | `grafana/mcp-grafana:2.0.2` | 8091 | `http://localhost:8091/mcp` | | x |
 
-Dashboard (`https://localhost:17410`) is always on and receives all signals in every mode.
+Dashboard (`https://localhost:17410`) is always on and receives all signals in both modes.
 
 Grafana login: `admin` / `admin` (LGTM default).
 
 ## Load script
 
-Added in task 3.1. From `spikes/metrics-mcp/`:
+From `spikes/metrics-mcp/`, with the stack running:
 
 ```sh
-node load.mjs
+node load.mjs [baseUrl]
 ```
 
-Sends 20 normal, 5 slow and 5 failing requests to `probe-web`. Node 20+, no dependencies.
+`baseUrl` defaults to `http://localhost:5172` (`probe-web`, http). Sends 20 normal, 5 slow and 5 failing requests to `probe-web`. Resilience retries turn each failing web request into 4 `probe-api` calls, so a fresh start shows 45 `probe-api` requests (25 x 200, 20 x 500). Node 20+, no dependencies.
 
 ## Stop
 
-`aspire stop` (or Ctrl+C for `aspire run`). `Probe.Api` / `Probe.Web` processes can survive; check, then confirm containers are gone:
+`aspire stop` (or Ctrl+C for `aspire run`; `aspire stop --all` if another AppHost holds ports 5171/5172). `Probe.Api` / `Probe.Web` processes can survive; check, then confirm containers are gone:
 
 ```sh
 # macOS / Linux
@@ -76,7 +76,7 @@ docker ps
 ```
 
 ```powershell
-# Windows
+# Windows (untested)
 Get-Process Probe.Api,Probe.Web -ErrorAction SilentlyContinue | Stop-Process
 docker ps
 ```
@@ -84,8 +84,8 @@ docker ps
 ## Notes
 
 - Local only. Grafana `admin`/`admin` is in `AppHost.cs`; do not copy the pattern.
-- MCP endpoints sit on host ports with no auth (the Prometheus MCP server is fully unauthenticated).
+- The Grafana MCP endpoint sits on a host port with no auth.
 - Grafana MCP runs with `--allowed-hosts localhost:8091,127.0.0.1:8091`; change it if host port 8091 changes.
-- Grafana MCP `--disable-write` leaves `grafana_api_request` (GET-only in read-only mode per the binary; runtime confirmation pending in task 2.2). `--disable-api` removes it.
-- Prometheus names OTLP metrics with `_` and unit/`_total` suffixes: `probe.visits` becomes `probe_visits_total`, `http.server.request.duration` becomes `http_server_request_duration_seconds_*`.
-- `.mcp.json` (added in task 2.1) lists `prometheus` and `grafana`; servers of a candidate that is not running show as failed in Claude Code.
+- Grafana MCP `--disable-write` leaves `grafana_api_request`: rejects non-GET at runtime (POST and DELETE rejected); still reaches any Grafana GET, e.g. `/api/users`. `--disable-api` removes it (hardening step).
+- `.mcp.json` lists `aspire` and `grafana`; in mode `none` the `grafana` server shows as failed in Claude Code.
+- Port 3000 (Grafana) often clashes with Node dev servers; change it in `AppHost.cs` if needed.

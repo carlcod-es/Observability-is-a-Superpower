@@ -1,36 +1,36 @@
 # Resume notes: spike-metrics-mcp
 
-Parked 2026-10-12. Resume with `/opsx:apply spike-metrics-mcp`; read this file,
+Updated 2026-10-12. Resume with `/opsx:apply spike-metrics-mcp`; read this file,
 `review-followups.md` and `findings.md` first. Delete this file when the change is archived.
 
 ## State
 
-- Progress: 7/14 tasks ticked (1.1, 1.3-1.6, 2.1, 2.2). Section 1 and 2 code reviewed and APPROVED
-  (three block reviews). Section-1 supervisor review not run yet (waits for 1.2).
+- Scope decision 2026-10-12 (PO): test only candidate B (Grafana LGTM + Grafana MCP); candidate A
+  dropped (`proposal.md`, `design.md` D2). Task 1.7 removed it from the code.
+- Progress: 14/15 ticked (3.6 held). PO signed off 2026-10-13: adopt B alongside the Aspire MCP.
+  Supervisor majors and README minors fixed 2026-10-12.
 - Package and images approved by the PO 2026-10-11 (`design.md` D1-D3).
-- Nothing is running. Last run (macOS) was stopped and cleaned up.
-- Uncommitted: `spikes/metrics-mcp/`, this change folder, one line in `Directory.Packages.props`
-  (`CommunityToolkit.Aspire.Hosting.OpenTelemetryCollector` 13.4.0), `PLANNING.md`. To resume on
-  another machine the PO commits and pushes first (Claude does not commit).
+- A stack may still be running (mode `both`): check `aspire ps` / `docker ps` and stop it.
+- Uncommitted: this change folder (and possibly `spikes/metrics-mcp/` edits). Claude does not commit.
 
 ## Open tasks, in order
 
 | Task | Owner | What is left |
 |---|---|---|
-| 1.2 | PO check | Dashboard Metrics page, `probe-api`: `probe.visits` and `probe.visit.duration` have data. Code done and reviewed; only this eye check is missing. |
-| 3.1 | PO check | Dashboard `http.server.request.duration` count for `probe-api` after one `node load.mjs` run on a fresh start = 45 (25 × 200, 20 × 500). Prometheus already showed exactly this (`findings.md`). |
-| supervisor | Architect | Section 1 supervisor review once 1.2 is ticked. |
-| 3.2 | PO + Architect | PO runs the two agent sessions per `agent-asks.md`, pastes transcripts into `agent-answers.md`; Architect cross-checks into `findings.md`. |
-| 3.3 | Architect | Freshness: time from one request to the change being visible via each MCP server, 3 measurements per candidate. Do while the PO runs 3.2 or after. |
-| 3.4 | Architect | Start-up time and `docker stats` memory for modes `none`, `a`, `b`, each a separate run; attendee prerequisites; cross-platform risks. |
-| 3.5 | Architect → PO | Talk fit and recommendation (adopt A / adopt B / keep ADR-0011); PO sign-off; update `PLANNING.md`. |
-| 3.6 | Architect | After sign-off, with `spike-aspire-probe` task 3.4: delete `spikes/metrics-mcp/`, remove the toolkit package, archive. |
+| 1.2 | done | PO confirmed `probe.visits` and `probe.visit.duration` on the dashboard, 2026-10-12. |
+| 3.1 | done | Dashboard `http.server.request.duration` count for `probe-api` = 90 after two runs (45 per run), PO confirmed 2026-10-12. |
+| 3.2 | done | Agent run, cross-check against Grafana API and dashboard (Firefox via playwright-cli) recorded in `findings.md`, 2026-10-12. |
+| 3.3 | done | Freshness measured 2026-10-12 (`findings.md`). |
+| 3.4 | done | Start-up and memory measured 2026-10-12 (`findings.md`). |
+| 3.5 | done | PO signed off 2026-10-13 (adopt B alongside the Aspire MCP). `PLANNING.md` updated. |
+| 3.6 | HELD (PO 2026-10-13) | Delete `spikes/metrics-mcp/`, remove the toolkit package, archive: only after the new ADR and the `add-demo-foundation` plan exist, together with `spike-aspire-probe` task 3.4. |
 
-Fresh-start check for 1.2 + 3.1 (one run covers both):
-1. `cd spikes/metrics-mcp` → `aspire start -- --Spike:Candidates=both` → wait for all Healthy.
-2. `node load.mjs` once, nothing else hitting the app.
-3. Dashboard (`https://localhost:17410`, login link printed by `aspire start`) → Metrics →
-   `probe-api`: check both custom metrics and the request count.
+Dashboard reading tips (found 2026-10-12):
+- The Metrics page defaults to "Last 5 minutes" and lists only instruments with data in that
+  window. Set Duration to 15 minutes or check right after a load run.
+- Playwright: `playwright-cli` is installed globally; direct URL
+  `https://localhost:17410/metrics/resource/probe-api?meter=<meter>&instrument=<name>&duration=15`.
+  Clicking the Table tab by text did not work; use a JS eval click or read it by eye.
 
 ## Resuming on another machine
 
@@ -38,18 +38,19 @@ Fresh-start check for 1.2 + 3.1 (one run covers both):
   Server and LGTM) are pulled on first start.
 - `spikes/metrics-mcp/` depends on `spikes/aspire-probe/` (Probe.Api, Probe.Web) and
   `src/SuperPower.ServiceDefaults` (both committed already).
-- Fixed host ports must be free: 17410 (dashboard), 5171/7171, 5172/7172, 9090, 3000, 8090, 8091.
+- Fixed host ports must be free: 17410 (dashboard), 5171/7171, 5172/7172, 3000, 8091.
 - Windows (untested so far; record results under task 3.4 cross-platform):
   - Run commands from PowerShell; leftover processes: `Get-Process Probe.Api,Probe.Web -ErrorAction SilentlyContinue | Stop-Process`.
   - Docker Desktop must use Linux containers.
   - The HTTPS dev certificate must be trusted (`dotnet dev-certs https --trust`) for the dashboard.
-- `claude mcp list` in `spikes/metrics-mcp/` with mode `both` running should show `aspire`,
-  `prometheus`, `grafana` Connected (verified on macOS).
+- `claude mcp list` in `spikes/metrics-mcp/` with mode `b` running should show `aspire` and
+  `grafana` Connected.
 
 ## Known issues and gotchas
 
 - `aspire stop` leaves `Probe.Api` / `Probe.Web` processes; kill them (README) and poll `docker ps`
-  until empty before the next start, or ports clash.
+  until empty before the next start, or ports clash. A second AppHost (the old `spike-aspire-probe`
+  one) holds ports 5171/5172: `aspire stop --all` first, and `aspire ps` to check.
 - Don't pipe `aspire start` through `tail`/`head` from an agent shell; it left a hung shell once.
 - Grafana MCP `query_prometheus` instant queries need `endTime: "now"`.
 - Grafana MCP `--allowed-hosts` is tied to host port 8091.
