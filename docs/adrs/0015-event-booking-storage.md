@@ -1,7 +1,9 @@
 # ADR-0015: Event booking storage
 
 ## Status
-Accepted (2026-10-08; custom table and Umbraco migration directed by the Product Owner)
+Superseded by ADR-0016 (2026-10-13; an Event booking is an ordinary submission — no booking
+table. Was: Accepted 2026-10-08, custom table and Umbraco migration directed by the Product
+Owner)
 
 ## Context
 Spec `form-submission` "Storing an Event booking": a valid Event booking is stored as a booking

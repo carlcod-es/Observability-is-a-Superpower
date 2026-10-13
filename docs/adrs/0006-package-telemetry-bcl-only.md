@@ -1,7 +1,7 @@
 # ADR-0006: Package telemetry uses BCL APIs only
 
 ## Status
-Accepted (2026-10-07)
+Superseded by ADR-0016 (2026-10-13; no package — the site's telemetry names are `Acme.Forms`)
 
 ## Context
 CLAUDE.md requires the package to emit its own ActivitySource and Meter. The original

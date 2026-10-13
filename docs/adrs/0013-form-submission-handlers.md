@@ -1,7 +1,8 @@
 # ADR-0013: Form submission handlers
 
 ## Status
-Accepted (2026-10-08)
+Superseded by ADR-0016 (2026-10-13; no handler interface — the past-event rule is called
+directly by the site's controller)
 
 ## Context
 The Event booking form needs rules that depend on the page it sits on (spec `form-submission`,

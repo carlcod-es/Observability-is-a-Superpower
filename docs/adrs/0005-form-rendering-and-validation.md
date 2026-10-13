@@ -1,7 +1,7 @@
 # ADR-0005: Form rendering and server-side validation
 
 ## Status
-Accepted (2026-10-07)
+Superseded by ADR-0016 (2026-10-13; no forms package, fixed site forms)
 
 ## Context
 Specs `form-submission` require rendering without client scripts, server-side validation only,

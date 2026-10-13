@@ -1,7 +1,7 @@
 # ADR-0004: Forms package schema and submission storage
 
 ## Status
-Accepted (2026-10-07)
+Superseded by ADR-0016 (2026-10-13; no forms package, fixed site forms)
 
 ## Context
 The package must create its field types and storage itself (spec `form-definitions`,

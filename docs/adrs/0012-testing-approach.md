@@ -1,23 +1,23 @@
 # ADR-0012: Testing approach
 
 ## Status
-Accepted (2026-10-07)
+Accepted (2026-10-07; revised 2026-10-13 — ADR-0016 removed the forms package, so all tests
+live in `tests/SuperPower.Web.Tests`)
 
 ## Context
-Nine days to the talk. The riskiest logic in this change is validation and submission mapping;
+Days to the talk. The riskiest logic in this change is validation and submission mapping;
 the riskiest integration is startup (install, migrations, seeding) on two databases.
 
 ## Decision
-- xUnit v3 test project `tests/SuperPower.Forms.Tests` for package logic that needs no
-  Umbraco runtime: validator rules, alias uniqueness, posted-value mapping, submission JSON.
-- xUnit v3 test project `tests/SuperPower.Web.Tests` for site logic that needs no Umbraco
-  runtime: the event booking handler's rules (past event, online fixed place, booking row
-  values) with a fake `TimeProvider` (added 2026-10-08; ADR-0013, ADR-0015).
+- One xUnit v3 test project `tests/SuperPower.Web.Tests` for site logic that needs no Umbraco
+  runtime: the form models' DataAnnotations rules, field-values-to-JSON mapping, the
+  past-event rule and upcoming-events ordering with a fake `TimeProvider` (ADR-0016,
+  ADR-0014).
 - Startup and end-to-end behaviour verified by scripted smoke checks against the running
   AppHost and the standalone SQLite site (HTTP requests for pages, a valid and an invalid
   submission), recorded as tasks, not automated test suites.
 - No Umbraco integration-test harness in this change.
-- Runner (added 2026-10-08, `add-demo-foundation` task 3.9): xunit.v3 4.x on
+- Runner (added 2026-10-08): xunit.v3 4.x on
   Microsoft.Testing.Platform, opted in by a root `global.json`
   (`"test": { "runner": "Microsoft.Testing.Platform" }`, no SDK pin). The .NET 10 SDK's
   `dotnet test` no longer runs MTP projects in VSTest mode. Only `xunit.v3` is referenced;

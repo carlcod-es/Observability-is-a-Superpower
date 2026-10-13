@@ -1,7 +1,8 @@
 # ADR-0011: Agent access to local telemetry
 
 ## Status
-Accepted (2026-10-07)
+Superseded by ADR-0017 (2026-10-13; Grafana MCP replaces the Aspire MCP — PO decision, one
+server; the presenter runs resource commands in the dashboard)
 
 ## Context
 Aspire 13.6 runs its MCP server from the CLI (`aspire agent mcp`, stdio); the dashboard MCP

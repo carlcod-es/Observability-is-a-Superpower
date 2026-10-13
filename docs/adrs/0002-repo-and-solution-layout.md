@@ -1,13 +1,13 @@
 # ADR-0002: Repo and solution layout
 
 ## Status
-Accepted (2026-10-07)
+Accepted (2026-10-07; revised 2026-10-13 — ADR-0016 removed the forms package, so
+`src/SuperPower.Forms` and `tests/SuperPower.Forms.Tests` are gone)
 
 ## Context
 The site exists as `src/SuperPower.Web` with `src/SuperPower.slnx` and a
 `Directory.Packages.props` inside the web project folder. Tests will live outside `src/`,
-and every project must share one set of package versions. The package must stay separable
-from the site (it owns its schema and has no site dependencies).
+and every project must share one set of package versions.
 
 ## Decision
 ```
@@ -16,10 +16,8 @@ Directory.Packages.props         (moved from src/SuperPower.Web/; central versio
 Directory.Build.props            (net10.0, nullable, implicit usings)
 src/SuperPower.AppHost           (Aspire AppHost, project-based)
 src/SuperPower.ServiceDefaults   (Aspire ServiceDefaults)
-src/SuperPower.Web               (Umbraco site; uSync files; views)
-src/SuperPower.Forms             (Razor class library: package)
-tests/SuperPower.Forms.Tests     (xUnit)
-tests/SuperPower.Web.Tests       (xUnit; site logic, added 2026-10-08, ADR-0012)
+src/SuperPower.Web               (Umbraco site; uSync files; views; the three fixed forms)
+tests/SuperPower.Web.Tests       (xUnit; site logic incl. forms, ADR-0012)
 docs/adrs, docs/research
 ```
 Casing is `SuperPower.*` for all identifiers.
