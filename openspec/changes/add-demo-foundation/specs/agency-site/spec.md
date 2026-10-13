@@ -3,7 +3,8 @@
 A small, believable website for a fictional marketing agency that gives the demo forms a
 realistic home and produces readable, low-noise telemetry for normal page requests.
 
-Decisions: ADR-0003 (content seeding), ADR-0014 (event content model); in `docs/adrs/`.
+Decisions: ADR-0003 (content seeding), ADR-0014 (event content model; to be revised: one event
+type, no format or capacity, PO 2026-10-13); in `docs/adrs/`.
 
 ## ADDED Requirements
 
@@ -28,16 +29,14 @@ Editors SHALL NOT choose or change a page's form.
 - **THEN** it shows the Contact form
 
 ### Requirement: Events
-Each event SHALL have a title, a description, a start date and time, and a format of either in
-person or online. An in-person event SHALL have a capacity in places, set by the editor; an
-online event SHALL have no capacity. Events are free; the site SHALL NOT show or take payment.
-The site SHALL include at least two in-person events and one online event, for example "How to
-get the most out of your CMS", all starting after 16 Oct 2026 so they are bookable during the
-talk.
+Each event SHALL have a title, a description, and a start date and time. Events have no format,
+capacity or places. Events are free; the site SHALL NOT show or take payment. The site SHALL
+include at least three events, for example "How to get the most out of your CMS", all starting
+after 16 Oct 2026 so they are bookable during the talk.
 
 #### Scenario: Events list
 - **WHEN** a visitor opens the Events page
-- **THEN** it lists upcoming events in date order with title, date, time and format, each
+- **THEN** it lists upcoming events in date order with title, date and time, each
   linking to its event page
 
 #### Scenario: Upcoming event page
@@ -47,10 +46,6 @@ talk.
 #### Scenario: Past event page
 - **WHEN** a visitor opens the page of an event whose start time has passed
 - **THEN** it shows "This event has ended" and no booking form
-
-#### Scenario: Editor sets capacity
-- **WHEN** an editor creates an in-person event
-- **THEN** they set its capacity in places; an online event offers no capacity setting
 
 ### Requirement: Services
 Each service SHALL have a title and a description. The site SHALL include at least Umbraco

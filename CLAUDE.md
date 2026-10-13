@@ -5,6 +5,11 @@ and AI Agents X-Ray Vision" (Fri 16 Oct 2026, 13:30-14:15 BST, 45 min, live demo
 Slides are maintained separately; this repo holds the demo and is published for
 attendees afterwards.
 
+## Principle
+- Keep it simple: this is a basic demo. Choose the simplest option that delivers the talk
+  promises. No edge-case handling, configurability or features the demo does not show.
+  Applies to requirements, design, code and docs.
+
 ## Roles
 - The user is the Product Owner (PO) and makes all product, scope and prioritisation
   decisions. Ask rather than assume; missing or contradictory requirements go to the PO.

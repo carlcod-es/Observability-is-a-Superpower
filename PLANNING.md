@@ -16,62 +16,57 @@ references this file, so the on-stage agent may read it.
   prometheus,loki,tempo,datasource`, 22 tools) next to the Aspire MCP (ADR-0011 kept). Findings in
   `openspec/changes/spike-metrics-mcp/findings.md`. Open: task 3.6 (delete `spikes/metrics-mcp/`, remove toolkit
   package, archive) waits for `spike-aspire-probe` task 3.4 (shared probe projects).
-- [ ] Architect: new ADR for B (Collector, LGTM, Grafana MCP, allow-list, prompt hints on which MCP to use for what)
-  and fold it into `add-demo-foundation` (package `CommunityToolkit.Aspire.Hosting.OpenTelemetryCollector`,
-  images, `.mcp.json`, `.claude/settings.json`, attendee pre-pull, Windows run). Via `/opsx:propose` or `/opsx:update`.
-- [ ] `/opsx:apply add-demo-foundation`: planning complete 2026-10-08 (ADR-0001..0015).
-- [ ] Architect: design and tasks for `add-event-bookings`; may run alongside the build
-  (ADR-0015 keeps its columns out of `add-demo-foundation`).
+- [ ] Architect: new ADR for B (Collector, LGTM, Grafana MCP, allow-list) and fold it into
+  `add-demo-foundation` (package `CommunityToolkit.Aspire.Hosting.OpenTelemetryCollector`, images,
+  `.mcp.json`, `.claude/settings.json`, attendee pre-pull, Windows run). PO 2026-10-13: the Grafana MCP
+  replaces the Aspire MCP (not alongside); revise ADR-0011. Via `/opsx:update`.
+- [ ] Architect: `/opsx:update add-demo-foundation` for the 2026-10-13 simplification (Event booking is
+  an ordinary submission): supersede ADR-0015; revise ADR-0014 (one `event` document type, no format or
+  capacity) and ADR-0011; design.md; re-plan tasks (remove the booking table code from task 5.1, task 8.1
+  Aspire MCP -> Grafana MCP, PO content tasks 6.1-6.3 and uSync for the merged event type); CLAUDE.md
+  "Stack" (no Aspire MCP) and "Demo site" (no `eventInPerson`/`eventOnline`, no `acmeEventBooking`).
+- [ ] `/opsx:apply add-demo-foundation`: resumes after the updates above.
 
-## Product requirements confirmed in explore (2026-10-06, revised 2026-10-08)
+## Product requirements confirmed in explore (2026-10-06, revised 2026-10-08, 2026-10-13)
+- Keep it simple (PO 2026-10-13, CLAUDE.md "Principle"): basic demo, no edge cases.
 - Site: fictional marketing agency, Acme Agency (replaces the pottery studio). Pages: Home,
   About us, Contact us, Events list, event pages, Services list, service pages.
-- Services (e.g. Umbraco upgrade, SEO audit, AdWords audit): no capacity; Service enquiry form.
-- Events (e.g. "How to get the most out of your CMS"): free; in person (capacity set by the
-  editor) or online (no capacity). Past events show "This event has ended", no form. No payment.
-- Forms (three; the event or service comes from the page, not a field):
+- Services (e.g. Umbraco upgrade, SEO audit, AdWords audit): Service enquiry form.
+- Events (e.g. "How to get the most out of your CMS"): free; title, description, start date and
+  time; no format, capacity or places. Past events show "This event has ended", no form. No payment.
+- Forms (three; the event or service comes from the page, not a field). After a valid
+  submission: "Thank you, we'll be in touch."
   - Contact: Name, Email, Message, "Reply by phone?" checkbox. Owner notification only.
   - Service enquiry: Name, Email, Company (optional), Website (optional), Message. Owner
     notification + submitter confirmation.
-  - Event booking: Name, Email, Places 1-4 (in person only; online is always 1), Notes
-    (optional), "Join mailing list" checkbox. No per-guest names.
-- Booking workflow: submitting stores a pending booking. A personal link (emailed) confirms it;
-  places are allocated when the link is opened, all or nothing, else waiting list. Online events
-  always confirm. Links never expire; opening again shows current status. Waiting list is final:
-  no promotion, no cancellation. One booking per email per event. Places left counted from
-  confirmed bookings, shown on in-person event pages.
-- Emails: booking received (click to confirm), confirmed (online: joining link), waitlisted;
-  enquiry owner + confirmation; contact owner. Owner notified of bookings on confirm/waitlist.
+  - Event booking: Name, Email, Notes (optional), "Join mailing list" checkbox. Owner
+    notification + submitter confirmation. An ordinary submission: no booking status,
+    confirmation link, waiting list or limit per email (PO 2026-10-13).
 - Stored submission: field values, form, page, UTC timestamp. No IP or browser info.
 - Agent never accesses the database; demo personal data is in telemetry only.
-- Never recorded in telemetry: Name, Message, Notes, Company, Website, email address, the
-  confirmation link. Fine: form, event or service, places, outcome.
+- Agent reads logs, traces and metrics via the Grafana MCP only; no resource state or commands
+  (presenter runs fault commands in the dashboard). PO 2026-10-13.
+- Never recorded in telemetry: Name, Message, Notes, Company, Website, email address. Fine:
+  form, event or service, outcome.
 - Owner dashboard of bookings: stretch goal.
 - Prod data: scripted submissions over the days before the talk (repeat submitters, validation
-  failures, all forms, bookings across events incl. some never confirmed, one in-person event
-  nearly full at talk time), plus attendees submitting live via QR code.
-- Prod attendee handling: notice on all forms (live demo, deleted within 7 days); bookings need a
-  real email, contact and enquiry may use a made-up one; delete prod submissions and bookings
-  within 7 days of 16 Oct; one booking per email per event; one presenter switch closes every
-  form; real emails sent.
+  failures, all forms, bookings across events), plus attendees submitting live via QR code.
+- Prod attendee handling: notice on all forms (live demo, deleted within 7 days); any form may use
+  a made-up email; delete prod submissions within 7 days of 16 Oct (or by taking prod down); one
+  presenter switch closes every form; real emails sent.
 - Prod owner mailbox: presenter-owned demo alias (prod settings only, never in the repo).
 - Forms simplified (2026-10-10): no separate forms package; the talk no longer promises a
   custom package. Three fixed forms in the site; the page type decides the form. No editor-
-  defined forms, fields or form text. No format rules beyond Email and Places 1-4.
+  defined forms, fields or form text. No format rules beyond Email.
 - Email settings (`add-form-emails`): owner address is an environment setting; subjects and
   bodies are fixed text. No backoffice settings.
 - Act 4 split: resolved (presenter-only notes).
 
-## Change order (2026-10-08)
-1. `add-demo-foundation`: agency site, events and services, three forms, booking storage
-   (bookings stay pending).
-2. `add-event-bookings`: confirmation link, allocation, waiting list, places left.
-3. `add-form-emails`: all emails, including the one carrying the link.
-4. `add-production-environment`.
-
-## Architect follow-ups from the 2026-10-08 pivot
-- [ ] `add-event-bookings`: design.md, ADR(s) and tasks (allocation under concurrent link opens;
-  new booking columns via new migration steps, ADR-0015).
+## Change order (2026-10-08, revised 2026-10-13)
+1. `add-demo-foundation`: agency site, events and services, three forms.
+2. `add-form-emails`: all emails.
+3. `add-production-environment`.
+`add-event-bookings` dropped 2026-10-13 (change directory removed).
 
 ## Architect follow-ups from the 2026-10-10 forms simplification
 - [ ] `/opsx:update add-demo-foundation`: design.md; revise ADR-0002, ADR-0004, ADR-0005,
@@ -84,18 +79,21 @@ references this file, so the on-stage agent may read it.
   types are still in both).
 
 ## Open decisions
-- [ ] Prod site after the talk (PO decides later): take it down once attendee submissions
-  are deleted (7 days after 16 Oct; closes the public form, stops cost), or keep it running
-  as a live reference (abuse surface stays open).
+- [x] Prod site after the talk (PO 2026-10-13): taken down after the talk; deleting the Azure
+  resources deletes attendee submissions.
+- [x] Telemetry MCP (PO 2026-10-13): logs, traces and metrics queries go to the Grafana MCP
+  (covers all three, `spike-metrics-mcp` findings). Architect: revise ADR-0011 and CLAUDE.md "Stack".
+- [x] Aspire MCP (PO 2026-10-13): dropped. Presenter runs Toxiproxy commands in the dashboard;
+  no console logs or resource state for the agent.
+- [x] Event bookings (PO 2026-10-13): Event booking is an ordinary submission; `add-event-bookings`
+  dropped.
 
 ## Unknowns to spike
 Decided in ADRs; verified by `add-demo-foundation` tasks:
 - [x] Umbraco 17 Serilog -> OTLP via forwarding sink (ADR-0007): task 1.3, passed 2026-10-08.
 - [ ] SqlClient spans for Umbraco's NPoco queries; background span volume (ADR-0008): task 2.4.
 - [ ] smtp4dev and Toxiproxy in the AppHost, Slow/Break/Heal commands (ADR-0010): tasks 2.2, 2.3.
-- [ ] Booking table migration timing on a fresh unattended install (ADR-0015): task 5.1.
 - [ ] Date Time with time zone stored value shape (ADR-0014): task 5.2.
-- [ ] Aspire MCP tool set and `aspire agent init --mcp` (ADR-0011): task 8.1.
 For `add-production-environment`:
 - [ ] Azure MCP Server: read-only mode, Monitor/App Insights query tools, running under a limited identity (Monitoring Reader + Log Analytics Reader).
 - [ ] Azure Communication Services Email via SMTP from Umbraco IEmailSender.
@@ -111,7 +109,10 @@ For `add-production-environment`:
   artifacts that describe later-act fixes off earlier demo branches.
 - [ ] Demo-specific CLAUDE.md for stage: agent instructions to diagnose and verify via telemetry.
   Decide whether the Roles and "Apply-phase team" sections and `.claude/agents/` stay on
-  `demo/act-N-*` branches and in the published repo.
+  `demo/act-N-*` branches and in the published repo. Analyst recommendation (PO to confirm):
+  leave them, and `.claude/commands/opsx/`, off demo branches and `main`; on stage they make
+  the agent role-play and route fixes through sub-agents. PO decides separately whether
+  attendees see the OpenSpec planning.
 - [ ] Script and rehearse agent prompts; rehearse with `/fast`.
 - [ ] Record fallback videos of agent segments.
 - [ ] Deploy to Azure the day before; smoke test the morning of; min replicas 1.

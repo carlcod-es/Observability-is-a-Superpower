@@ -5,8 +5,9 @@ so that every submission attempt reaches the server and is observable. Forms are
 site, not content: editors cannot define forms, fields or form text.
 
 Decisions: ADR-0004 (schema and storage), ADR-0005 (rendering and validation), ADR-0013
-(submission handlers), ADR-0015 (event booking storage); in `docs/adrs/`. ADR-0004, ADR-0005
-and ADR-0013 predate the fixed-forms decision (2026-10-10) and are to be revised.
+(submission handlers); in `docs/adrs/`. ADR-0004, ADR-0005 and ADR-0013 predate the
+fixed-forms decision (2026-10-10) and are to be revised. ADR-0015 (event booking storage) no
+longer applies: an Event booking is an ordinary submission (PO 2026-10-13).
 
 ## ADDED Requirements
 
@@ -16,8 +17,8 @@ The site SHALL have exactly three forms with these fields:
   Reply by phone? (checkbox).
 - Service enquiry: Name (text, required), Email (email, required), Company (text, optional),
   Website (text, optional), Message (multi-line text, required).
-- Event booking: Name (text, required), Email (email, required), Places (choice of 1, 2, 3 or 4,
-  required), Notes (multi-line text, optional), Join mailing list (checkbox).
+- Event booking: Name (text, required), Email (email, required), Notes (multi-line text,
+  optional), Join mailing list (checkbox).
 
 The service or event a submission is about SHALL come from the page the form is on, not from a
 field the visitor fills in.
@@ -26,10 +27,6 @@ field the visitor fills in.
 - **WHEN** the site has started against an empty database
 - **THEN** all three forms exist with exactly these fields and required flags, with no editor
   action
-
-#### Scenario: Booking an online event
-- **WHEN** a visitor opens the Event booking form on an online event's page
-- **THEN** the Places field is not shown and the booking is for one place
 
 ### Requirement: Fixed form text
 Form labels, messages and notices SHALL be fixed by the site. Editors SHALL NOT be able to add,
@@ -50,9 +47,8 @@ include forgery protection. Rendering SHALL NOT require client-side scripting.
 
 ### Requirement: Server-side validation only
 Validation SHALL happen on the server only; the browser SHALL NOT block submission for
-missing or malformed values. A field fails validation when it is required and empty, when an
-email value is not a valid address, or when a Places value is not one of 1, 2, 3 or 4. No other
-format rules apply.
+missing or malformed values. A field fails validation when it is required and empty, or when an
+email value is not a valid address. No other format rules apply.
 
 #### Scenario: Missing required field
 - **WHEN** a visitor submits the Contact form without a Message
@@ -61,10 +57,6 @@ format rules apply.
 #### Scenario: Invalid email
 - **WHEN** a visitor submits a form with an Email value that is not a valid address
 - **THEN** the form is shown again with an error next to Email
-
-#### Scenario: Tampered Places value
-- **WHEN** a submission contains a Places value that is not one of 1, 2, 3 or 4
-- **THEN** the submission fails validation and is not stored
 
 ### Requirement: Forgery protection
 The site SHALL reject submissions without a valid forgery-protection token.
@@ -87,23 +79,9 @@ visitor's IP address or browser details.
 - **WHEN** a submission fails validation
 - **THEN** nothing is stored
 
-### Requirement: Storing an Event booking
-A valid Event booking submission SHALL also be stored as a booking for the event whose page it
-was submitted from, with the number of places requested and the status pending. An Event
-booking on an online event SHALL be for exactly one place. No action in this change moves a
-booking out of pending; the confirmation workflow is change `add-event-bookings`.
-
-#### Scenario: Booking an in-person event
-- **WHEN** a visitor submits a valid Event booking for 3 places on an in-person event
-- **THEN** one submission is stored, and one pending booking for that event and 3 places
-
-#### Scenario: Booking an online event
-- **WHEN** a visitor submits a valid Event booking on an online event
-- **THEN** one pending booking for that event and 1 place is stored
-
-#### Scenario: Places sent for an online event
-- **WHEN** an Event booking for an online event arrives with a Places value other than 1
-- **THEN** the submission fails validation and nothing is stored
+### Requirement: Booking a past event
+An Event booking SHALL be stored like any other submission. An Event booking for an event that
+has started SHALL be rejected. There are no places, capacity or booking status.
 
 #### Scenario: Booking a past event
 - **WHEN** an Event booking arrives for an event whose start time has passed
@@ -111,9 +89,8 @@ booking out of pending; the confirmation workflow is change `add-event-bookings`
   ended"
 
 ### Requirement: Confirmation after submit
-After a valid submission the visitor SHALL see a confirmation message, and refreshing the page
-SHALL NOT submit the form again. After a valid Event booking the message SHALL be "Booking
-received".
+After a valid submission the visitor SHALL see the message "Thank you, we'll be in touch.", and
+refreshing the page SHALL NOT submit the form again.
 
 #### Scenario: Refresh after submit
 - **WHEN** a visitor refreshes the page after a successful submission
