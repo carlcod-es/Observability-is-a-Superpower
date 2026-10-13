@@ -7,15 +7,16 @@ Rule: no demo answers here (planted problems, their causes or fixes). CLAUDE.md
 references this file, so the on-stage agent may read it.
 
 ## Next step
-- [ ] Architect: new ADR for B (Collector, LGTM, Grafana MCP, allow-list) and fold it into
-  `add-demo-foundation` (package `CommunityToolkit.Aspire.Hosting.OpenTelemetryCollector`, images,
-  `.mcp.json`, `.claude/settings.json`, attendee pre-pull, Windows run). PO 2026-10-13: the Grafana MCP
-  replaces the Aspire MCP (not alongside); revise ADR-0011. Via `/opsx:update`.
-- [ ] Architect: `/opsx:update add-demo-foundation` for the 2026-10-13 simplification (Event booking is
-  an ordinary submission): revise ADR-0014 (one `event` document type, no format or
-  capacity) and ADR-0011; design.md; re-plan tasks (remove the booking table code from task 5.1, task 8.1
-  Aspire MCP -> Grafana MCP, PO content tasks 6.1-6.3 and uSync for the merged event type).
-- [ ] `/opsx:apply add-demo-foundation`: resumes after the updates above.
+- [x] Architect (2026-10-13): ADR-0017 (Collector, LGTM, Grafana MCP, allow-list) written, ADR-0011
+  superseded; ADR-0016 written, ADR-0004/0005/0006/0013/0015 removed; ADR-0002/0012/0014 revised;
+  `/opsx:update add-demo-foundation` done — design.md, specs, tasks.md re-planned (sections 3-9),
+  `po-backoffice-steps.md` and `review-followups.md` reworked.
+- [ ] `/opsx:apply add-demo-foundation`: resume with task 2.5 and section 3 (first: 3.1 package
+  removal, then PO task 6.1 database reset).
+- [x] Spike closure (PO 2026-10-13): keep both spikes open for reference until pre-talk cleanup.
+  Then: `spike-aspire-probe` task 3.4 and `spike-metrics-mcp` task 3.6 (delete `spikes/`, drop
+  `Microsoft.Data.SqlClient` from `Directory.Packages.props`, keep the toolkit package — used by
+  `add-demo-foundation` task 2.5), archive both. Tracked in Todos.
 
 ## Product requirements confirmed in explore (2026-10-06, revised 2026-10-08, 2026-10-13)
 - Keep it simple (PO 2026-10-13, CLAUDE.md "Principle"): basic demo, no edge cases.
@@ -60,12 +61,9 @@ references this file, so the on-stage agent may read it.
 `add-event-bookings` dropped 2026-10-13 (change directory removed).
 
 ## Architect follow-ups from the 2026-10-10 forms simplification
-- [ ] `/opsx:update add-demo-foundation`: design.md; revise ADR-0002 (no package, no field
-  element types or form document type);
-  re-plan `tasks.md` sections 3, 4 and 6 (ticked 3.2, 3.5, 3.7 and code for 3.8, 4.1 rework);
-  `review-followups.md` entries that no longer apply.
-- [ ] PO: reset local SQLite and SQL databases once the package code is removed (field element
-  types are still in both).
+- [x] `/opsx:update add-demo-foundation` done 2026-10-13 (see "Next step").
+- [ ] PO: reset local SQLite and SQL databases once the package code is removed — now
+  `add-demo-foundation` task 6.1 (after task 3.1).
 
 ## Open decisions
 - [ ] Prod hosting (PO 2026-10-13): working assumption is the local environment behind a
@@ -96,9 +94,12 @@ references this file, so the on-stage agent may read it.
 ## Unknowns to spike
 Decided in ADRs; verified by `add-demo-foundation` tasks:
 - [x] Umbraco 17 Serilog -> OTLP via forwarding sink (ADR-0007): task 1.3, passed 2026-10-08.
-- [ ] SqlClient spans for Umbraco's NPoco queries; background span volume (ADR-0008): task 2.4.
-- [ ] smtp4dev and Toxiproxy in the AppHost, Slow/Break/Heal commands (ADR-0010): tasks 2.2, 2.3.
-- [ ] Date Time with time zone stored value shape (ADR-0014): task 5.2.
+- [x] SqlClient spans for Umbraco's NPoco queries; background span volume (ADR-0008): task 2.4,
+  passed 2026-10-09 (`verification.md`).
+- [x] smtp4dev and Toxiproxy in the AppHost, Slow/Break/Heal commands (ADR-0010): tasks 2.2, 2.3,
+  passed 2026-10-09 (`verification.md`).
+- [ ] Date Time with time zone stored value shape (ADR-0014): task 3.4.
+- [ ] LGTM stack, Collector and Grafana MCP on Windows (ADR-0017; spike ran on macOS): task 9.3.
 For `add-production-environment`, tunnel baseline:
 - [ ] Cloudflare tunnel to the local site: public URL for the QR code, only the site exposed
   (no dashboard, Grafana, smtp4dev or backoffice).
@@ -109,10 +110,11 @@ For `add-production-environment`, Azure stretch (only if time allows):
 - [ ] Azure Monitor exporter switch (ADR-0008; code in task 2.4) verified against Application Insights.
 
 ## Todos
-- [ ] `spike-aspire-probe` task 3.4 (PO deferred 2026-10-11, keep the probe until closer to the
-  talk): delete `spikes/aspire-probe/`, remove `Microsoft.Data.SqlClient` from
-  `Directory.Packages.props`, root build; then archive the change. Keep `spikes/` off
-  `demo/act-N-*` branches and out of the published repo.
+- [ ] Pre-talk cleanup of both spikes (PO 2026-10-11, reconfirmed 2026-10-13: keep open for
+  reference until then): `spike-aspire-probe` task 3.4 and `spike-metrics-mcp` task 3.6 —
+  delete `spikes/`, remove `Microsoft.Data.SqlClient` from `Directory.Packages.props` (keep the
+  toolkit package, used by `add-demo-foundation` task 2.5), root build; archive both changes.
+  Keep `spikes/` off `demo/act-N-*` branches and out of the published repo.
 - [ ] Plan and create `demo/act-N-*` fallback branches. Keep `docs/research/` and any OpenSpec
   artifacts that describe later-act fixes off earlier demo branches.
 - [ ] Demo-specific CLAUDE.md for stage: agent instructions to diagnose and verify via telemetry.

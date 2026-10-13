@@ -109,9 +109,6 @@ runnable by attendees.
 ## Repo conventions
 - Planning via OpenSpec in `openspec/`. Change order: `add-demo-foundation`,
   `add-form-emails`, `add-production-environment`.
-- ADRs, `design.md` and `tasks.md` of `add-demo-foundation` predate the 2026-10-10 and
-  2026-10-13 decisions until `/opsx:update add-demo-foundation` runs (see `PLANNING.md`).
-  Where they disagree with this file, this file holds the PO decision.
 - `PLANNING.md` (temporary): open decisions, unknowns and todos. Check it before
   starting work; update it when items are resolved or discovered.
 - Demo recovery points are git branches `demo/act-N-*`; `main` is the final state.

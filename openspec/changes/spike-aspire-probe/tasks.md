@@ -25,3 +25,4 @@ Owner: Architect, with the PO observing the dashboard. Depends on: 1, 2.
 - [x] 3.3 Summarise in `findings.md` what changes for the demo (if anything); update ADR-0011 Consequences if a finding contradicts it; report to the PO
 - [ ] 3.4 After PO sign-off: delete `spikes/aspire-probe/`, remove `Microsoft.Data.SqlClient` from `Directory.Packages.props` unless another project uses it; verify `dotnet build` at the root still succeeds
   - Signed off 2026-10-11; deletion deferred by the PO until closer to the talk (`PLANNING.md` Todos).
+  - PO 2026-10-13: keep the spike open for reference; this task and archiving wait until pre-talk cleanup.

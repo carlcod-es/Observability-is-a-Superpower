@@ -3,6 +3,10 @@
 Recorded observations for spec scenarios not covered by unit tests (design.md "Bar and test
 strategy"). Evidence comes from the block reviews; the reviewer ran each check independently.
 
+Tasks were renumbered 2026-10-13 (ADR-0016/ADR-0017 re-plan); entries cite the task numbers
+current at the time. The section 3 entries, and the task 6.1 and folder-step entries, record
+the forms package that the re-plan removes (new task 3.1).
+
 ## Section 1
 
 - `add-demo-foundation` task 1.1, 2026-10-08: `aspire --version` prints 13.6.0.

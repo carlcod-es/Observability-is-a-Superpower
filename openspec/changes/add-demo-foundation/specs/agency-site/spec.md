@@ -3,8 +3,7 @@
 A small, believable website for a fictional marketing agency that gives the demo forms a
 realistic home and produces readable, low-noise telemetry for normal page requests.
 
-Decisions: ADR-0003 (content seeding), ADR-0014 (event content model; to be revised: one event
-type, no format or capacity, PO 2026-10-13); in `docs/adrs/`.
+Decisions: ADR-0003 (content seeding), ADR-0014 (event content model); in `docs/adrs/`.
 
 ## ADDED Requirements
 

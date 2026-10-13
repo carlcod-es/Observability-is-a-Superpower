@@ -3,9 +3,7 @@
 Gives the coding agent read access to the local environment's logs, traces and metrics, so it
 can identify failures and verify changes from evidence rather than guesswork.
 
-Decisions: ADR-0011 (agent access to local telemetry; to be revised: one telemetry MCP server
-covering logs, traces and metrics, no resource state or commands, PO 2026-10-13); in
-`docs/adrs/`.
+Decisions: ADR-0017 (Grafana LGTM and Grafana MCP; supersedes ADR-0011); in `docs/adrs/`.
 
 ## ADDED Requirements
 
