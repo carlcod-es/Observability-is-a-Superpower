@@ -5,6 +5,14 @@ and AI Agents X-Ray Vision" (Fri 16 Oct 2026, 13:30-14:15 BST, 45 min, live demo
 Slides are maintained separately; this repo holds the demo and is published for
 attendees afterwards.
 
+## Why
+Observability is usually added after production breaks. The talk argues the same telemetry
+should drive development: build a feature, find real problems and prove fixes with logs,
+traces and metrics locally, before release. It also gives a coding agent that telemetry over
+MCP, so the agent diagnoses and verifies its own work from evidence instead of only generating
+code. Everything in this repo exists to make those moments work live on stage, then to be
+runnable by attendees.
+
 ## Principle
 - Keep it simple: this is a basic demo. Choose the simplest option that delivers the talk
   promises. No edge-case handling, configurability or features the demo does not show.
@@ -33,8 +41,9 @@ attendees afterwards.
   decisions outside `/opsx:propose`.
 
 ## Talk promises (fixed constraints; the demo must deliver each)
-- Local Umbraco site + custom package; .NET Aspire + OpenTelemetry bring logs,
-  traces and metrics into one local observability environment.
+- Local Umbraco site; .NET Aspire + OpenTelemetry bring logs, traces and metrics into one
+  local observability environment. The abstract also names a custom package; dropped by the
+  PO 2026-10-10 (no package in the demo).
 - Build a new feature, diagnose real problems, verify fixes using telemetry.
 - Coding agents use observability data via MCP to identify failures, suggest
   changes and validate the result - not just generate code.
@@ -44,51 +53,60 @@ attendees afterwards.
 
 ## Stack
 - .NET 10, Umbraco 17 LTS, .NET Aspire (AppHost + ServiceDefaults), OpenTelemetry.
-- Agent: Claude Code CLI, Aspire MCP (local), Azure MCP Server (prod, read-only).
+- Agent: Claude Code CLI. Local: Grafana MCP (read-only) over Grafana LGTM, fed by an
+  OpenTelemetry Collector alongside the Aspire dashboard; logs, traces and metrics. No Aspire
+  MCP: the agent gets no resource state or commands (PO 2026-10-13). Prod: Azure MCP Server
+  (read-only).
 - Prod: Azure Container Apps (1 replica, min replicas 1), Azure SQL,
   Application Insights, Azure Communication Services Email (SMTP).
 
-## Forms package (demo package)
-- Name `SuperPower.Forms` (final); must not be named "Umbraco Forms" (HQ product).
-  Not planned for release.
-- Form definitions: Block List of field element types (Text, Email, Textarea,
-  Checkbox, Select). Per field: alias, label, required, optional regex + error message.
-  No custom backoffice UI. Form setting: success message.
-- Submissions: custom table via NPoco + PackageMigrationPlan (the same plan creates
-  the element types). Stores form key, page key, UTC timestamp, fields JSON. No IP or
-  browser info.
-- Rendering: ViewComponent; POST via SurfaceController with antiforgery.
-- Site hooks: `IFormSubmissionHandler` (close a form, fix field values, act on a stored
-  submission in the same scope). ADR-0013.
-- Later (change `add-form-emails`): Email field "send confirmation" toggle; form settings
-  owner email + subject, confirmation subject + body; owner notification + submitter
-  confirmation via Umbraco IEmailSender.
-
 ## Demo site
-- Acme Agency (fictional marketing agency): pages, events (`eventInPerson` with capacity,
-  `eventOnline`), services; Contact, Service enquiry and Event booking forms. Spec
-  `agency-site`, ADR-0014.
-- Event bookings: site-owned table `acmeEventBooking` via a site migration plan. ADR-0015.
+- Acme Agency (fictional marketing agency): Home, About us, Contact us, Events list, event
+  pages, Services list, service pages. Spec `agency-site`.
+- Events: one document type; free; title, description, start date and time; no format,
+  capacity or places. Past events show "This event has ended" and no form.
+- Forms: three, fixed in the site code (no package, no editor-defined forms, fields or form
+  text). The page type decides the form; the event or service comes from the page. Spec
+  `form-submission`.
+  - Contact: Name, Email, Message, "Reply by phone?".
+  - Service enquiry: Name, Email, Company (optional), Website (optional), Message.
+  - Event booking: Name, Email, Notes (optional), "Join mailing list". An ordinary
+    submission: no booking status, places or limits.
+  - Server-side validation only; no format rules beyond Email. Success text "Thank you,
+    we'll be in touch."
+  - Rendering: ViewComponent; POST via SurfaceController with antiforgery.
+- Submissions: one site-owned table. Stores form, page key, UTC timestamp, field values.
+  No IP or browser info.
 - Must work on SQLite and SQL Server: no raw SQL, NPoco Sql<ISqlContext> builders,
   NVARCHARMAX for JSON columns. Demo uses SQL Server container via Aspire.
+- Later (change `add-form-emails`): owner notification on all forms, submitter confirmation on
+  Service enquiry and Event booking, via Umbraco IEmailSender. Owner address is an environment
+  setting; subjects and bodies are fixed text.
 
 ## Local environment (AppHost)
 - SQL Server: AddAzureSqlServer(...).RunAsContainer() - container locally, Azure SQL deployed.
   Set umbracoDbDSN and umbracoDbDSN_ProviderName.
 - SMTP: Umbraco -> Toxiproxy -> smtp4dev (container). Toxiproxy injects latency /
-  failures; exposed as Aspire dashboard resource commands.
-- ServiceDefaults: OTLP to Aspire locally; Azure Monitor exporter when
+  failures; exposed as Aspire dashboard resource commands, run by the presenter only.
+- ServiceDefaults: OTLP locally; Azure Monitor exporter when
   APPLICATIONINSIGHTS_CONNECTION_STRING is set. Instrumentation code identical in both.
 
 ## Telemetry
-- Package emits its own ActivitySource and Meter.
+- The site's forms code emits its own ActivitySource and Meter (spans and instruments in
+  change `add-form-emails`).
+- Never recorded: Name, Message, Notes, Company, Website, email address. Fine: form, event or
+  service, outcome.
 
 ## Scope
 - Protect PII from the observability platform only. The database is out of scope;
   agents never get database access.
 
 ## Repo conventions
-- Planning via OpenSpec in `openspec/`.
+- Planning via OpenSpec in `openspec/`. Change order: `add-demo-foundation`,
+  `add-form-emails`, `add-production-environment`.
+- ADRs, `design.md` and `tasks.md` of `add-demo-foundation` predate the 2026-10-10 and
+  2026-10-13 decisions until `/opsx:update add-demo-foundation` runs (see `PLANNING.md`).
+  Where they disagree with this file, this file holds the PO decision.
 - `PLANNING.md` (temporary): open decisions, unknowns and todos. Check it before
   starting work; update it when items are resolved or discovered.
 - Demo recovery points are git branches `demo/act-N-*`; `main` is the final state.
@@ -104,10 +122,10 @@ Bash only for build, tests, linters and read-only git.
 
 Ownership:
 - worker-backend: `src/SuperPower.AppHost/`, `src/SuperPower.ServiceDefaults/`,
-  `src/SuperPower.Forms/` (except `Views/`), `src/SuperPower.Web/` C# code (Program.cs,
-  migrations, handlers, repositories, controllers, view models), `tests/SuperPower.*.Tests/`.
-- worker-frontend: `src/SuperPower.Web/Views/`, `src/SuperPower.Web/wwwroot/`,
-  `src/SuperPower.Forms/Views/`, any client-side script and its tests.
+  `src/SuperPower.Web/` C# code (Program.cs, migrations, repositories, controllers, view
+  models), `tests/SuperPower.*.Tests/`.
+- worker-frontend: `src/SuperPower.Web/Views/`, `src/SuperPower.Web/wwwroot/`, any
+  client-side script and its tests.
 - PO: `src/SuperPower.Web/uSync/` (backoffice export; tasks marked "(PO)").
 - Shared, changed only when the Architect assigns them in a brief: `SuperPower.slnx`,
   `Directory.*.props`, `.gitignore`, `appsettings*.json`, `launchSettings.json`, `.mcp.json`,

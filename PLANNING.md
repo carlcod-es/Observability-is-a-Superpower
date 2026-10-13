@@ -23,8 +23,7 @@ references this file, so the on-stage agent may read it.
 - [ ] Architect: `/opsx:update add-demo-foundation` for the 2026-10-13 simplification (Event booking is
   an ordinary submission): supersede ADR-0015; revise ADR-0014 (one `event` document type, no format or
   capacity) and ADR-0011; design.md; re-plan tasks (remove the booking table code from task 5.1, task 8.1
-  Aspire MCP -> Grafana MCP, PO content tasks 6.1-6.3 and uSync for the merged event type); CLAUDE.md
-  "Stack" (no Aspire MCP) and "Demo site" (no `eventInPerson`/`eventOnline`, no `acmeEventBooking`).
+  Aspire MCP -> Grafana MCP, PO content tasks 6.1-6.3 and uSync for the merged event type).
 - [ ] `/opsx:apply add-demo-foundation`: resumes after the updates above.
 
 ## Product requirements confirmed in explore (2026-10-06, revised 2026-10-08, 2026-10-13)
@@ -73,8 +72,6 @@ references this file, so the on-stage agent may read it.
   ADR-0006, ADR-0013 (no package, no field element types or form document type);
   re-plan `tasks.md` sections 3, 4 and 6 (ticked 3.2, 3.5, 3.7 and code for 3.8, 4.1 rework);
   `review-followups.md` entries that no longer apply.
-- [ ] CLAUDE.md "Talk promises", "Forms package", "Telemetry", "Apply-phase team" ownership;
-  `openspec/config.yaml` context (names the demo package).
 - [ ] PO: reset local SQLite and SQL databases once the package code is removed (field element
   types are still in both).
 
@@ -82,7 +79,7 @@ references this file, so the on-stage agent may read it.
 - [x] Prod site after the talk (PO 2026-10-13): taken down after the talk; deleting the Azure
   resources deletes attendee submissions.
 - [x] Telemetry MCP (PO 2026-10-13): logs, traces and metrics queries go to the Grafana MCP
-  (covers all three, `spike-metrics-mcp` findings). Architect: revise ADR-0011 and CLAUDE.md "Stack".
+  (covers all three, `spike-metrics-mcp` findings). Architect: revise ADR-0011.
 - [x] Aspire MCP (PO 2026-10-13): dropped. Presenter runs Toxiproxy commands in the dashboard;
   no console logs or resource state for the agent.
 - [x] Event bookings (PO 2026-10-13): Event booking is an ordinary submission; `add-event-bookings`
