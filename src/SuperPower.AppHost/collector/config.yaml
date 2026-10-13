@@ -1,0 +1,38 @@
+# WithAppForwarding() sets ASPIRE_ENDPOINT / ASPIRE_API_KEY / ASPIRE_INSECURE on the collector;
+# LGTM_OTLP_URL is set by the AppHost. Every signal goes to both the Aspire dashboard and LGTM.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+
+exporters:
+  otlp/aspire:
+    endpoint: ${env:ASPIRE_ENDPOINT}
+    headers:
+      x-otlp-api-key: ${env:ASPIRE_API_KEY}
+    tls:
+      insecure: ${env:ASPIRE_INSECURE}
+      insecure_skip_verify: true
+  otlphttp/lgtm:
+    endpoint: ${env:LGTM_OTLP_URL}
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire, otlphttp/lgtm]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire, otlphttp/lgtm]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire, otlphttp/lgtm]

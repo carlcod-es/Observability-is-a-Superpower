@@ -14,7 +14,8 @@ simple; the presenter runs Toxiproxy fault commands in the dashboard.
 
 ## Decision
 - The AppHost adds an OpenTelemetry Collector via
-  `CommunityToolkit.Aspire.Hosting.OpenTelemetryCollector` (13.4.0) with `WithAppForwarding()`:
+  `CommunityToolkit.Aspire.Hosting.OpenTelemetryCollector` (13.4.0, collector image
+  `opentelemetry-collector-contrib:0.162.0`) with `WithAppForwarding()`:
   apps and ServiceDefaults unchanged; the Collector fans out to the Aspire dashboard and to
   `grafana/otel-lgtm:0.36.0` (Grafana on fixed host port 3000).
 - `grafana/mcp-grafana:2.0.2` container on fixed host port 8091 with

@@ -91,7 +91,8 @@ Test strategy that follows (ADR-0012):
    proxy populated on ready; `WithHttpCommand` Slow (latency) / Break (reset_peer) / Heal
    (reset). Rejected: MailPit, .NET Toxiproxy client, timeout toxic. ADR-0010.
 9. **Agent access** - OpenTelemetry Collector
-   (`CommunityToolkit.Aspire.Hosting.OpenTelemetryCollector` 13.4.0, `WithAppForwarding()`)
+   (`CommunityToolkit.Aspire.Hosting.OpenTelemetryCollector` 13.4.0, collector image
+   `opentelemetry-collector-contrib:0.162.0`, `WithAppForwarding()`)
    fans out to the dashboard and `grafana/otel-lgtm:0.36.0` (port 3000); `grafana/mcp-grafana`
    2.0.2 (port 8091, `--disable-write --enabled-tools prometheus,loki,tempo,datasource`,
    22 read-only tools) is the agent's only MCP server in `.mcp.json`, pre-approved in

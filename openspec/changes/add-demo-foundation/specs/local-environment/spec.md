@@ -5,14 +5,15 @@ site and its dependencies into one observability dashboard, with controls to deg
 path on demand.
 
 Decisions: ADR-0001 (platform and versions), ADR-0007 (logs), ADR-0008 (traces, metrics,
-exporters), ADR-0009 (local database), ADR-0010 (mail path and fault injection); in
-`docs/adrs/`.
+exporters), ADR-0009 (local database), ADR-0010 (mail path and fault injection), ADR-0017
+(collector, Grafana LGTM and Grafana MCP); in `docs/adrs/`.
 
 ## ADDED Requirements
 
 ### Requirement: One-command start
-The presenter SHALL start the site, its server database, the mail catcher and the mail-path
-fault hop with one command, and the dashboard SHALL show each as a resource with its state.
+The presenter SHALL start the site, its server database, the mail catcher, the mail-path
+fault hop and the telemetry backend (collector, Grafana stack and its MCP server, ADR-0017)
+with one command, and the dashboard SHALL show each as a resource with its state.
 
 #### Scenario: Start the environment
 - **WHEN** the presenter runs the start command on a machine with the prerequisites

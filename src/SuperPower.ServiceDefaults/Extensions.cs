@@ -64,12 +64,12 @@ public static class Extensions
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
-                    .AddMeter("SuperPower.Forms");
+                    .AddMeter("Acme.Forms");
             })
             .WithTracing(tracing =>
             {
                 tracing.AddSource(builder.Environment.ApplicationName)
-                    .AddSource("SuperPower.Forms") // ADR-0006; literal because ServiceDefaults must not reference Forms
+                    .AddSource("Acme.Forms") // ADR-0016; literal because ServiceDefaults must not reference the site project
                     .AddAspNetCoreInstrumentation(o =>
                         // ADR-0008: exclude health and static asset requests (shared with the log sink)
                         o.Filter = context => !TelemetryPaths.IsExcluded(context.Request.Path))

@@ -61,6 +61,31 @@ toxiproxy
             IconName = "Heart"
         });
 
+// Telemetry: apps -> collector -> Aspire dashboard + Grafana LGTM (ADR-0017).
+// WithAppForwarding re-points the projects' OTLP endpoint at the collector.
+var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "0.36.0")
+    .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "grafana")
+    .WithHttpEndpoint(targetPort: 4318, name: "otlp-http")
+    .WithHttpHealthCheck("/api/health", endpointName: "grafana");
+
+var collector = builder.AddOpenTelemetryCollector("collector", c => c.CollectorTag = "0.162.0")
+    .WithConfig("./collector/config.yaml")
+    .WithAppForwarding()
+    .WithEnvironment("LGTM_OTLP_URL", lgtm.GetEndpoint("otlp-http"))
+    .WaitFor(lgtm);
+
+// Read-only Grafana MCP for the agent. Host validation defaults to loopback variants of --address,
+// so allow the published host port.
+builder.AddContainer("grafana-mcp", "grafana/mcp-grafana", "2.0.2")
+    .WithArgs("-t", "streamable-http", "--address", "0.0.0.0:8000", "--disable-write",
+        "--enabled-tools", "prometheus,loki,tempo,datasource",
+        "--allowed-hosts", "localhost:8091,127.0.0.1:8091")
+    .WithEnvironment("GRAFANA_URL", lgtm.GetEndpoint("grafana"))
+    .WithEnvironment("GRAFANA_USERNAME", "admin")
+    .WithEnvironment("GRAFANA_PASSWORD", "admin")
+    .WithHttpEndpoint(port: 8091, targetPort: 8000, name: "mcp")
+    .WaitFor(lgtm);
+
 builder.AddProject<Projects.SuperPower_Web>("site")
     .WithReference(db, connectionName: "umbracoDbDSN")
     .WithEnvironment("ConnectionStrings__umbracoDbDSN_ProviderName", "Microsoft.Data.SqlClient")
@@ -70,6 +95,7 @@ builder.AddProject<Projects.SuperPower_Web>("site")
     .WithEnvironment("Umbraco__CMS__Global__Smtp__From", "noreply@acme-agency.example")
     .WaitFor(db)
     .WaitFor(toxiproxy)
+    .WaitFor(collector)
     .WithExternalHttpEndpoints();
 
 builder.Build().Run();

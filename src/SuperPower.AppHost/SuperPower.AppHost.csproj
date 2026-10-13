@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.Azure.Sql" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.OpenTelemetryCollector" />
     <ProjectReference Include="..\SuperPower.Web\SuperPower.Web.csproj" />
   </ItemGroup>
 

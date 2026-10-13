@@ -33,7 +33,8 @@ instrumentation code.
 - Rely on SqlClient's own diagnostics without the instrumentation package: no OTel spans;
   rejected.
 - OTLP everywhere including prod via a collector: extra component to run; rejected for a
-  one-replica demo.
+  one-replica demo. Rejected for the prod path only: locally a collector fans the same OTLP
+  out to the dashboard and Grafana LGTM (ADR-0017); the app's exporter switch is unchanged.
 
 ## Outcome of `add-demo-foundation` task 2.4 (2026-10-09)
 - Exporters are exclusive: Azure Monitor when `APPLICATIONINSIGHTS_CONNECTION_STRING` is set,
