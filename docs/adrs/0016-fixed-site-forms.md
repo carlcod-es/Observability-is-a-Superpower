@@ -2,15 +2,15 @@
 
 ## Status
 Accepted (2026-10-13; proposed 2026-10-10, trimmed 2026-10-13 when the PO made Event booking
-an ordinary submission). Supersedes ADR-0004, ADR-0005, ADR-0006, ADR-0013, ADR-0015.
+an ordinary submission).
 
 ## Context
 The talk no longer promises a custom forms package (PO 2026-10-10). The three forms are fixed:
 editors cannot define forms, fields or form text; the page type decides which form a page shows
 (spec `form-submission`). An Event booking is an ordinary submission: no places, capacity or
 booking status (PO 2026-10-13). The package built for editor-defined forms
-(`src/SuperPower.Forms`, ADR-0004/0005/0006/0013) and the booking table (ADR-0015) no longer
-have a requirement behind them. CLAUDE.md principle: keep it simple.
+(`src/SuperPower.Forms`) and the booking table no longer have a requirement behind them.
+CLAUDE.md principle: keep it simple.
 
 ## Decision
 - Three typed form models in `SuperPower.Web`: `ContactForm`, `ServiceEnquiryForm`,

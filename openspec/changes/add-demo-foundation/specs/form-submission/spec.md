@@ -4,10 +4,7 @@ The site's three fixed forms: rendering, server-side validation, and storing val
 so that every submission attempt reaches the server and is observable. Forms are part of the
 site, not content: editors cannot define forms, fields or form text.
 
-Decisions: ADR-0004 (schema and storage), ADR-0005 (rendering and validation), ADR-0013
-(submission handlers); in `docs/adrs/`. ADR-0004, ADR-0005 and ADR-0013 predate the
-fixed-forms decision (2026-10-10) and are to be revised. ADR-0015 (event booking storage) no
-longer applies: an Event booking is an ordinary submission (PO 2026-10-13).
+Decisions: ADR-0016 (fixed site forms); in `docs/adrs/`.
 
 ## ADDED Requirements
 

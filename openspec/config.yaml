@@ -15,7 +15,7 @@ context: |
   Code must stay portable across Windows, macOS and Linux.
   Roles: the user is Product Owner. Proposals and designs are Architect work;
   every technology decision gets an ADR in docs/adrs/ (NNNN-<slug>.md, cited as ADR-NNNN).
-  Cite numbered items with their source (e.g. ADR-0004, `<change>` task 5.3).
+  Cite numbered items with their source (e.g. ADR-0016, `<change>` task 5.3).
 
 rules:
   proposal:

@@ -77,8 +77,7 @@ Test strategy that follows (ADR-0012):
    message "Thank you, we'll be in touch.", past-event rule via `TimeProvider`, one
    `acmeFormSubmission` table from site migration plan "Acme.Site" (NPoco `Sql<ISqlContext>`,
    `NVARCHARMAX` JSON, no client info), telemetry names `Acme.Forms`. The page type decides
-   the form. Rejected: generic form engine, separate forms project. ADR-0016 (supersedes
-   ADR-0004, ADR-0005, ADR-0006, ADR-0013, ADR-0015).
+   the form. Rejected: generic form engine, separate forms project. ADR-0016.
 5. **Logs** - forward Umbraco's Serilog events to ServiceDefaults' logger providers via a DI
    sink; call `AddServiceDefaults()` after `CreateUmbracoBuilder()`; no Async wrapper.
    Fallback: Serilog.Sinks.OpenTelemetry. ADR-0007.

@@ -57,7 +57,7 @@ strategy"). Evidence comes from the block reviews; the reviewer ran each check i
   `add-production-environment`).
 - `add-demo-foundation` task 6.1, 2026-10-09 (PO): fresh SQLite install standalone; package types
   present; sample-site content imported.
-- Folder step `...4003` (PO request, ADR-0004), 2026-10-09: fresh scratch SQLite (worker and
+- Folder step `...4003` (PO request), 2026-10-09: fresh scratch SQLite (worker and
   reviewer) and a copy of the PO's database at `...4002`: root document type folder
   "SuperPower Forms" (key `...5001`) created once, six package types moved into it, data types
   untouched; restart: no migration, no duplicate folder.

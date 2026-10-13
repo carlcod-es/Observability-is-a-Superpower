@@ -7,21 +7,12 @@ Rule: no demo answers here (planted problems, their causes or fixes). CLAUDE.md
 references this file, so the on-stage agent may read it.
 
 ## Next step
-- [x] `spike-aspire-probe` (2026-10-11): signed off by the PO 2026-10-11. Findings in
-  `openspec/changes/spike-aspire-probe/findings.md`: ADR-0011 confirmed (no metrics over MCP).
-  Open for `add-demo-foundation` (ADR-0008): SqlClient metrics in ServiceDefaults; RecordException.
-  `add-demo-foundation` can resume; ADR-0016 proposal still awaits PO approval.
-- [x] `spike-metrics-mcp` (2026-10-11..13): PO signed off 2026-10-13 on recommendation "adopt B alongside
-  the Aspire MCP": Grafana LGTM + Grafana MCP (`--disable-write --enabled-tools
-  prometheus,loki,tempo,datasource`, 22 tools) next to the Aspire MCP (ADR-0011 kept). Findings in
-  `openspec/changes/spike-metrics-mcp/findings.md`. Open: task 3.6 (delete `spikes/metrics-mcp/`, remove toolkit
-  package, archive) waits for `spike-aspire-probe` task 3.4 (shared probe projects).
 - [ ] Architect: new ADR for B (Collector, LGTM, Grafana MCP, allow-list) and fold it into
   `add-demo-foundation` (package `CommunityToolkit.Aspire.Hosting.OpenTelemetryCollector`, images,
   `.mcp.json`, `.claude/settings.json`, attendee pre-pull, Windows run). PO 2026-10-13: the Grafana MCP
   replaces the Aspire MCP (not alongside); revise ADR-0011. Via `/opsx:update`.
 - [ ] Architect: `/opsx:update add-demo-foundation` for the 2026-10-13 simplification (Event booking is
-  an ordinary submission): supersede ADR-0015; revise ADR-0014 (one `event` document type, no format or
+  an ordinary submission): revise ADR-0014 (one `event` document type, no format or
   capacity) and ADR-0011; design.md; re-plan tasks (remove the booking table code from task 5.1, task 8.1
   Aspire MCP -> Grafana MCP, PO content tasks 6.1-6.3 and uSync for the merged event type).
 - [ ] `/opsx:apply add-demo-foundation`: resumes after the updates above.
@@ -69,8 +60,8 @@ references this file, so the on-stage agent may read it.
 `add-event-bookings` dropped 2026-10-13 (change directory removed).
 
 ## Architect follow-ups from the 2026-10-10 forms simplification
-- [ ] `/opsx:update add-demo-foundation`: design.md; revise ADR-0002, ADR-0004, ADR-0005,
-  ADR-0006, ADR-0013 (no package, no field element types or form document type);
+- [ ] `/opsx:update add-demo-foundation`: design.md; revise ADR-0002 (no package, no field
+  element types or form document type);
   re-plan `tasks.md` sections 3, 4 and 6 (ticked 3.2, 3.5, 3.7 and code for 3.8, 4.1 rework);
   `review-followups.md` entries that no longer apply.
 - [ ] PO: reset local SQLite and SQL databases once the package code is removed (field element
@@ -138,13 +129,6 @@ For `add-production-environment`, Azure stretch (only if time allows):
 - [ ] Venue network plan: everything local except the LLM.
 - [ ] Before the talk: remove demo-plan entries from Claude memory, or run the demo
   from a different clone path (memory is keyed to the folder path and loads on stage).
-
-Resolved 2026-10-08 and removed: repo layout (ADR-0002), media (spec `agency-site`, no media
-library), Architect proposals (ADR-0002, ADR-0005, ADR-0006), uSync seeding (ADR-0003), Aspire
-version and MCP command (ADR-0001, ADR-0011), first `/opsx:propose` and OpenSpec change, attendee
-agent config (task 8.1), attendee README (task 9.1), build (`add-demo-foundation`), apply-phase
-team (CLAUDE.md "Apply-phase team", `.claude/agents/`), ADR file naming (`NNNN-<slug>.md`),
-`add-demo-foundation` bar (prototype).
 
 ## Decision rationale (confirmed decisions in CLAUDE.md)
 - Fixed forms in the site (2026-10-10, replaces Block List field definitions): editor-defined
