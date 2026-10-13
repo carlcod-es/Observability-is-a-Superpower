@@ -6,8 +6,10 @@ context: |
   Demo repo for the conference talk "Observability is a Superpower" (16 Oct 2026,
   45 min, live demo). Published for attendees afterwards.
   Fixed talk constraints: .NET 10, Umbraco 17 LTS, .NET Aspire, OpenTelemetry,
-  Claude Code CLI with MCP (Grafana MCP read-only locally, Azure MCP Server read-only for
-  prod), Azure (Container Apps, Azure SQL, Application Insights).
+  Claude Code CLI with MCP (Grafana MCP read-only locally).
+  Prod hosting: baseline is the local environment behind a Cloudflare tunnel, built first;
+  Azure (Container Apps, Azure SQL, Application Insights, Azure MCP Server read-only) is a
+  stretch, built only if time allows. Final choice open (PO).
   No custom package: the three forms are fixed in the site (PO 2026-10-10).
   Keep it simple: basic demo, no edge cases or features the demo does not show.
   Code must stay portable across Windows, macOS and Linux.

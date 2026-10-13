@@ -64,7 +64,8 @@ references this file, so the on-stage agent may read it.
 ## Change order (2026-10-08, revised 2026-10-13)
 1. `add-demo-foundation`: agency site, events and services, three forms.
 2. `add-form-emails`: all emails.
-3. `add-production-environment`.
+3. `add-production-environment`: tunnel baseline first; Azure only if time allows (see Open
+   decisions, prod hosting).
 `add-event-bookings` dropped 2026-10-13 (change directory removed).
 
 ## Architect follow-ups from the 2026-10-10 forms simplification
@@ -76,8 +77,24 @@ references this file, so the on-stage agent may read it.
   types are still in both).
 
 ## Open decisions
-- [x] Prod site after the talk (PO 2026-10-13): taken down after the talk; deleting the Azure
-  resources deletes attendee submissions.
+- [ ] Prod hosting (PO 2026-10-13): working assumption is the local environment behind a
+  Cloudflare tunnel as baseline and fallback, built first; Azure built only if time allows. PO
+  makes the final choice before it is needed. Implications of the tunnel baseline, to resolve
+  in `add-production-environment`:
+  - "Read-only AI access to production observability": prod telemetry is the same local stack
+    the agent already reads; decide what is shown as production and how access is controlled.
+  - Real emails to attendees: smtp4dev catches everything; needs a real mail route or the
+    confirmations are not sent.
+  - Scripted prod submissions over the days before the talk: needs the laptop running for days,
+    or generate the history shortly before.
+  - Faults injected on stage also reach attendees submitting via QR code.
+  - Venue network: adds a public inbound dependency ("everything local except the LLM" no
+    longer holds).
+  - Architect: ADR-0008 (Azure Monitor exporter) and ADR-0009 (Azure SQL for deploy parity)
+    lose their reason if Azure is never built.
+- [x] Prod site after the talk (PO 2026-10-13): taken down after the talk. Azure: deleting the
+  resources deletes attendee submissions. Tunnel: close the tunnel, reset the local database
+  and telemetry.
 - [x] Telemetry MCP (PO 2026-10-13): logs, traces and metrics queries go to the Grafana MCP
   (covers all three, `spike-metrics-mcp` findings). Architect: revise ADR-0011.
 - [x] Aspire MCP (PO 2026-10-13): dropped. Presenter runs Toxiproxy commands in the dashboard;
@@ -91,7 +108,10 @@ Decided in ADRs; verified by `add-demo-foundation` tasks:
 - [ ] SqlClient spans for Umbraco's NPoco queries; background span volume (ADR-0008): task 2.4.
 - [ ] smtp4dev and Toxiproxy in the AppHost, Slow/Break/Heal commands (ADR-0010): tasks 2.2, 2.3.
 - [ ] Date Time with time zone stored value shape (ADR-0014): task 5.2.
-For `add-production-environment`:
+For `add-production-environment`, tunnel baseline:
+- [ ] Cloudflare tunnel to the local site: public URL for the QR code, only the site exposed
+  (no dashboard, Grafana, smtp4dev or backoffice).
+For `add-production-environment`, Azure stretch (only if time allows):
 - [ ] Azure MCP Server: read-only mode, Monitor/App Insights query tools, running under a limited identity (Monitoring Reader + Log Analytics Reader).
 - [ ] Azure Communication Services Email via SMTP from Umbraco IEmailSender.
 - [ ] Umbraco 17 on Azure Container Apps: deploy via azd / `aspire deploy`, cold start, Examine/temp on local disk.
@@ -112,7 +132,8 @@ For `add-production-environment`:
   attendees see the OpenSpec planning.
 - [ ] Script and rehearse agent prompts; rehearse with `/fast`.
 - [ ] Record fallback videos of agent segments.
-- [ ] Deploy to Azure the day before; smoke test the morning of; min replicas 1.
+- [ ] Tunnel baseline: start the environment and tunnel before the talk; smoke test the public
+  URL the morning of. Azure (if built): deploy the day before; min replicas 1.
 - [ ] Stage layout: VSCodium + Claude CLI terminal, browser tabs (dashboard, smtp4dev, site).
 - [ ] Venue network plan: everything local except the LLM.
 - [ ] Before the talk: remove demo-plan entries from Claude memory, or run the demo
@@ -135,7 +156,8 @@ team (CLAUDE.md "Apply-phase team", `.claude/agents/`), ADR file naming (`NNNN-<
 - Toxiproxy: localhost SMTP is too fast to be realistic; latency toxic multiplies per
   SMTP round trip (~7 per email).
 - Claude Code CLI on stage: presenter's normal workflow; Copilot is not available in VSCodium.
-- Real Azure deploy: prod runs the finished build; Act 4 prod segment is about PII not
-  reaching the observability platform.
+- Prod (either hosting): runs the finished build; Act 4 prod segment is about PII not
+  reaching the observability platform. Tunnel first because it is the shorter route to a
+  public site before 16 Oct (PO 2026-10-13).
 - PII: source-level redaction is primary (knows semantics, GDPR minimisation); pipeline
   (OTel Collector) and ingestion (DCR) are defence in depth for known-shape data.

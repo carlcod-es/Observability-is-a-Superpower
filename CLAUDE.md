@@ -49,16 +49,21 @@ runnable by attendees.
   changes and validate the result - not just generate code.
 - What telemetry is genuinely useful.
 - Avoid collecting personal form data in telemetry.
-- Controlled, read-only AI access to production observability.
+- Controlled, read-only AI access to production observability. What "production" is depends
+  on the prod hosting decision (see "Stack").
 
 ## Stack
 - .NET 10, Umbraco 17 LTS, .NET Aspire (AppHost + ServiceDefaults), OpenTelemetry.
 - Agent: Claude Code CLI. Local: Grafana MCP (read-only) over Grafana LGTM, fed by an
   OpenTelemetry Collector alongside the Aspire dashboard; logs, traces and metrics. No Aspire
-  MCP: the agent gets no resource state or commands (PO 2026-10-13). Prod: Azure MCP Server
-  (read-only).
-- Prod: Azure Container Apps (1 replica, min replicas 1), Azure SQL,
-  Application Insights, Azure Communication Services Email (SMTP).
+  MCP: the agent gets no resource state or commands (PO 2026-10-13).
+- Prod hosting (PO 2026-10-13; final choice open, made by the PO before it is needed):
+  - Baseline, built first, and the fallback: the local environment exposed to attendees
+    through a Cloudflare tunnel.
+  - Stretch, only if time allows: Azure Container Apps (1 replica, min replicas 1), Azure SQL,
+    Application Insights, Azure Communication Services Email (SMTP), Azure MCP Server
+    (read-only).
+  - Do not build Azure-only work ahead of the baseline.
 
 ## Demo site
 - Acme Agency (fictional marketing agency): Home, About us, Contact us, Events list, event
