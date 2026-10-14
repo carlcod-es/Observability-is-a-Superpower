@@ -117,16 +117,19 @@ a:hover { color: var(--color-primary-dark); }
   color: var(--color-text);
 }
 .site-nav__toggle {
-  min-height: 2.75rem;
-  padding: var(--space-s) var(--space-m);
-  font: inherit;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
   color: var(--color-text);
   background: transparent;
   border: 1px solid var(--color-border);
   border-radius: 0.25rem;
   cursor: pointer;
 }
+.site-nav__toggle[hidden] { display: none; }
 .site-nav__toggle:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 .site-nav__toggle[aria-expanded="true"] { background: var(--color-surface); }
 @media (max-width: 47.99em) {
