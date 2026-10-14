@@ -8,3 +8,6 @@ TestResults/
 # Umbraco-generated JSON schemas in test projects (the site's copies stay committed)
 tests/**/appsettings-schema*.json
 tests/**/umbraco-package-schema.json
+
+# Cloudflare tunnel credential (presenter-local, never committed)
+.cloudflared-token
