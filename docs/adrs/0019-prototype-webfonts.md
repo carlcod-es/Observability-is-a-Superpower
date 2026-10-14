@@ -34,3 +34,10 @@ is published for attendees, so licences must permit redistribution.
   no-preprocessor decisions stand.
 - Page weight grows by the WOFF2 files (~100-200 KB total, latin subsets only).
 - Attendees need nothing new: `npm install` already required for Eleventy.
+
+## Outcome in the Umbraco site (change `add-demo-foundation` task 7.1, 2026-10-14)
+- The site has no npm build, so the three WOFF2 files and their OFL licences are committed under
+  `src/SuperPower.Web/wwwroot/css/fonts/`. "No binary font files committed" applies to
+  `prototype/` only.
+- Served from `/css/fonts/`, not `/fonts/`: `/css` is already excluded from telemetry
+  (ADR-0008), so font requests add no traces.

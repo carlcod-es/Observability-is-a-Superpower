@@ -12,13 +12,12 @@ State at 2026-10-14 (late), branch `sample-site` at 92bbbe1 (`main` merged). Res
    "Constraints for PO UI work" below, plus `dotnet run tests/smoke/smoke.cs -- standalone`.
 2. Nothing runs between sessions; agents start and stop the AppHost or standalone site
    themselves. Serialize anything that runs the site with PO backoffice sessions.
-3. Next actions, in order: the past-event session (clears 3.5, 7.1, 9.4) -> section 7
-   supervisor -> backend clean-up block (follow-ups) and 9.5 -> PO content (6.3, 6.4) and
+3. Next actions, in order: PO reverts the past event date -> backend clean-up block (follow-ups) and 9.5 -> PO content (6.3, 6.4) and
    8.1/8.2 -> 9.2 (destructive, PO approval) -> 9.3 -> 9.1, 9.6 -> section 9 supervisor.
 
 ## Progress
 
-17 of 30 tasks ticked. Sections 1, 2, 4 and 5 complete. Section 3 lacks 3.2 and 3.5.
+20 of 30 tasks ticked. Sections 1, 2, 4 and 5 complete. Section 3 lacks 3.2. Past-event session done 2026-10-14 (3.5, 7.1, 9.4 ticked).
 
 Done and reviewed, awaiting one check each:
 - 7.1 site views (block 7A, reviewer APPROVED): PO past-event page check + network panel glance.
@@ -29,8 +28,7 @@ Done and reviewed, awaiting one check each:
   `FieldsJson`); fresh-volume / fresh-SQLite first boot waits for 9.2. Unticked by the
   sections 3-5 supervisor for missing post-re-plan SQL Server evidence.
 
-Reviews done: sections 3-5 supervisor APPROVED (findings in `review-followups.md`). Owed:
-section 7 supervisor after 7.1; section 9 supervisor at the end.
+Reviews done: sections 3-5 supervisor APPROVED (findings in `review-followups.md`). Section 7 supervisor APPROVED 2026-10-14. Owed: section 9 supervisor at the end.
 
 ## PO decisions this session (recorded in specs, tasks, ADRs)
 
@@ -45,7 +43,7 @@ section 7 supervisor after 7.1; section 9 supervisor at the end.
 
 | Task | Owner | Waiting on |
 |---|---|---|
-| 3.5, 7.1, 9.4 | PO + Architect | One past-event session: PO moves one event's start into the past (do not commit the uSync export); PO checks "This event has ended", no form, gone from Events list and Home; Architect posts an Event booking to it and confirms nothing stored; PO glances at the network panel; PO reverts the date |
+| - | PO | Revert the past event date (do not commit the uSync export) |
 | 6.3 | PO | Content: Home body ("Rubber Duck Agency" / Borderlands placeholder, banner heading "Homepage"), Summary on top-level pages, About us body, event summaries/bodies, service descriptions |
 | 6.4 | PO | Optional banner images; the `<img>` branch of `Views/Partials/Media.cshtml` has never run |
 | 8.1, 8.2 | PO | Fresh Claude Code session at the repo root with the AppHost running: Home trace with spans, its logs, a request-duration metric, no approval prompts; 22 read-only tools only |

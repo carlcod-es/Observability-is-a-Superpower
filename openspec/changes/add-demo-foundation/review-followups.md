@@ -10,8 +10,8 @@ task numbers where it matters.
 
 - [ ] PO decision (task 6.2, 2026-10-14) Kept against the task text, by PO choice: the image
   block in `compPage`'s `mainContent` Block List and the "products" media folder (PO plans
-  media pickers and content later; spec `agency-site` "No media library dependency" only
-  requires pages not to depend on media), and the unused duplicate data type "Date Time
+  media pickers and content later; spec `agency-site` "No media library dependency", since
+  replaced by "Imagery from the media library" (PO 2026-10-14): media optional, colour-block fallback), and the unused duplicate data type "Date Time
   Picker (with time zone)" (PO could not delete it in the backoffice). If media is added
   later: demo content must still render with no missing images on a fresh database, and the
   site stays script-free (spec `agency-site`).
@@ -45,7 +45,7 @@ task numbers where it matters.
 - [ ] PO (block 2C) `/umbraco` and `/umbraco/login` page loads are traced (backoffice assets are not). Decide whether backoffice page loads should be traced.
 - [ ] minor (section 2 supervisor) `src/SuperPower.AppHost/AppHost.cs:27`: `.WithExternalHttpEndpoints()` on smtp4dev is not needed locally; if the AppHost model is deployed it would publish a mail inbox (and Toxiproxy, SMTP env vars). `add-production-environment`: remove it and add mail-path resources and SMTP env only when `builder.ExecutionContext.IsRunMode`; record in that change's design.
 - [ ] nit (section 2 supervisor) `src/SuperPower.AppHost/AppHost.cs:42`: `HttpClient` created per ready event and not disposed; `using var`.
-- [ ] nit (section 2 supervisor) `src/SuperPower.ServiceDefaults/TelemetryPaths.cs:12`: `/favicon.ico` is traced. Task 7.1 brief: stylesheet under `wwwroot/css/`; optionally add `/favicon.ico`.
+- [x] (done: task 2.6, section 7 supervisor) nit (section 2 supervisor) `src/SuperPower.ServiceDefaults/TelemetryPaths.cs:12`: `/favicon.ico` is traced. Task 7.1 brief: stylesheet under `wwwroot/css/`; optionally add `/favicon.ico`.
 - [ ] risk (section 2 supervisor) Development config logs "Request starting" with the full query string (traces redact `url.query`). Keep personal data out of query strings, including redirect targets.
 - [ ] risk (section 2 supervisor) SQL Server image is amd64-only (emulated on Apple Silicon; not on Linux arm64). Task 9.3 starts only the standalone site on Linux; Windows AppHost run still needed in 9.3.
 - [ ] Architect (section 2 supervisor, re-pointed) Task 9.4 smoke re-check: Home trace still has database spans after task 3.5 (new controller); Slow/Break/Heal; no duplicate start-up logs.
@@ -85,7 +85,7 @@ task numbers where it matters.
 - [x] (done in block 7A runtime check, 2026-10-14; past-event post still open under task 3.5) note (block 4A review, task 4.1 → 7.1 runtime check) Antiforgery unsettled from the compiled package (~85% confident `BeginUmbracoForm` auto-emits the token; no manual `@Html.AntiForgeryToken()` added — right default, duplicate risk). The 7.1 runtime check MUST confirm per form: exactly one `__RequestVerificationToken` + the `ufprt` field; `novalidate` + method=post on the form tag; no `required`/`pattern`/`<script>`; valid post → PRG + success text on that form only; invalid post → values + field errors redisplayed; past-event booking → ended message via ModelOnly summary; `asp-*` attributes actually expanded (i.e. _ViewImports fix effective site-wide).
 - [ ] PO (block 2D, task 2.5) Human-observation residuals, low risk (API-level evidence covers the data path): glance at the Aspire dashboard Metrics tab for `http.server.request.duration`, and open Grafana Explore at `http://localhost:3000` once to confirm a site trace, log and metric.
 - [ ] nit (block 4A, re-pointed to new task 4.1) Consider `autocomplete` hints on the form partials later.
-- [ ] minor (block 7A, task 7.1) `src/SuperPower.Web/Views/Events.cshtml:15` (and Services): list pages render card `h3` straight under the banner `h1` (skipped `h2`). Fix: visually-hidden `<h2>` before the list, or accept at prototype bar.
+- [ ] minor (block 7A, task 7.1) `src/SuperPower.Web/Views/Events.cshtml:14` and `Services.cshtml:6` (line refs corrected by section 7 supervisor): list pages render card `h3` straight under the banner `h1` (skipped `h2`). Fix: visually-hidden `<h2>` before the list, or accept at prototype bar.
 - [ ] PO (block 7A, task 6.3) Home content still reads "At Rubber Duck Agency, we are here to listen…" and the Home banner heading is "Homepage"; event and service `summary`/`mainContent` are empty (event cards show title and date only). Content, not code; must be fixed before demo branches (with the Borderlands placeholder note).
 - [ ] PO (block 7A, task 7.1) The `<img>` branch of `Views/Partials/Media.cshtml` and `blocklist/Components/imageBlock.cshtml` has never run: no page has a `mainBanner` image. Verified when the PO adds media (task 6.4); task 9.2 re-checks.
 - [ ] note (block 7A) The worker found no SQLite database on disk; the standalone run installed fresh and uSync imported 83 items. The new DB holds 6 fake test submissions from the worker and reviewer checks; removed by any later reset.
@@ -103,6 +103,15 @@ task numbers where it matters.
 - [ ] note (block 9A) SQLite `FieldsJson` column has `COLLATE NOCASE` (NPoco SQLite provider); stored bytes unaffected.
 - [ ] note (block 9A) SQL Server database holds a trashed duplicate "Contact Us" node (uniqueId 211A32DE-…) sharing the `contact-us` segment; the smoke script filters `trashed = 0`; gone after the task 9.2 fresh volume.
 - [ ] note (block 9A) `sqlite3 -readonly` / `?mode=ro` fail in the agent shell ("unable to open database file"); `Microsoft.Data.Sqlite` `Mode=ReadOnly` works.
+
+- [ ] nit (section 7 supervisor) `Views/master.cshtml:54`: banner guard duplicates `Partials/Media.cshtml:8`; the coloured `.banner` is the fallback, `.banner__image--empty` has no CSS. Fix: always call Media + `.banner__image--empty{display:none}`, or comment the guard.
+- [ ] nit (section 7 supervisor) `Views/Partials/Media.cshtml:12`: `Html.Raw` for width/height in attribute position; use `width="@w"` (Razor drops null attributes) or drop them.
+- [ ] nit (section 7 supervisor) `wwwroot/css/site.css:237-238`: dead `.card__summary:empty` (guarded in `Card.cshtml:14`) and unused `.event-list`; `.card__image` declared twice (168, 181). Fix: remove/merge.
+- [ ] nit (section 7 supervisor, pre-talk cleanup) `Views/Partials/blockgrid/*.cshtml`, `Partials/singleblock/default.cshtml`: Umbraco template leftovers, no data type uses them. Fix: delete.
+- [ ] nit (section 7 supervisor, backend, optional) Rendered forms carry inert `data-val*` attributes (view-source noise). Fix: `HtmlHelperOptions.ClientValidationEnabled = false` in Program.cs.
+- [ ] PO (section 7 supervisor) `wwwroot/favicon.ico` is the Umbraco template default, not Acme branding (telemetry-excluded). Replace or remove if wanted.
+- [ ] PO risk (section 7 supervisor) `/does-not-exist/` renders Umbraco's default 404 page (non-Acme branding, links to umbra.co and the forum; links only, no third-party requests). Outside task 7.1; visible if the audience hits a bad URL.
+- [ ] note (section 7 supervisor) `dotnet test SuperPower.slnx` fails on the .NET 10 SDK (MTP); briefs use `dotnet test --solution SuperPower.slnx` (or plain `dotnet test` at the root, as in README).
 
 ## Superseded by the 2026-10-13 re-plan (ADR-0016, ADR-0017)
 
