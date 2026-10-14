@@ -17,8 +17,10 @@ src/
   SuperPower.Web/            Umbraco 17 site (Acme Agency)
 tests/
   SuperPower.Web.Tests/      xUnit v3 unit tests (ADR-0012)
-  smoke/                     scripted end-to-end checks (added by add-demo-foundation task 9.4)
+  smoke/                     end-to-end smoke check, `dotnet run tests/smoke/smoke.cs` (ADR-0012)
 docs/adrs/                   architecture decision records
+prototype/                   static Eleventy prototype the site views were built from (ADR-0018,
+                             ADR-0019); design artefact, not part of the demo environment
 openspec/                    planning: specs (openspec/specs) and changes (openspec/changes)
 .mcp.json                    MCP servers for Claude Code (Grafana MCP only, ADR-0017)
 .claude/settings.json        pre-approved read-only Grafana MCP tools
@@ -141,8 +143,9 @@ SQLite and SQL Server.
 
 - `dotnet test` at the root runs `tests/SuperPower.Web.Tests`: form validation, field-to-JSON
   mapping, past/upcoming event rules with a fake `TimeProvider`.
-- No Umbraco or Aspire integration harness; end-to-end behaviour is covered by the smoke
-  checks in `tests/smoke/` (ADR-0012).
+- `dotnet run tests/smoke/smoke.cs` (full environment, run right after starting the AppHost) or
+  `... -- standalone` (SQLite): pages, form submissions and stored rows, Home trace with database
+  spans and linked logs, Slow/Break/Heal (ADR-0012). No Umbraco or Aspire integration harness.
 
 ## Planning and branches
 

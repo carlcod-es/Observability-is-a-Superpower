@@ -1,8 +1,20 @@
 # Handover: add-demo-foundation
 
-State at 2026-10-14 (late), branch `sample-site`. Resume with `/opsx:apply add-demo-foundation`;
-read this file, `review-followups.md` and `po-backoffice-steps.md` first. `tasks.md` is the
-source of truth for progress; evidence is in `verification.md`.
+State at 2026-10-14 (late), branch `sample-site` at 92bbbe1 (`main` merged). Resume with
+`/opsx:apply add-demo-foundation`; read this file, `review-followups.md` and
+`po-backoffice-steps.md` first. `tasks.md` is the source of truth for progress; evidence is in
+`verification.md`.
+
+## Resume here
+
+1. `git status`: only this file and `docs/project-setup.md` may be uncommitted; ask the PO
+   whether anything changed since (UI work, content). If views changed: reviewer pass against
+   "Constraints for PO UI work" below, plus `dotnet run tests/smoke/smoke.cs -- standalone`.
+2. Nothing runs between sessions; agents start and stop the AppHost or standalone site
+   themselves. Serialize anything that runs the site with PO backoffice sessions.
+3. Next actions, in order: the past-event session (clears 3.5, 7.1, 9.4) -> section 7
+   supervisor -> backend clean-up block (follow-ups) and 9.5 -> PO content (6.3, 6.4) and
+   8.1/8.2 -> 9.2 (destructive, PO approval) -> 9.3 -> 9.1, 9.6 -> section 9 supervisor.
 
 ## Progress
 
@@ -41,7 +53,7 @@ section 7 supervisor after 7.1; section 9 supervisor at the end.
 | 9.2 | Architect (destructive: PO approval) | Remove SQL volume + SQLite file + TEMP, start both; after content and media are final. Also closes 3.2 |
 | 9.3 | PO + Architect | Windows and macOS from a fresh clone; Linux standalone in a container |
 | 9.5 | Architect | `PLANNING.md` tidy |
-| 9.6 | Architect | `docs/project-setup.md` matches the final state (now also: smoke usage, ADR-0018/0019 after the merge) |
+| 9.6 | Architect | `docs/project-setup.md` matches the final state (smoke usage and `prototype/` added 2026-10-14) |
 
 Next backend block (from follow-ups): remove the dead submission read path
 (`IFormSubmissionRepository`/`FormSubmissionRepository` read methods, `FormSubmission`), move
@@ -74,7 +86,7 @@ UI changes must keep these, or 7.1 and the forms checks need re-running:
 - SQL Server holds a trashed duplicate "Contact Us" node; harmless, gone after 9.2.
 - Don't lower Umbraco/Serilog log levels to Debug while submitting forms: failed inserts would
   log form values.
-- Merge of `main` (prototype, ADR-0018/0019, `add-site-prototype`) is safe; one `.gitignore`
-  conflict, keep both blocks.
+- `main` merged 2026-10-14 (92bbbe1): `prototype/`, ADR-0018/0019 and change `add-site-prototype`
+  (complete; archiving is the PO's call) are now on this branch.
 - `aspire run` needs `--apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj` while
   `spikes/` exists. LGTM telemetry is lost on every AppHost restart.
