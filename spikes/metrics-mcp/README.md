@@ -64,6 +64,25 @@ node load.mjs [baseUrl]
 
 `baseUrl` defaults to `http://localhost:5172` (`probe-web`, http). Sends 20 normal, 5 slow and 5 failing requests to `probe-web`. Resilience retries turn each failing web request into 4 `probe-api` calls, so a fresh start shows 45 `probe-api` requests (25 x 200, 20 x 500). Node 20+, no dependencies.
 
+## Dashboards
+
+Mode `b` only. Grafana: `http://localhost:3000`, login in [Resources per mode](#resources-per-mode). Dashboards live in the `lgtm` container and are lost on every AppHost restart; import them again after each start.
+
+| File in `dashboards/` | Dashboard |
+|---|---|
+| `probe-basic.json` | Probe - basic: request rate, 5xx error rate, request p95 (with trace exemplars), `probe_visits_total` rate, `probe_visit_duration_milliseconds` p95, Loki error logs |
+| `aspnetcore-19924.json` | ASP.NET Core (grafana.com 19924, unchanged) |
+| `aspnetcore-endpoint-19925.json` | ASP.NET Core Endpoint (grafana.com 19925, unchanged) |
+
+Import each file:
+
+1. Grafana > Dashboards > New > Import.
+2. Upload the JSON file.
+3. For the two ASP.NET Core files, select `Prometheus` as the datasource.
+4. Import (choose overwrite if the dashboard already exists).
+
+Run `node load.mjs` or open `probe-web` a few times; the panels cover the last 15 minutes (probe-basic) or 5 minutes (ASP.NET Core).
+
 ## Stop
 
 `aspire stop` (or Ctrl+C for `aspire run`; `aspire stop --all` if another AppHost holds ports 5171/5172). `Probe.Api` / `Probe.Web` processes can survive; check, then confirm containers are gone:
