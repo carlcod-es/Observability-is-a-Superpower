@@ -1,0 +1,5 @@
+{
+  "appHost": {
+    "path": "Probe.AppHost/Probe.AppHost.csproj"
+  }
+}

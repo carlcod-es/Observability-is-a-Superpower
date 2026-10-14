@@ -7,83 +7,134 @@ Rule: no demo answers here (planted problems, their causes or fixes). CLAUDE.md
 references this file, so the on-stage agent may read it.
 
 ## Next step
-- [ ] `/opsx:propose`: product requirements below become the proposal and specs; Architect
-  decisions (proposals, open technical decisions, spikes) become design and ADRs.
+- [x] Architect (2026-10-13): ADR-0017 (Collector, LGTM, Grafana MCP, allow-list) written, ADR-0011
+  superseded; ADR-0016 written, ADR-0004/0005/0006/0013/0015 removed; ADR-0002/0012/0014 revised;
+  `/opsx:update add-demo-foundation` done — design.md, specs, tasks.md re-planned (sections 3-9),
+  `po-backoffice-steps.md` and `review-followups.md` reworked.
+- [ ] `/opsx:apply add-demo-foundation`: resume with task 2.5 and section 3 (first: 3.1 package
+  removal, then PO task 6.1 database reset).
+- [x] Spike closure (PO 2026-10-13): keep both spikes open for reference until pre-talk cleanup.
+  Then: `spike-aspire-probe` task 3.4 and `spike-metrics-mcp` task 3.6 (delete `spikes/`, drop
+  `Microsoft.Data.SqlClient` from `Directory.Packages.props`, keep the toolkit package — used by
+  `add-demo-foundation` task 2.5), archive both. Tracked in Todos.
 
-## Product requirements confirmed in explore (2026-10-06)
-- Site: fictional pottery studio (working name Slipcast Studio). Pages: Home, Classes, Contact.
-- Forms (two):
+## Product requirements confirmed in explore (2026-10-06, revised 2026-10-08, 2026-10-13)
+- Keep it simple (PO 2026-10-13, CLAUDE.md "Principle"): basic demo, no edge cases.
+- Site: fictional marketing agency, Acme Agency (replaces the pottery studio). Pages: Home,
+  About us, Contact us, Events list, event pages, Services list, service pages.
+- Services (e.g. Umbraco upgrade, SEO audit, AdWords audit): Service enquiry form.
+- Events (e.g. "How to get the most out of your CMS"): free; title, description, start date and
+  time; no format, capacity or places. Past events show "This event has ended", no form. No payment.
+- Forms (three; the event or service comes from the page, not a field). After a valid
+  submission: "Thank you, we'll be in touch."
   - Contact: Name, Email, Message, "Reply by phone?" checkbox. Owner notification only.
-  - Book a class: Name, Email (sends confirmation), Class (select: Wheel throwing, Hand
-    building, Glazing), Experience notes (optional), "Join mailing list" checkbox.
-    Owner notification + submitter confirmation. A booking is a plain submission: no
-    places, availability or payment.
-- Select field type stays.
+  - Service enquiry: Name, Email, Company (optional), Website (optional), Message. Owner
+    notification + submitter confirmation.
+  - Event booking: Name, Email, Notes (optional), "Join mailing list" checkbox. Owner
+    notification + submitter confirmation. An ordinary submission: no booking status,
+    confirmation link, waiting list or limit per email (PO 2026-10-13).
 - Stored submission: field values, form, page, UTC timestamp. No IP or browser info.
 - Agent never accesses the database; demo personal data is in telemetry only.
-- Name, Message and Experience notes are never recorded in telemetry.
-- Prod data: scripted submissions over the days before the talk (repeat submitters,
-  validation failures, both forms, all classes), plus attendees submitting live via QR code.
-- Prod attendee handling: notice on both forms (live demo, deleted within 7 days, made-up
-  email allowed); delete prod submissions within 7 days of 16 Oct; per-visitor submission
-  limit; presenter switch to close forms; real confirmation emails sent.
+- Agent reads logs, traces and metrics via the Grafana MCP only; no resource state or commands
+  (presenter runs fault commands in the dashboard). PO 2026-10-13.
+- Never recorded in telemetry: Name, Message, Notes, Company, Website, email address. Fine:
+  form, event or service, outcome.
+- Owner dashboard of bookings: stretch goal.
+- Prod data: scripted submissions over the days before the talk (repeat submitters, validation
+  failures, all forms, bookings across events), plus attendees submitting live via QR code.
+- Prod attendee handling: notice on all forms (live demo, deleted within 7 days); any form may use
+  a made-up email; delete prod submissions within 7 days of 16 Oct (or by taking prod down); one
+  presenter switch closes every form; real emails sent.
 - Prod owner mailbox: presenter-owned demo alias (prod settings only, never in the repo).
-- Package name `Superpower.Forms` is final; not planned for release.
+- Forms simplified (2026-10-10): no separate forms package; the talk no longer promises a
+  custom package. Three fixed forms in the site; the page type decides the form. No editor-
+  defined forms, fields or form text. No format rules beyond Email.
+- Email settings (`add-form-emails`): owner address is an environment setting; subjects and
+  bodies are fixed text. No backoffice settings.
 - Act 4 split: resolved (presenter-only notes).
 
-## Architect proposals (deferred to /opsx:propose; not for explore)
-- [ ] Repo layout:
-  `src/Superpower.AppHost`, `src/Superpower.ServiceDefaults`, `src/Superpower.Web`
-  (thin Umbraco site), `src/Superpower.Forms` (package, single RCL project),
-  `tests/Superpower.Forms.Tests` (xUnit), `infra/` (only if `aspire deploy` is not enough),
-  `Superpower.slnx`.
-- [ ] Package telemetry depends only on BCL (`ActivitySource`, `Meter`, `ILogger`), no
-  OpenTelemetry package references; host opts in via `AddSource`/`AddMeter("Superpower.Forms")`.
-  Rationale: zero cost for consumers, releasable later, Act 1 talking point.
-- [ ] Server-side validation only (no client JS): every submission reaches the server,
-  validation failures per form/field become a metric - "useful telemetry" example.
+## Change order (2026-10-08, revised 2026-10-13)
+1. `add-demo-foundation`: agency site, events and services, three forms.
+2. `add-form-emails`: all emails.
+3. `add-production-environment`: tunnel baseline first; Azure only if time allows (see Open
+   decisions, prod hosting).
+`add-event-bookings` dropped 2026-10-13 (change directory removed).
+
+## Architect follow-ups from the 2026-10-10 forms simplification
+- [x] `/opsx:update add-demo-foundation` done 2026-10-13 (see "Next step").
+- [ ] PO: reset local SQLite and SQL databases once the package code is removed — now
+  `add-demo-foundation` task 6.1 (after task 3.1).
 
 ## Open decisions
-- [ ] Repo layout: AppHost, ServiceDefaults, demo site, package, tests.
-- [ ] Site content (pages, forms) in prod: create manually after first deploy, or uSync.
-- [ ] Media on Azure Container Apps: media-free site, Azure Files mount or Blob provider.
-- [ ] Prod site after the talk (PO decides later): take it down once attendee submissions
-  are deleted (7 days after 16 Oct; closes the public form, stops cost), or keep it running
-  as a live reference (abuse surface stays open).
+- [ ] Prod hosting (PO 2026-10-13): working assumption is the local environment behind a
+  Cloudflare tunnel as baseline and fallback, built first; Azure built only if time allows. PO
+  makes the final choice before it is needed. Implications of the tunnel baseline, to resolve
+  in `add-production-environment`:
+  - "Read-only AI access to production observability": prod telemetry is the same local stack
+    the agent already reads; decide what is shown as production and how access is controlled.
+  - Real emails to attendees: smtp4dev catches everything; needs a real mail route or the
+    confirmations are not sent.
+  - Scripted prod submissions over the days before the talk: needs the laptop running for days,
+    or generate the history shortly before.
+  - Faults injected on stage also reach attendees submitting via QR code.
+  - Venue network: adds a public inbound dependency ("everything local except the LLM" no
+    longer holds).
+  - Architect: ADR-0008 (Azure Monitor exporter) and ADR-0009 (Azure SQL for deploy parity)
+    lose their reason if Azure is never built.
+- [x] Prod site after the talk (PO 2026-10-13): taken down after the talk. Azure: deleting the
+  resources deletes attendee submissions. Tunnel: close the tunnel, reset the local database
+  and telemetry.
+- [x] Telemetry MCP (PO 2026-10-13): logs, traces and metrics queries go to the Grafana MCP
+  (covers all three, `spike-metrics-mcp` findings). Architect: revise ADR-0011.
+- [x] Aspire MCP (PO 2026-10-13): dropped. Presenter runs Toxiproxy commands in the dashboard;
+  no console logs or resource state for the agent.
+- [x] Event bookings (PO 2026-10-13): Event booking is an ordinary submission; `add-event-bookings`
+  dropped.
 
 ## Unknowns to spike
-- [ ] Current Aspire version at talk date; dashboard MCP server tool set (traces, logs, metrics, resource commands?).
-- [ ] Aspire CLI command for agent/MCP config (`aspire mcp init` vs `aspire agent init`).
-- [ ] Umbraco 17 logging (Serilog) -> OTLP: bridge vs ILogger provider; how logs appear in the dashboard.
-- [ ] SqlClient instrumentation spans for Umbraco's NPoco queries.
-- [ ] smtp4dev container in AppHost: ports, endpoints, UI.
-- [ ] Toxiproxy container in AppHost: proxy setup at startup, dashboard resource commands (`WithCommand`).
+Decided in ADRs; verified by `add-demo-foundation` tasks:
+- [x] Umbraco 17 Serilog -> OTLP via forwarding sink (ADR-0007): task 1.3, passed 2026-10-08.
+- [x] SqlClient spans for Umbraco's NPoco queries; background span volume (ADR-0008): task 2.4,
+  passed 2026-10-09 (`verification.md`).
+- [x] smtp4dev and Toxiproxy in the AppHost, Slow/Break/Heal commands (ADR-0010): tasks 2.2, 2.3,
+  passed 2026-10-09 (`verification.md`).
+- [ ] Date Time with time zone stored value shape (ADR-0014): task 3.4.
+- [ ] LGTM stack, Collector and Grafana MCP on Windows (ADR-0017; spike ran on macOS): task 9.3.
+For `add-production-environment`, tunnel baseline:
+- [ ] Cloudflare tunnel to the local site: public URL for the QR code, only the site exposed
+  (no dashboard, Grafana, smtp4dev or backoffice).
+For `add-production-environment`, Azure stretch (only if time allows):
 - [ ] Azure MCP Server: read-only mode, Monitor/App Insights query tools, running under a limited identity (Monitoring Reader + Log Analytics Reader).
 - [ ] Azure Communication Services Email via SMTP from Umbraco IEmailSender.
 - [ ] Umbraco 17 on Azure Container Apps: deploy via azd / `aspire deploy`, cold start, Examine/temp on local disk.
-- [ ] Azure Monitor exporter switch in ServiceDefaults when APPLICATIONINSIGHTS_CONNECTION_STRING is set.
+- [ ] Azure Monitor exporter switch (ADR-0008; code in task 2.4) verified against Application Insights.
 
 ## Todos
-- [ ] First /opsx:propose: re-run the existing technology decisions (CLAUDE.md, Decision rationale below)
-  through the Architect phase as ADRs. Talk technology is a prerequisite; check it for gaps.
-- [ ] Capture confirmed decisions as an OpenSpec change (proposal, design, specs, tasks).
-- [ ] Build the forms package and demo site.
+- [ ] Pre-talk cleanup of both spikes (PO 2026-10-11, reconfirmed 2026-10-13: keep open for
+  reference until then): `spike-aspire-probe` task 3.4 and `spike-metrics-mcp` task 3.6 —
+  delete `spikes/`, remove `Microsoft.Data.SqlClient` from `Directory.Packages.props` (keep the
+  toolkit package, used by `add-demo-foundation` task 2.5), root build; archive both changes.
+  Keep `spikes/` off `demo/act-N-*` branches and out of the published repo.
 - [ ] Plan and create `demo/act-N-*` fallback branches. Keep `docs/research/` and any OpenSpec
   artifacts that describe later-act fixes off earlier demo branches.
-- [ ] Commit Claude Code config for attendees: `.mcp.json`, `.claude/settings.json` (read-only MCP tools allowlisted).
 - [ ] Demo-specific CLAUDE.md for stage: agent instructions to diagnose and verify via telemetry.
+  Decide whether the Roles and "Apply-phase team" sections and `.claude/agents/` stay on
+  `demo/act-N-*` branches and in the published repo. Analyst recommendation (PO to confirm):
+  leave them, and `.claude/commands/opsx/`, off demo branches and `main`; on stage they make
+  the agent role-play and route fixes through sub-agents. PO decides separately whether
+  attendees see the OpenSpec planning.
 - [ ] Script and rehearse agent prompts; rehearse with `/fast`.
 - [ ] Record fallback videos of agent segments.
-- [ ] Deploy to Azure the day before; smoke test the morning of; min replicas 1.
+- [ ] Tunnel baseline: start the environment and tunnel before the talk; smoke test the public
+  URL the morning of. Azure (if built): deploy the day before; min replicas 1.
 - [ ] Stage layout: VSCodium + Claude CLI terminal, browser tabs (dashboard, smtp4dev, site).
 - [ ] Venue network plan: everything local except the LLM.
-- [ ] Attendee README: how to run, MCP setup, SQLite note (no DB spans on SQLite).
 - [ ] Before the talk: remove demo-plan entries from Claude memory, or run the demo
   from a different clone path (memory is keyed to the folder path and loads on stage).
 
 ## Decision rationale (confirmed decisions in CLAUDE.md)
-- Block List field definitions: Umbraco 17 backoffice is Lit/TS; custom UI would be
-  most of the build and adds nothing to the talk.
+- Fixed forms in the site (2026-10-10, replaces Block List field definitions): editor-defined
+  forms added build and backoffice work without adding to the observability story.
 - NPoco + PackageMigrationPlan over EF Core: provider-agnostic from one migration;
   EF Core needs per-provider migration sets. SqlClient instrumentation gives DB spans on
   SQL Server (including Umbraco's own queries); SQLite gets none.
@@ -91,7 +142,8 @@ references this file, so the on-stage agent may read it.
 - Toxiproxy: localhost SMTP is too fast to be realistic; latency toxic multiplies per
   SMTP round trip (~7 per email).
 - Claude Code CLI on stage: presenter's normal workflow; Copilot is not available in VSCodium.
-- Real Azure deploy: prod runs the finished build; Act 4 prod segment is about PII not
-  reaching the observability platform.
+- Prod (either hosting): runs the finished build; Act 4 prod segment is about PII not
+  reaching the observability platform. Tunnel first because it is the shorter route to a
+  public site before 16 Oct (PO 2026-10-13).
 - PII: source-level redaction is primary (knows semantics, GDPR minimisation); pipeline
   (OTel Collector) and ingestion (DCR) are defence in depth for known-shape data.
