@@ -14,6 +14,7 @@ Decisions and their reasons: `docs/adrs/`.
 - Aspire CLI 13.6 or later: install from https://aspire.dev, then check `aspire --version`.
 - A trusted HTTPS development certificate: `dotnet dev-certs https --trust`.
 - Optional: Claude Code, to let an agent query the telemetry (see "Connecting Claude Code").
+- Optional: Node.js 18 or later, for the load test (see "Load test").
 
 The SQL Server image is amd64-only: it runs emulated on Apple Silicon and does not run on
 Linux arm64. The standalone run (SQLite) works everywhere.
@@ -137,6 +138,39 @@ dotnet run tests/smoke/smoke.cs -- standalone # site on its own, SQLite
 Run the full-environment check right after starting the AppHost, before loading any page: Home
 makes database calls only on its first load after start. The check adds test submissions to the
 database.
+
+### Load test
+
+Simulated users request the ten public pages (GET only, no form submissions) for a fixed time,
+then report requests, failures and response times (min, avg, p50, p95, p99, max) per page and in
+total. Targets the public URL by default, so the full environment and the Cloudflare tunnel must
+be running.
+
+```sh
+node tests/load/load-test.mjs --label before
+# make the change, restart the site
+node tests/load/load-test.mjs --label after --compare tests/load/results/<before-run-id>.json
+```
+
+| Option | Default | Meaning |
+|---|---|---|
+| `--label` | `run` | Suffix of the run ID and result file names |
+| `--users` | 10 | Concurrent simulated users |
+| `--duration` | 60 | Test length in seconds |
+| `--ramp` | 10 | Seconds over which users start |
+| `--seed` | 1 | Page order per user; same seed and options give the same request sequence |
+| `--timeout` | 30000 | Per-request timeout in ms; a timeout counts as a failure |
+| `--base` | `https://observability.carlcod.es` | Site root; `http://localhost:21258` tests the local site without the tunnel |
+| `--compare` | - | Earlier result `.json`; adds before → after per page (avg, p50, p95, failed) |
+
+Each run writes `tests/load/results/<run-id>.json` (input for `--compare`) and `<run-id>.md`
+(table for display). Both record the UTC start and end of the run: use them as the Grafana time
+range. Requests carry `User-Agent: SuperPower-LoadTest/1.0 (run <run-id>)`.
+
+- Failed = timeouts, network errors and non-2xx responses. 403 or 429 means Cloudflare rate
+  limiting or a bot challenge, not the site.
+- Timings vary by about ±30% per page between identical short runs. Compare the TOTAL row and
+  p95 from runs of 60 s or more.
 
 ## Cloudflare tunnel (presenter, before the demo)
 
