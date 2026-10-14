@@ -82,9 +82,18 @@ contains only the site's own work.
 - **WHEN** a visitor loads any page
 - **THEN** the browser requests resources only from the site itself
 
-### Requirement: No media library dependency
-The site SHALL NOT depend on uploaded media; any imagery SHALL be static site assets.
+### Requirement: Imagery from the media library
+Site imagery SHALL come from the Umbraco media library: an editor-chosen image per page, used
+for that page's banner and for its card on list pages. Media SHALL be seeded from source
+control like content (media items and their files are committed). Imagery SHALL be optional
+everywhere: where a page has no image, or its media is absent, the site SHALL render a plain
+single-colour block in its place — never a broken image or an incomplete page.
+(PO 2026-10-14; replaces "No media library dependency".)
 
 #### Scenario: Fresh environment has complete pages
 - **WHEN** the site runs against a freshly populated database
-- **THEN** no page shows a missing image
+- **THEN** media items are imported along with the content and no page shows a missing image
+
+#### Scenario: Page without an image
+- **WHEN** a visitor opens a page, or a list showing a page, that has no image chosen
+- **THEN** the banner or card shows a single-colour block and the page is otherwise complete

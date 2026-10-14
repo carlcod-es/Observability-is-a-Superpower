@@ -114,8 +114,10 @@ For `add-production-environment`, Azure stretch (only if time allows):
   `prototype/`, Eleventy, ADR-0018/0019): branded Rubber Duck Consulting, prototype-only -
   the Umbraco site stays Acme Agency (spec `site-prototype` Purpose, PO 2026-10-14). Task 7.1
   uses its layouts, form markup and `site.css` as the template basis and copies the built
-  self-hosted fonts (ADR-0019); its Blog section, newsletter box and per-item images are
-  prototype-only (spec `agency-site` has none). The 7.1 worker materialises `prototype/` from
+  self-hosted fonts (ADR-0019); its Blog section and newsletter box are prototype-only.
+  Imagery changed 2026-10-14 (explore): media-library images via `mainBanner`, optional with a
+  single-colour fallback (design.md Decision 12, spec `agency-site` "Imagery from the media
+  library", tasks 2.6/6.4). The 7.1 worker materialises `prototype/` from
   `main` via `git archive` into the scratchpad (no merge needed). Merging `main` into
   `sample-site` is the PO's call; expect trivial conflicts in PLANNING.md and .gitignore.
 - [ ] Pre-talk cleanup of both spikes (PO 2026-10-11, reconfirmed 2026-10-13: keep open for

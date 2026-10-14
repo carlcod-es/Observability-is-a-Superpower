@@ -66,15 +66,23 @@ Re-verified 2026-10-14 after the PO's clean export: tree, types, titles, dates a
 state are all right. What remains is text (spec `agency-site`: events and services each need
 a description; Home needs the introduction).
 
+Where text lands in the templates (design.md "Site structure", 2026-10-14): **Page Title** =
+banner heading (node name when empty); **Summary** = banner text on the page itself AND the
+card text on Home/list pages; **Main Content** = page body. So every page wants a Summary;
+events and About us also want a body.
+
 - [ ] Home: replace the placeholder body text (currently pasted filler about Borderlands
       vault cards) with an Acme Agency introduction. Must not survive to the talk or the
       published repo.
+- [ ] Summary on each top-level page (Home, About us, Events, Services, Contact us): one or
+      two sentences of banner text.
+- [ ] About us: body text (Main Content) — currently empty.
 - [x] About us: keep or adjust (PO's call; kept).
 - [x] Contact us: recreate as document type `contact` (verified: node is type `contact`).
 - [x] Events: five `event` children with real titles, every **`startDate`** after
       16 Oct 2026 (verified: 20 Oct – 13 Nov 2026), published.
-- [ ] Events: each event needs a description (all five have empty `summary` and
-      `mainContent`).
+- [ ] Events: each event needs a Summary (card + banner text) and ideally a short body
+      (all five currently have empty `summary` and `mainContent`).
 - [x] Services: Umbraco upgrade, SEO audit, AdWords audit, published.
 - [ ] Services: each service needs a short description (all three have empty `summary` and
       `mainContent`).
@@ -85,10 +93,28 @@ a description; Home needs the introduction).
 Pages render with the old Page template or blank templates until task 7.1; forms appear once
 task 7.1 renders the partials. That is expected.
 
+## 6.4 Media (added 2026-10-14; design.md Decision 12, spec `agency-site` "Imagery from the
+media library")
+
+Imagery is optional on every page: anything left without an image renders a single-colour
+block once task 7.1 lands. Do as much or as little of this as you like before hand-back.
+
+- [ ] Source images: generated SVGs (ask the Architect) or licence-free files you choose
+      (you own the licensing call for a published repo).
+- [ ] Upload to the media library (the "products" folder or wherever suits).
+- [ ] On each event and service (other pages optional): pick the image in **Main Banner**.
+- [ ] Publish and let uSync export.
+- [ ] Check: media `.config` files under `src/SuperPower.Web/uSync/v17/Media/` and the image
+      files under `src/SuperPower.Web/wwwroot/media/` are present and committed (neither is
+      gitignored).
+
 ## Hand-back
 
-- [ ] Optional, saves the 7.1 worker a step: Settings > Models Builder > Generate models
-      (SourceCodeManual into `src/SuperPower.Web/Models/`, configured 2026-10-14).
+- [ ] REQUIRED before task 7.1 (PO decision 2026-10-14, typed views): Settings > Models
+      Builder > Generate models (SourceCodeManual, namespace `SuperPower.Web.Models`, into
+      `src/SuperPower.Web/Models/`). Expect one `.generated.cs` per document/element type.
+      Note: pages will still 500 afterwards — the old views use a different namespace and are
+      replaced wholesale by task 7.1. That is expected.
 - [ ] Stop the site.
 - [ ] Tell the Architect: anything that differed from this list.
 - [ ] Commit when ready (your call). The uSync files are yours.
