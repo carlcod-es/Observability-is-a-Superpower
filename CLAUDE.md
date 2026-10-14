@@ -109,6 +109,9 @@ runnable by attendees.
 ## Repo conventions
 - Planning via OpenSpec in `openspec/`. Change order: `add-demo-foundation`,
   `add-form-emails`, `add-production-environment`.
+- Feature requests: `docs/feature-requests/NNNN-<slug>.md`, cited as FR-NNNN; sections: Status,
+  Request, Why, Acceptance criteria, Notes. Recorded by the Architect; folded into a change via
+  `/opsx:propose` or `/opsx:update`, then Status names that change.
 - `PLANNING.md` (temporary): open decisions, unknowns and todos. Check it before
   starting work; update it when items are resolved or discovered.
 - Demo recovery points are git branches `demo/act-N-*`; `main` is the final state.
