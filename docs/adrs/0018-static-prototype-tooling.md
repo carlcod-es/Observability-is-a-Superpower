@@ -1,7 +1,7 @@
 # ADR-0018: Static site prototype built with Eleventy
 
 ## Status
-Accepted (2026-10-14); typography point superseded by ADR-0019 (2026-10-14)
+Accepted (2026-10-14); typography point superseded by ADR-0019 (2026-10-14); "deletable wholesale" consequence amended by ADR-0020 (2026-10-14)
 
 ## Context
 Change `add-site-prototype` delivers a standalone static prototype of the Acme Agency site (four
@@ -31,7 +31,8 @@ otherwise .NET.
 
 ## Consequences
 - One Node toolchain appears in the repo, confined to `prototype/`; deletable wholesale once the
-  markup is in Umbraco.
+  markup is in Umbraco. (Amended by ADR-0020: `prototype/` is now the source of the site's
+  stylesheet and script.)
 - The emitted HTML and `site.css` are the deliverable; integration copies markup into Razor
   views section by section.
 - Anyone reviewing the prototype needs Node.js installed; attendees do not (the prototype is a
