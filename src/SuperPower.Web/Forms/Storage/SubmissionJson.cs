@@ -5,7 +5,7 @@ using System.Text.Json;
 namespace SuperPower.Web.Forms.Storage;
 
 /// <summary>
-/// Maps a form model's field values to the <c>FieldsJson</c> column and back (ADR-0016). Field order relies on
+/// Maps a form model's field values to the <c>FieldsJson</c> column (ADR-0016). Field order relies on
 /// compiler declaration order (<c>MetadataToken</c>); null values are stored as empty strings.
 /// </summary>
 public static class SubmissionJson
@@ -46,24 +46,5 @@ public static class SubmissionJson
         }
 
         return System.Text.Encoding.UTF8.GetString(stream.ToArray());
-    }
-
-    /// <summary>Reads a JSON object of string values, preserving property order.</summary>
-    public static IReadOnlyList<KeyValuePair<string, string>> Deserialize(string json)
-    {
-        ArgumentNullException.ThrowIfNull(json);
-        using var doc = JsonDocument.Parse(json);
-        if (doc.RootElement.ValueKind != JsonValueKind.Object)
-        {
-            throw new JsonException("Submission fields JSON must be an object.");
-        }
-
-        return doc.RootElement.EnumerateObject()
-            .Select(p => new KeyValuePair<string, string>(
-                p.Name,
-                p.Value.ValueKind == JsonValueKind.String
-                    ? p.Value.GetString()!
-                    : throw new JsonException($"Field '{p.Name}' is not a string.")))
-            .ToList();
     }
 }

@@ -12,12 +12,12 @@ State at 2026-10-14 (late), branch `sample-site` at 92bbbe1 (`main` merged). Res
    "Constraints for PO UI work" below, plus `dotnet run tests/smoke/smoke.cs -- standalone`.
 2. Nothing runs between sessions; agents start and stop the AppHost or standalone site
    themselves. Serialize anything that runs the site with PO backoffice sessions.
-3. Next actions, in order: PO reverts the past event date -> backend clean-up block (follow-ups) and 9.5 -> PO content (6.3, 6.4) and
+3. Next actions, in order (backend clean-up block and 9.5 done 2026-10-14): PO content (6.3, 6.4) and
    8.1/8.2 -> 9.2 (destructive, PO approval) -> 9.3 -> 9.1, 9.6 -> section 9 supervisor.
 
 ## Progress
 
-20 of 30 tasks ticked. Sections 1, 2, 4 and 5 complete. Section 3 lacks 3.2. Past-event session done 2026-10-14 (3.5, 7.1, 9.4 ticked).
+21 of 30 tasks ticked. Sections 1, 2, 4 and 5 complete. Section 3 lacks 3.2. Past-event session done 2026-10-14 (3.5, 7.1, 9.4 ticked).
 
 Done and reviewed, awaiting one check each:
 - 7.1 site views (block 7A, reviewer APPROVED): PO past-event page check + network panel glance.
@@ -50,12 +50,9 @@ Reviews done: sections 3-5 supervisor APPROVED (findings in `review-followups.md
 | 9.1 | Architect | README drafted (prerequisites, pre-pull, runs, resets, log levels, Claude Code, smoke usage); verify by following it on a fresh clone (with 9.3) |
 | 9.2 | Architect (destructive: PO approval) | Remove SQL volume + SQLite file + TEMP, start both; after content and media are final. Also closes 3.2 |
 | 9.3 | PO + Architect | Windows and macOS from a fresh clone; Linux standalone in a container |
-| 9.5 | Architect | `PLANNING.md` tidy |
 | 9.6 | Architect | `docs/project-setup.md` matches the final state (smoke usage and `prototype/` added 2026-10-14) |
 
-Next backend block (from follow-ups): remove the dead submission read path
-(`IFormSubmissionRepository`/`FormSubmissionRepository` read methods, `FormSubmission`), move
-`EventAlias` next to `StartDateAlias`.
+Backend clean-up block done 2026-10-14 (reviewer APPROVED; see verification.md). Remaining backend follow-ups are optional nits in review-followups.md.
 
 ## Constraints for PO UI work
 

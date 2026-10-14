@@ -14,6 +14,7 @@ public interface IEventSchedule
 
 public sealed class EventSchedule(TimeProvider timeProvider) : IEventSchedule
 {
+    public const string EventAlias = "event";
     public const string StartDateAlias = "startDate";
 
     public bool IsPast(DateTimeOffset start) => start.UtcDateTime <= timeProvider.GetUtcNow().UtcDateTime;

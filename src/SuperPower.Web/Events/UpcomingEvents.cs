@@ -1,4 +1,3 @@
-using SuperPower.Web.Forms;
 using Umbraco.Cms.Core.Models.PublishedContent;
 
 namespace SuperPower.Web.Events;
@@ -28,6 +27,6 @@ public sealed class UpcomingEvents(IEventSchedule schedule) : IUpcomingEvents
 
     public IReadOnlyList<IPublishedContent> GetUpcoming(IPublishedContent eventsParent) =>
         Filter(eventsParent.Children
-            .Where(c => c.ContentType.Alias == EventBookingGuard.EventAlias)
+            .Where(c => c.ContentType.Alias == EventSchedule.EventAlias)
             .Select(c => (c, c.GetProperty(EventSchedule.StartDateAlias)?.GetValue() as DateTimeOffset?)));
 }

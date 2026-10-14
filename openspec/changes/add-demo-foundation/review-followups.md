@@ -92,8 +92,8 @@ task numbers where it matters.
 - [ ] nit (block 7A) `master.cshtml:84-89`: footer link list duplicates the main nav (from the prototype); keep or drop.
 - [ ] nit (block 7A) `master.cshtml:30-40`: ancestor nav items get `aria-current="true"` (prototype behaviour); harmless.
 - [ ] nit (block 7A) `Views/Partials/Media.cshtml`: `<img>` omits width/height when `umbracoWidth`/`umbracoHeight` are missing; fine.
-- [ ] minor (section 3-5 supervisor) Dead read path shown to attendees: `IFormSubmissionRepository.cs:12-14`, `FormSubmissionRepository.cs:29-50` (`GetAsync`, `GetFieldsJsonAsync`, `GetDtoAsync`), `FormSubmission.cs` and `SubmissionJson.Deserialize` have no production caller. Fix: `InsertAsync` returns `Task`, drop the read methods and `FormSubmission`; keep or drop `Deserialize` with its round-trip test; drop the `Kind != Utc` branch at `FormSubmissionRepository.cs:17`. Next backend block in `src/SuperPower.Web/Forms/`.
-- [ ] nit (section 3-5 supervisor) `Events/UpcomingEvents.cs:1,31` uses `EventBookingGuard.EventAlias` (Events depends on Forms). Fix: move `EventAlias` next to `EventSchedule.StartDateAlias`.
+- [x] (done: backend clean-up block 2026-10-14, reviewer APPROVED) minor (section 3-5 supervisor) Dead read path shown to attendees: `IFormSubmissionRepository.cs:12-14`, `FormSubmissionRepository.cs:29-50` (`GetAsync`, `GetFieldsJsonAsync`, `GetDtoAsync`), `FormSubmission.cs` and `SubmissionJson.Deserialize` have no production caller. Fix: `InsertAsync` returns `Task`, drop the read methods and `FormSubmission`; keep or drop `Deserialize` with its round-trip test; drop the `Kind != Utc` branch at `FormSubmissionRepository.cs:17`. Next backend block in `src/SuperPower.Web/Forms/`.
+- [x] (done: backend clean-up block 2026-10-14, now `EventSchedule.EventAlias`) nit (section 3-5 supervisor) `Events/UpcomingEvents.cs:1,31` uses `EventBookingGuard.EventAlias` (Events depends on Forms). Fix: move `EventAlias` next to `EventSchedule.StartDateAlias`.
 - [ ] nit (section 3-5 supervisor) `Events/UpcomingEvents.cs:14`: `Filter<T>` is on the public interface only for tests; keep the interface to `GetUpcoming`. Optional.
 - [ ] risk (section 3-5 supervisor) At Debug level Umbraco's database exception handler logs failing SQL with its arguments; for a submission insert that includes `FieldsJson` (form values). Never lower Umbraco/Serilog levels on stage while forms are submitted.
 - [ ] note (section 3-5 supervisor) View fails open, controller fails closed on a missing `startDate` (Architect decision); unreachable while the property is mandatory.
@@ -112,6 +112,8 @@ task numbers where it matters.
 - [ ] PO (section 7 supervisor) `wwwroot/favicon.ico` is the Umbraco template default, not Acme branding (telemetry-excluded). Replace or remove if wanted.
 - [ ] PO risk (section 7 supervisor) `/does-not-exist/` renders Umbraco's default 404 page (non-Acme branding, links to umbra.co and the forum; links only, no third-party requests). Outside task 7.1; visible if the audience hits a bad URL.
 - [ ] note (section 7 supervisor) `dotnet test SuperPower.slnx` fails on the .NET 10 SDK (MTP); briefs use `dotnet test --solution SuperPower.slnx` (or plain `dotnet test` at the root, as in README).
+- [ ] nit (backend clean-up review) `src/SuperPower.Web/Events/UpcomingEvents.cs:29`: pre-existing CS0618, `IPublishedContent.Children` obsolete (removed in Umbraco 18). Fix: `Children()` extension from `Umbraco.Extensions`. Optional.
+- [ ] note (backend clean-up block) Insert path changed (return type, UTC branch) without a runtime run; next smoke run (tasks 9.2/9.3) covers it.
 
 ## Superseded by the 2026-10-13 re-plan (ADR-0016, ADR-0017)
 

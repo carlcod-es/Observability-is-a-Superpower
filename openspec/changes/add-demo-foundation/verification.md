@@ -101,6 +101,14 @@ the forms package that the re-plan removes (new task 3.1).
   `/css/fonts/` (telemetry-excluded). Minors fixed in ADR-0008, ADR-0019 and review-followups;
   nits in `review-followups.md`.
 
+## Backend clean-up block (2026-10-14, review follow-ups)
+
+- Dead submission read path removed (`InsertAsync` returns `Task`; `GetAsync`, `GetFieldsJsonAsync`,
+  `FormSubmission`, `SubmissionJson.Deserialize` and its round-trip test gone); `EventAlias` moved to
+  `EventSchedule`. Reviewer APPROVED, no findings: `dotnet build SuperPower.slnx --no-incremental`
+  0 errors, 47 warnings (NU15xx/NU190x + pre-existing CS0618); `dotnet test --solution
+  SuperPower.slnx` 36/36. Not run at runtime; next smoke run covers the insert path.
+
 ## Sections 3-5 supervisor (2026-10-14, HEAD e78babd)
 
 - APPROVED, no blockers or majors. `dotnet build` clean apart from recorded warnings;

@@ -46,15 +46,4 @@ public class SubmissionJsonTests
             "{\"Name\":\"A \\\"q\\\" <b>\",\"Email\":\"a@example.com\",\"Message\":\"line1\\nå中\",\"ReplyByPhone\":\"true\"}",
             json);
     }
-
-    [Fact]
-    public void Round_trip_preserves_values()
-    {
-        var form = new ServiceEnquiryForm { Name = "Ann", Email = "a@example.com", Website = "x <y>", Message = "å中\n\"q\"" };
-        var fields = SubmissionJson.ToFields(form);
-
-        var back = SubmissionJson.Deserialize(SubmissionJson.Serialize(fields));
-
-        Assert.Equal(fields.ToList(), back.ToList());
-    }
 }
