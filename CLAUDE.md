@@ -129,9 +129,9 @@ Ownership:
 - worker-backend: `src/SuperPower.AppHost/`, `src/SuperPower.ServiceDefaults/`,
   `src/SuperPower.Web/` C# code (Program.cs, migrations, repositories, controllers, view
   models), `tests/SuperPower.*.Tests/`.
-- worker-frontend: `src/SuperPower.Web/Views/`, `src/SuperPower.Web/wwwroot/`, `prototype/`,
+- worker-frontend: `src/SuperPower.Web/Views/`, `src/SuperPower.Web/wwwroot/`,
   any client-side script and its tests. `wwwroot/css/site.css` and `wwwroot/js/site.js` are
-  edited in `prototype/src/` and copied with `npm run sync` (ADR-0020).
+  edited in place (ADR-0021).
 - PO: `src/SuperPower.Web/uSync/` (backoffice export; tasks marked "(PO)").
 - Shared, changed only when the Architect assigns them in a brief: `SuperPower.slnx`,
   `Directory.*.props`, `.gitignore`, `appsettings*.json`, `launchSettings.json`, `.mcp.json`,

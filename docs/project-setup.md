@@ -19,9 +19,6 @@ tests/
   SuperPower.Web.Tests/      xUnit v3 unit tests (ADR-0012)
   smoke/                     end-to-end smoke check, `dotnet run tests/smoke/smoke.cs` (ADR-0012)
 docs/adrs/                   architecture decision records
-prototype/                   static Eleventy prototype the site views were built from (ADR-0018,
-                             ADR-0019); source of the site's site.css and site.js (ADR-0020);
-                             not part of the demo environment
 openspec/                    planning: specs (openspec/specs) and changes (openspec/changes)
 .mcp.json                    MCP servers for Claude Code (Grafana MCP only, ADR-0017)
 .claude/settings.json        pre-approved read-only Grafana MCP tools
@@ -128,7 +125,7 @@ server is reachable only while the AppHost runs.
 | `uSync/v17/` | document types, templates, data types, content, media (exported by uSync on save) |
 | `Views/` | layout `master.cshtml`, one view per template, partials for cards, media and forms |
 | `Views/Partials/Forms/` | the three form partials (Contact, Service enquiry, Event booking) |
-| `wwwroot/css/`, `wwwroot/js/` | `site.css` and `site.js`: synced copies of `prototype/src/` (edit there, then `npm run sync` in `prototype/`; a test fails on drift, ADR-0020); self-hosted fonts; no external resources |
+| `wwwroot/css/`, `wwwroot/js/` | `site.css` and `site.js`, edited in place (ADR-0021); self-hosted fonts; no external resources |
 | `Forms/` | form models, `AcmeFormsController` (SurfaceController), submission storage, migration plan "Acme.Site", telemetry names (ADR-0016) |
 | `Events/` | past/upcoming event rules on `TimeProvider` (ADR-0014) |
 
