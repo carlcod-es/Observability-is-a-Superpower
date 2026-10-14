@@ -82,3 +82,13 @@ the forms package that the re-plan removes (new task 3.1).
     invalid post 200 with entered values and field errors, nothing stored; post without token
     400, nothing stored.
   - Pending PO: past-event page check (and past-event post rejection), browser network panel.
+
+## Sections 3-5 supervisor (2026-10-14, HEAD e78babd)
+
+- APPROVED, no blockers or majors. `dotnet build` clean apart from recorded warnings;
+  `dotnet test` 37/37. Controller/partial binding contract, TempData success key, past-event
+  guard (controller fail-closed), upcoming-events use in views, DI and `Acme.Forms`
+  registration consistent; ADR-0016 and ADR-0014 conform; no form values in logs, traces or
+  metrics at configured levels; no package leftovers.
+- Coverage gap: spec `form-submission` "Both databases" has no post-re-plan evidence on SQL
+  Server; task 3.2 unticked, re-verified via tasks 9.4 and 9.2.
