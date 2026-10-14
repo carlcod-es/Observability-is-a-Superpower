@@ -97,6 +97,12 @@ task numbers where it matters.
 - [ ] nit (section 3-5 supervisor) `Events/UpcomingEvents.cs:14`: `Filter<T>` is on the public interface only for tests; keep the interface to `GetUpcoming`. Optional.
 - [ ] risk (section 3-5 supervisor) At Debug level Umbraco's database exception handler logs failing SQL with its arguments; for a submission insert that includes `FieldsJson` (form values). Never lower Umbraco/Serilog levels on stage while forms are submitted.
 - [ ] note (section 3-5 supervisor) View fails open, controller fails closed on a missing `startDate` (Architect decision); unreachable while the property is mandatory.
+- [ ] minor (block 9A, task 9.4) `tests/smoke/smoke.cs:322`: `Delivered` returns true when the smtp4dev URL is not found, so mail steps pass on SMTP 250 alone (a "note:" line is printed). Acceptable at prototype bar; a hard FAIL would be stricter.
+- [ ] nit (block 9A) `tests/smoke/smoke.cs:146`: Service and Event `FieldsJson` checks only test posted fields are present (not bools or key casing); the Contact literal check is the strict one.
+- [ ] nit (block 9A) `tests/smoke/smoke.cs:114,216`: `JsonDocument` not disposed; regex form parsing brittle. Script only.
+- [ ] note (block 9A) SQLite `FieldsJson` column has `COLLATE NOCASE` (NPoco SQLite provider); stored bytes unaffected.
+- [ ] note (block 9A) SQL Server database holds a trashed duplicate "Contact Us" node (uniqueId 211A32DE-…) sharing the `contact-us` segment; the smoke script filters `trashed = 0`; gone after the task 9.2 fresh volume.
+- [ ] note (block 9A) `sqlite3 -readonly` / `?mode=ro` fail in the agent shell ("unable to open database file"); `Microsoft.Data.Sqlite` `Mode=ReadOnly` works.
 
 ## Superseded by the 2026-10-13 re-plan (ADR-0016, ADR-0017)
 

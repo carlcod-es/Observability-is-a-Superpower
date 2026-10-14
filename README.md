@@ -124,8 +124,19 @@ Ports 3000, 8091 and 2525 must be free; 3000 often clashes with Node dev servers
 dotnet test
 ```
 
-Unit tests for form validation, stored field values and the event date rules. End-to-end smoke
-checks are in `tests/smoke/`.
+Unit tests for form validation, stored field values and the event date rules.
+
+End-to-end smoke check (pages, form submissions, stored rows, Home trace with database spans
+and linked logs, Slow/Break/Heal):
+
+```sh
+dotnet run tests/smoke/smoke.cs               # full environment, SQL Server
+dotnet run tests/smoke/smoke.cs -- standalone # site on its own, SQLite
+```
+
+Run the full-environment check right after starting the AppHost, before loading any page: Home
+makes database calls only on its first load after start. The check adds test submissions to the
+database.
 
 ## Cloudflare tunnel (presenter, before the demo)
 

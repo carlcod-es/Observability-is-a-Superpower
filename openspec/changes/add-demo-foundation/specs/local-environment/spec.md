@@ -25,13 +25,14 @@ with one command, and the dashboard SHALL show each as a resource with its state
 
 ### Requirement: Telemetry in one place
 Structured logs, traces and metrics from the site SHALL appear in the dashboard, correlated by
-trace. A page request trace SHALL include the site's database calls when running on the server
-database.
+trace. A page request trace SHALL include the database calls the request makes when running on
+the server database.
 
 #### Scenario: Page request trace
-- **WHEN** a visitor loads the Home page
+- **WHEN** a visitor loads the Home page for the first time after the site starts
 - **THEN** the dashboard shows one trace for the request containing its database calls, and
-  the request's log entries are linked to that trace
+  the request's log entries are linked to that trace (later loads are served from Umbraco's
+  cache and make no database calls; PO 2026-10-14)
 
 #### Scenario: Site logs are structured
 - **WHEN** the site writes a log entry with named values

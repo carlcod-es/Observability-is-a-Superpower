@@ -92,3 +92,25 @@ the forms package that the re-plan removes (new task 3.1).
   metrics at configured levels; no package leftovers.
 - Coverage gap: spec `form-submission` "Both databases" has no post-re-plan evidence on SQL
   Server; task 3.2 unticked, re-verified via tasks 9.4 and 9.2.
+
+## Section 9 (block 9A, smoke check)
+
+- `add-demo-foundation` task 9.4, 2026-10-14, `dotnet run tests/smoke/smoke.cs` (worker, reworked;
+  reviewer re-run, APPROVED): on a freshly started AppHost (no page loaded before the script) all
+  checks PASS, exit 0: 13 pages 200; Contact, Service enquiry and Event booking submissions 302 +
+  success text, one row each with form key, page key, UTC timestamp, field JSON; invalid
+  submission 200 with field errors, 0 rows; Home trace (first load) 1 server span + 2 database
+  spans, request log line carries its trace_id (spec `local-environment` "Page request trace",
+  amended PO 2026-10-14); mail baseline delivered (<400 ms), Slow ~6.04 s delivered, Break fails
+  in ~1 s, Heal delivered (<30 ms), delivery confirmed in smtp4dev. Second run on the warm
+  AppHost: Home check FAILs with the restart message, exit 1 (as designed). Standalone target
+  (SQLite): pages, Contact submission, invalid submission PASS.
+- Contact `FieldsJson` asserted byte-for-byte against one literal on both targets (quote,
+  non-ASCII, newline): identical on SQL Server and SQLite (spec `form-submission` "Both
+  databases").
+- `add-demo-foundation` task 3.2, existing databases (worker, via sqlcmd/sqlite3): SQL Server
+  `acmeFormSubmission` Id int PK, FormKey uniqueidentifier (IX_acmeFormSubmission_FormKey),
+  PageKey, SubmittedUtc datetime, FieldsJson nvarchar(max); SQLite equivalent; upgrader state
+  `Acme.Site` at final state on both; restarts log "Running migration plan Acme.Site ... At
+  <final state> ... Done" with no step executed. Fresh-volume / fresh-SQLite first boot: task 9.2.
+- Not scripted (PO 2026-10-14): Event booking post to a past event; pending the PO past-event check.
