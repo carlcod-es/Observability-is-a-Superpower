@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.Hosting;
 internal static class TelemetryPaths
 {
     private static readonly string[] ExcludedPrefixes =
-        ["/health", "/alive", "/umbraco/backoffice", "/css", "/js"];
+        ["/health", "/alive", "/umbraco/backoffice", "/css", "/js", "/media", "/favicon.ico"];
 
     public static bool IsExcluded(PathString path) =>
         ExcludedPrefixes.Any(p => path.StartsWithSegments(p, StringComparison.OrdinalIgnoreCase));

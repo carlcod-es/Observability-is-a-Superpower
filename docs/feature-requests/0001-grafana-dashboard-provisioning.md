@@ -25,5 +25,10 @@ step to forget; attendees would need the same manual step.
   whether the image ships a dashboard provider config or one must be mounted too.
 - Startup load only; live reload of edited JSON is not required (file-change events may not
   reach the container on Windows).
-- Planned home: the demo dashboard ADR and `/opsx:update add-demo-foundation` (`PLANNING.md`);
-  Windows confirmation alongside `add-demo-foundation` task 9.3.
+- Planned home: change `add-demo-dashboard` (PO 2026-10-14), via `/opsx:propose`; Windows
+  confirmation alongside `add-demo-foundation` task 9.3.
+- PO 2026-10-14: if the provisioning mount fails verification, the AppHost imports the JSON on
+  start (`POST /api/dashboards/db` on the `lgtm` resource-ready event); no manual import.
+- PO 2026-10-14: provision the community ASP.NET Core dashboard 19924 as well, unchanged except
+  `${DS_PROMETHEUS}` replaced by the literal UID `prometheus` (the share form fails when saved
+  directly, `spike-grafana-dashboard` `findings.md` section 4).

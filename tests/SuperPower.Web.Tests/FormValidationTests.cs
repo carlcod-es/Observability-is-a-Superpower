@@ -106,12 +106,9 @@ public class FormValidationTests
     [InlineData(false)]
     public void Checkboxes_never_fail_validation(bool value)
     {
-        var contact = Contact();
-        contact.ReplyByPhone = value;
         var booking = Booking();
         booking.JoinMailingList = value;
 
-        Assert.Empty(Validate(contact));
         Assert.Empty(Validate(booking));
     }
 }

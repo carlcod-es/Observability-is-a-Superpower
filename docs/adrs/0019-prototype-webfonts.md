@@ -1,7 +1,7 @@
 # ADR-0019: Self-hosted open-licence webfonts in the prototype
 
 ## Status
-Accepted (2026-10-14)
+Accepted (2026-10-14); prototype font path amended by ADR-0020 (2026-10-14)
 
 ## Context
 The PO rebranded the prototype to Rubber Duck Consulting (prototype-only; the Umbraco demo site
@@ -34,3 +34,14 @@ is published for attendees, so licences must permit redistribution.
   no-preprocessor decisions stand.
 - Page weight grows by the WOFF2 files (~100-200 KB total, latin subsets only).
 - Attendees need nothing new: `npm install` already required for Eleventy.
+
+## Outcome in the Umbraco site (change `add-demo-foundation` task 7.1, 2026-10-14)
+- The site has no npm build, so the three WOFF2 files and their OFL licences are committed under
+  `src/SuperPower.Web/wwwroot/css/fonts/`. "No binary font files committed" applies to
+  `prototype/` only.
+- Served from `/css/fonts/`, not `/fonts/`: `/css` is already excluded from telemetry
+  (ADR-0008), so font requests add no traces.
+
+## Amendment (ADR-0020, 2026-10-14)
+- The prototype passthrough-copies the WOFF2 files to `css/fonts/`, so the shared stylesheet
+  declares `/css/fonts/` URLs that work in both the prototype and the site.

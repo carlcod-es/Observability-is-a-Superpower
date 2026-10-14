@@ -1,0 +1,5 @@
+@inherits UmbracoViewPage<ICompPage>
+@if (Model.MainContent?.Any() == true)
+{
+    @await Html.GetBlockListHtmlAsync(Model.MainContent)
+}

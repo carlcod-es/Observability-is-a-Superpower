@@ -73,13 +73,13 @@ runnable by attendees.
 - Forms: three, fixed in the site code (no package, no editor-defined forms, fields or form
   text). The page type decides the form; the event or service comes from the page. Spec
   `form-submission`.
-  - Contact: Name, Email, Message, "Reply by phone?".
+  - Contact: Name, Email, Message ("Reply by phone?" dropped, PO 2026-10-14).
   - Service enquiry: Name, Email, Company (optional), Website (optional), Message.
   - Event booking: Name, Email, Notes (optional), "Join mailing list". An ordinary
     submission: no booking status, places or limits.
   - Server-side validation only; no format rules beyond Email. Success text "Thank you,
     we'll be in touch."
-  - Rendering: ViewComponent; POST via SurfaceController with antiforgery.
+  - Rendering: one partial view per form (ADR-0016); POST via SurfaceController with antiforgery.
 - Submissions: one site-owned table. Stores form, page key, UTC timestamp, field values.
   No IP or browser info.
 - Must work on SQLite and SQL Server: no raw SQL, NPoco Sql<ISqlContext> builders,
@@ -108,7 +108,7 @@ runnable by attendees.
 
 ## Repo conventions
 - Planning via OpenSpec in `openspec/`. Change order: `add-demo-foundation`,
-  `add-form-emails`, `add-production-environment`.
+  `add-demo-dashboard`, `add-form-emails`, `add-production-environment`.
 - Feature requests: `docs/feature-requests/NNNN-<slug>.md`, cited as FR-NNNN; sections: Status,
   Request, Why, Acceptance criteria, Notes. Recorded by the Architect; folded into a change via
   `/opsx:propose` or `/opsx:update`, then Status names that change.
@@ -129,8 +129,9 @@ Ownership:
 - worker-backend: `src/SuperPower.AppHost/`, `src/SuperPower.ServiceDefaults/`,
   `src/SuperPower.Web/` C# code (Program.cs, migrations, repositories, controllers, view
   models), `tests/SuperPower.*.Tests/`.
-- worker-frontend: `src/SuperPower.Web/Views/`, `src/SuperPower.Web/wwwroot/`, any
-  client-side script and its tests.
+- worker-frontend: `src/SuperPower.Web/Views/`, `src/SuperPower.Web/wwwroot/`, `prototype/`,
+  any client-side script and its tests. `wwwroot/css/site.css` and `wwwroot/js/site.js` are
+  edited in `prototype/src/` and copied with `npm run sync` (ADR-0020).
 - PO: `src/SuperPower.Web/uSync/` (backoffice export; tasks marked "(PO)").
 - Shared, changed only when the Architect assigns them in a brief: `SuperPower.slnx`,
   `Directory.*.props`, `.gitignore`, `appsettings*.json`, `launchSettings.json`, `.mcp.json`,

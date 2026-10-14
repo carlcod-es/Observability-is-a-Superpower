@@ -1,0 +1,23 @@
+﻿@inherits UmbracoViewPage<Event>
+@inject SuperPower.Web.Events.IEventSchedule Schedule
+@{
+    Layout = "master.cshtml";
+}
+<section>
+    @if (Model.StartDate is { } start)
+    {
+        <p class="event-when">@await Html.PartialAsync("Partials/EventWhen", start)</p>
+    }
+    @await Html.PartialAsync("Partials/MainContent", Model)
+</section>
+<section>
+    @if (Schedule.IsPast(Model))
+    {
+        <p class="event-ended">@EventBookingGuard.EndedMessage</p>
+    }
+    else
+    {
+        <h2>Book your place</h2>
+        @await Html.PartialAsync("Partials/Forms/EventBookingForm", new EventBookingForm())
+    }
+</section>

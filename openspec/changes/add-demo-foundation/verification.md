@@ -65,3 +65,79 @@ the forms package that the re-plan removes (new task 3.1).
   reviewer) and a copy of the PO's database at `...4002`: root document type folder
   "SuperPower Forms" (key `...5001`) created once, six package types moved into it, data types
   untouched; restart: no migration, no duplicate folder.
+
+## Section 7 (and runtime checks for tasks 3.5, 4.1)
+
+- `add-demo-foundation` tasks 7.1/3.5/4.1, 2026-10-14, standalone SQLite site (fresh install, uSync
+  first boot), worker run and independent reviewer re-run:
+  - 13 pages (Home, About us, Events, Services, Contact us, 3 services, 5 events) return 200 with
+    the navigation; 0 `<script>`, 0 external resource URLs, exactly one stylesheet; fonts served
+    from `/css/fonts/` (telemetry-excluded path).
+  - No page has a `mainBanner` image: every banner and card renders the colour block, 0 `<img>`
+    (spec `agency-site` "Page without an image"). Image branch not exercised.
+  - Forms (Contact, SEO audit service, Umbraco Builders Day event): one
+    `__RequestVerificationToken` and one `ufprt` per form; `method="post"` + `novalidate`; no
+    `required`/`pattern`; `asp-*` expanded; valid post 302 then "Thank you, we'll be in touch." on
+    that form only, refresh stores nothing (rows +1 per valid post via `sqlite3 -readonly`);
+    invalid post 200 with entered values and field errors, nothing stored; post without token
+    400, nothing stored.
+  - Pending PO: past-event page check (and past-event post rejection), browser network panel.
+  - Past-event session 2026-10-14, AppHost (SQL Server), event "Creating great editor experiences"
+    moved to 2026-10-06 by the PO (uSync export not committed): PO confirmed the page shows "This
+    event has ended" with no form and the event is gone from the Events list; Architect over HTTP:
+    Home does not list it, the page loads only `/css/site.css` (no `<script>`, `<img>` or external
+    URL). Event booking post (antiforgery token + `ufprt` from an upcoming event's form) to the
+    past event: 200, no redirect, "This event has ended", no success text, no form; PO SQL count of
+    rows from that post: 0. PO browser network panel: all requests to the site's own domain.
+
+## Section 7 supervisor (2026-10-14, HEAD 244d2e6)
+
+- APPROVED, no blockers or majors. `dotnet build SuperPower.slnx` 0 errors (recorded NU15xx/NU190x
+  warnings); `dotnet test --solution SuperPower.slnx` 37/37. Read-only GETs on the AppHost: all page
+  types 200, one stylesheet, 0 `<script>`, 0 `<img>`, 0 external URLs; colour blocks on every card;
+  past event ended with no form and absent from Home/Events; forms carry one token + one `ufprt`,
+  `novalidate`, POST, unprefixed input names; event times London local with correct offset across
+  the 25 Oct clock change. ADR-0016 contract honoured; no date logic in views; fonts under
+  `/css/fonts/` (telemetry-excluded). Minors fixed in ADR-0008, ADR-0019 and review-followups;
+  nits in `review-followups.md`.
+
+## Backend clean-up block (2026-10-14, review follow-ups)
+
+- Dead submission read path removed (`InsertAsync` returns `Task`; `GetAsync`, `GetFieldsJsonAsync`,
+  `FormSubmission`, `SubmissionJson.Deserialize` and its round-trip test gone); `EventAlias` moved to
+  `EventSchedule`. Reviewer APPROVED, no findings: `dotnet build SuperPower.slnx --no-incremental`
+  0 errors, 47 warnings (NU15xx/NU190x + pre-existing CS0618); `dotnet test --solution
+  SuperPower.slnx` 36/36. Not run at runtime; next smoke run covers the insert path.
+
+## Sections 3-5 supervisor (2026-10-14, HEAD e78babd)
+
+- APPROVED, no blockers or majors. `dotnet build` clean apart from recorded warnings;
+  `dotnet test` 37/37. Controller/partial binding contract, TempData success key, past-event
+  guard (controller fail-closed), upcoming-events use in views, DI and `Acme.Forms`
+  registration consistent; ADR-0016 and ADR-0014 conform; no form values in logs, traces or
+  metrics at configured levels; no package leftovers.
+- Coverage gap: spec `form-submission` "Both databases" has no post-re-plan evidence on SQL
+  Server; task 3.2 unticked, re-verified via tasks 9.4 and 9.2.
+
+## Section 9 (block 9A, smoke check)
+
+- `add-demo-foundation` task 9.4, 2026-10-14, `dotnet run tests/smoke/smoke.cs` (worker, reworked;
+  reviewer re-run, APPROVED): on a freshly started AppHost (no page loaded before the script) all
+  checks PASS, exit 0: 13 pages 200; Contact, Service enquiry and Event booking submissions 302 +
+  success text, one row each with form key, page key, UTC timestamp, field JSON; invalid
+  submission 200 with field errors, 0 rows; Home trace (first load) 1 server span + 2 database
+  spans, request log line carries its trace_id (spec `local-environment` "Page request trace",
+  amended PO 2026-10-14); mail baseline delivered (<400 ms), Slow ~6.04 s delivered, Break fails
+  in ~1 s, Heal delivered (<30 ms), delivery confirmed in smtp4dev. Second run on the warm
+  AppHost: Home check FAILs with the restart message, exit 1 (as designed). Standalone target
+  (SQLite): pages, Contact submission, invalid submission PASS.
+- Contact `FieldsJson` asserted byte-for-byte against one literal on both targets (quote,
+  non-ASCII, newline): identical on SQL Server and SQLite (spec `form-submission` "Both
+  databases").
+- `add-demo-foundation` task 3.2, existing databases (worker, via sqlcmd/sqlite3): SQL Server
+  `acmeFormSubmission` Id int PK, FormKey uniqueidentifier (IX_acmeFormSubmission_FormKey),
+  PageKey, SubmittedUtc datetime, FieldsJson nvarchar(max); SQLite equivalent; upgrader state
+  `Acme.Site` at final state on both; restarts log "Running migration plan Acme.Site ... At
+  <final state> ... Done" with no step executed. Fresh-volume / fresh-SQLite first boot: task 9.2.
+- Not scripted (PO 2026-10-14): Event booking post to a past event; done manually in the past-event
+  session 2026-10-14 (see block 7A entry above): rejected, 0 rows.

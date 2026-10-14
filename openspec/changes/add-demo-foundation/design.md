@@ -46,6 +46,7 @@ metrics tool, so the agent queries Grafana LGTM through the Grafana MCP instead 
 - Any booking workflow: an Event booking is an ordinary submission (PO 2026-10-13); no places,
   capacity, status or owner dashboard.
 - Demo branch creation (separate planning topic).
+- The demo Grafana dashboard, its provisioning and demo traffic (change `add-demo-dashboard`).
 
 ## Bar and test strategy
 
@@ -104,10 +105,22 @@ Test strategy that follows (ADR-0012):
     with time zone, Europe/London only, mandatory); past when `startDate` <= UTC now; no form
     picker, the template decides the form. Rejected: in-person/online types with capacity,
     plain Date Time, form picker. ADR-0014.
+12. **Media imagery** (PO 2026-10-14, explore; replaces "no media items") - a page's image is
+    its existing `compPage.mainBanner` (MediaPicker3), rendered in the page banner and in the
+    page's card on Home and list pages. Media is seeded like content: uSync media items plus
+    the stored files under `src/SuperPower.Web/wwwroot/media/`, both committed;
+    `ImportOnFirstBoot` covers media items. Imagery is optional everywhere: no image (or
+    missing media) renders a plain single-colour block, never a broken image (spec
+    `agency-site` "Imagery from the media library"). `/media` and `/favicon.ico` join the
+    `TelemetryPaths` exclusions (ADR-0008) so image requests leave no traces or logs.
+    Rejected: static-asset images by URL-segment convention (media library is the natural
+    Umbraco story and matches the PO's later media plans); mandatory imagery (fallback caps
+    the risk of a failed media import on stage).
 
 Site structure (content, via uSync):
 ```
-Home (home)                  template Home      introduction, next upcoming events
+Home (home)                  template Home      introduction (banner; body when present),
+                                                Services and upcoming Events card sections
 +-- About us (page)          template Page
 +-- Events (events)          template Events    upcoming events by date
 |   +-- <event> (event)      template Event     details; Event booking form ("This event has
@@ -116,8 +129,15 @@ Home (home)                  template Home      introduction, next upcoming even
 |   +-- <service> (service)  template Service   description; Service enquiry form
 +-- Contact us (contact)     template Contact   Contact form
 ```
-Pages share a layout with navigation and one small stylesheet; no media items; no form content
-nodes.
+Pages share a layout with navigation, a breadcrumb trail from the content tree, and one small
+stylesheet; imagery via `mainBanner` from the media library, optional with a single-colour
+fallback (Decision 12); no form content nodes. Template basis: the `prototype/` Eleventy site
+on `main` (ADR-0018/0019) — its layouts, form markup, `site.css` and self-hosted fonts; its
+Blog section, newsletter box and thank-you page are prototype-only. Banner heading maps to
+`pageTitle` (fallback: node name), banner text and card summaries to `summary`, page bodies to
+`mainContent`. Home mirrors the prototype home — banner introduction, `mainContent` body when
+present, then Services and upcoming Events card sections — with the Blog section dropped.
+(Mapping, breadcrumbs and the Home shape: PO 2026-10-14, explore.)
 
 ## Risks / Trade-offs
 
@@ -129,12 +149,16 @@ nodes.
   during rehearsal; 3000 commonly clashes with Node dev servers.
 - [Date Time with time zone stored value shape unverified for 17.7.1] → read one stored value
   before writing the past-event check (task 3.4).
-- [LGTM stack unverified on Windows; spike ran on macOS] → verify during apply (task 9.3);
-  Docker Desktop in Linux-container mode, trusted dev certificate.
+- [LGTM stack unverified on Windows for this AppHost; `spike-metrics-mcp` ran on macOS,
+  `spike-grafana-dashboard` ran the spike stack on Windows 2026-10-14 without issues] → verify
+  during apply (task 9.3); Aspire CLI must match the AppHost SDK (a mismatched CLI kills the
+  AppHost); Docker Desktop in Linux-container mode, trusted dev certificate.
 - [~4.8 GB first image pull (LGTM alone 2.6 GB) stalls attendees and rehearsals] → pre-pull
   step in the README; presenter pulls before the talk.
 - [Leftover package element types and form document type in existing local databases] → reset
   SQLite and the SQL volume after the package removal (task 6.1).
+- [uSync first-boot media import unverified] → the colour fallback keeps every page complete
+  without media; task 9.2 verifies media items import on both databases.
 - [ServiceDefaults' HttpClient resilience handler alters Umbraco's own HTTP calls] → keep
   defaults; revisit only if a failure appears.
 

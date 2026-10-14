@@ -7,35 +7,27 @@ Rule: no demo answers here (planted problems, their causes or fixes). CLAUDE.md
 references this file, so the on-stage agent may read it.
 
 ## Next step
-- [ ] `add-site-prototype` (2026-10-14): standalone static prototype (Eleventy, ADR-0018
-  Accepted) as the basis for the Umbraco views. PO decisions 2026-10-14: Blog and newsletter
-  signup are prototype-only (not demo scope); detail pages carry their forms as static markup;
-  forms are markup-only, submitting to a static thank-you page. Apply done through section 5,
-  all reviews closed (sections 1-3 supervisor-approved after fixes; section 5 theme
-  supervisor-approved 2026-10-14). PO sign-off task 4.1 (Acme-branded version) given 2026-10-14;
-  PO then commissioned the Rubber Duck Consulting theme (prototype-only, PO 2026-10-14; demo
-  scope stays Acme Agency): Baloo 2/Nunito self-hosted (ADR-0019), duck palette, 10 bath-toy SVG
-  illustrations, rebranded copy and slugs. PO task 6.1 sign-off given 2026-10-14; merged to
-  main on PO instruction 2026-10-14. Remaining: archive the change. Known
-  gap carried to `add-demo-foundation`: form error / past-event notice styles; Umbraco
-  integration re-brands back to Acme and must use POST forms (see review-followups.md).
-- [x] Architect (2026-10-13): ADR-0017 (Collector, LGTM, Grafana MCP, allow-list) written, ADR-0011
-  superseded; ADR-0016 written, ADR-0004/0005/0006/0013/0015 removed; ADR-0002/0012/0014 revised;
-  `/opsx:update add-demo-foundation` done — design.md, specs, tasks.md re-planned (sections 3-9),
-  `po-backoffice-steps.md` and `review-followups.md` reworked.
-- [ ] `/opsx:apply add-demo-foundation`: resume with task 2.5 and section 3 (first: 3.1 package
-  removal, then PO task 6.1 database reset).
+- [ ] `/opsx:apply add-demo-foundation` (21/30, 2026-10-14): Architect state
+  in Claude memory. Remaining (`add-demo-foundation` tasks): PO content (6.3, 6.4), agent check (8.1, 8.2), fresh-database first
+  boot (9.2, also closes 3.2), cross-platform (9.3), README and project-setup (9.1, 9.6),
+  section 9 supervisor.
+- [ ] `add-mobile-responsive` (2026-10-14, branch `mobile-responsive` from `sample-site`):
+  applied 2026-10-14, sections 1-3 supervisor-approved (4/8 ticked); prototype is the
+  source of the site's CSS/JS (ADR-0020). Next: PO browser check (task 4.2), which closes 1.2, 1.3,
+  2.1; then PO commit.
+- [ ] `add-site-prototype`: complete and merged to `main` 2026-10-14; archiving is the PO's call.
 - [x] `spike-grafana-dashboard` run 2026-10-14 (PO reviewed in the UI, hosts stopped). Result in its
   `findings.md` section 6: one custom JSON-first demo dashboard (request rate, 5xx rate, p95 with
   trace exemplars, form meters, Loki error logs), drill-down through the bundled Logs/Traces
   Drilldown apps, JSON in the repo. Open: its task 4.4 (provisioning, not attempted), now FR-0001.
-- [ ] Architect: plan the demo dashboard from `spike-grafana-dashboard` `findings.md` section 6 —
-  ADR, then `/opsx:update add-demo-foundation` (dashboard JSON, provisioning mount in the AppHost per
-  FR-0001, demo traffic source) and form-meter panels in `add-form-emails`.
-- [x] Spike closure (PO 2026-10-13): keep both spikes open for reference until pre-talk cleanup.
-  Then: `spike-aspire-probe` task 3.4 and `spike-metrics-mcp` task 3.6 (delete `spikes/`, drop
-  `Microsoft.Data.SqlClient` from `Directory.Packages.props`, keep the toolkit package — used by
-  `add-demo-foundation` task 2.5), archive both. Tracked in Todos.
+- [ ] Architect: `/opsx:propose add-demo-dashboard` (PO 2026-10-14: own change, after
+  `add-demo-foundation`, before `add-form-emails`). Inputs: `spike-grafana-dashboard`
+  `findings.md` section 6; FR-0001 (provisioning mount, fallback import on start); also provision
+  community dashboard 19924; demo traffic from a .NET 10 file-based app in `tests/` (ADR-0012)
+  that browses pages and posts no forms; ADR for the dashboard. Form-meter panels go in
+  `add-form-emails`.
+- [x] Spike closure (PO 2026-10-13): keep both spikes open for reference until pre-talk cleanup
+  (Todos).
 
 ## Product requirements confirmed in explore (2026-10-06, revised 2026-10-08, 2026-10-13)
 - Keep it simple (PO 2026-10-13, CLAUDE.md "Principle"): basic demo, no edge cases.
@@ -46,7 +38,7 @@ references this file, so the on-stage agent may read it.
   time; no format, capacity or places. Past events show "This event has ended", no form. No payment.
 - Forms (three; the event or service comes from the page, not a field). After a valid
   submission: "Thank you, we'll be in touch."
-  - Contact: Name, Email, Message, "Reply by phone?" checkbox. Owner notification only.
+  - Contact: Name, Email, Message ("Reply by phone?" dropped, PO 2026-10-14). Owner notification only.
   - Service enquiry: Name, Email, Company (optional), Website (optional), Message. Owner
     notification + submitter confirmation.
   - Event booking: Name, Email, Notes (optional), "Join mailing list" checkbox. Owner
@@ -74,15 +66,11 @@ references this file, so the on-stage agent may read it.
 
 ## Change order (2026-10-08, revised 2026-10-13)
 1. `add-demo-foundation`: agency site, events and services, three forms.
-2. `add-form-emails`: all emails.
-3. `add-production-environment`: tunnel baseline first; Azure only if time allows (see Open
+2. `add-demo-dashboard`: demo Grafana dashboard, provisioning, demo traffic (PO 2026-10-14).
+3. `add-form-emails`: all emails.
+4. `add-production-environment`: tunnel baseline first; Azure only if time allows (see Open
    decisions, prod hosting).
 `add-event-bookings` dropped 2026-10-13 (change directory removed).
-
-## Architect follow-ups from the 2026-10-10 forms simplification
-- [x] `/opsx:update add-demo-foundation` done 2026-10-13 (see "Next step").
-- [ ] PO: reset local SQLite and SQL databases once the package code is removed — now
-  `add-demo-foundation` task 6.1 (after task 3.1).
 
 ## Open decisions
 - [ ] Prod hosting (PO 2026-10-13): working assumption is the local environment behind a
@@ -117,7 +105,7 @@ Decided in ADRs; verified by `add-demo-foundation` tasks:
   passed 2026-10-09 (`verification.md`).
 - [x] smtp4dev and Toxiproxy in the AppHost, Slow/Break/Heal commands (ADR-0010): tasks 2.2, 2.3,
   passed 2026-10-09 (`verification.md`).
-- [ ] Date Time with time zone stored value shape (ADR-0014): task 3.4.
+- [x] Date Time with time zone stored value shape (ADR-0014): task 3.4, confirmed.
 - [ ] LGTM stack, Collector and Grafana MCP on Windows (ADR-0017; spike ran on macOS): task 9.3.
   `spike-grafana-dashboard` ran the spike stack on Windows 2026-10-14 without Windows-specific
   issues; Aspire CLI must match the AppHost SDK (13.4.6 CLI vs 13.6.1 SDK kills the AppHost).
@@ -135,6 +123,8 @@ For `add-production-environment`, Azure stretch (only if time allows):
 - [ ] Azure Monitor exporter switch (ADR-0008; code in task 2.4) verified against Application Insights.
 
 ## Todos
+- [x] Static site prototype (`add-site-prototype`, ADR-0018/0019) used as the basis for the
+  Umbraco views: `add-demo-foundation` task 7.1 done 2026-10-14; `main` merged into `sample-site`.
 - [ ] Pre-talk cleanup of both spikes (PO 2026-10-11, reconfirmed 2026-10-13: keep open for
   reference until then): `spike-aspire-probe` task 3.4 and `spike-metrics-mcp` task 3.6 —
   delete `spikes/` (includes `spikes/metrics-mcp/dashboards/` from `spike-grafana-dashboard`;
@@ -166,11 +156,7 @@ For `add-production-environment`, Azure stretch (only if time allows):
   EF Core needs per-provider migration sets. SqlClient instrumentation gives DB spans on
   SQL Server (including Umbraco's own queries); SQLite gets none.
 - smtp4dev over MailPit: presenter familiarity; MailPit's fault injection is covered by Toxiproxy.
-- Toxiproxy: localhost SMTP is too fast to be realistic; latency toxic multiplies per
-  SMTP round trip (~7 per email).
 - Claude Code CLI on stage: presenter's normal workflow; Copilot is not available in VSCodium.
 - Prod (either hosting): runs the finished build; Act 4 prod segment is about PII not
   reaching the observability platform. Tunnel first because it is the shorter route to a
   public site before 16 Oct (PO 2026-10-13).
-- PII: source-level redaction is primary (knows semantics, GDPR minimisation); pipeline
-  (OTel Collector) and ingestion (DCR) are defence in depth for known-shape data.

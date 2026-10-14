@@ -1,0 +1,15 @@
+﻿@inherits UmbracoViewPage<Events>
+@inject SuperPower.Web.Events.IUpcomingEvents UpcomingEvents
+@{
+    Layout = "master.cshtml";
+    var upcoming = UpcomingEvents.GetUpcoming(Model).OfType<Event>().ToList();
+}
+@await Html.PartialAsync("Partials/MainContent", Model)
+@if (upcoming.Count == 0)
+{
+    <p>No upcoming events at the moment.</p>
+}
+else
+{
+    @await Html.PartialAsync("Partials/CardList", upcoming.Cast<ICompPage>())
+}

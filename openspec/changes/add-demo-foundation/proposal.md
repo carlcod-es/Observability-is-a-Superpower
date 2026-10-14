@@ -31,6 +31,8 @@ Out of scope (later changes):
 - Production environment, production agent access, attendee safeguards, history generation.
 - Protection of personal data in telemetry beyond what the baseline records.
 - Owner dashboard of bookings (stretch goal, no change planned yet).
+- Demo Grafana dashboard, its provisioning and a demo traffic source (separate change
+  `add-demo-dashboard`, FR-0001).
 - Editor-defined forms, form fields or form text.
 
 ## Capabilities

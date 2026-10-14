@@ -1,0 +1,6 @@
+﻿@inherits UmbracoViewPage<Contact>
+@{
+    Layout = "master.cshtml";
+}
+@await Html.PartialAsync("Partials/MainContent", Model)
+@await Html.PartialAsync("Partials/Forms/ContactForm", new ContactForm())
