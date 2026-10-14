@@ -11,3 +11,7 @@ tests/**/umbraco-package-schema.json
 
 # Cloudflare tunnel credential (presenter-local, never committed)
 .cloudflared-token
+
+# Static site prototype (Eleventy)
+prototype/_site/
+prototype/node_modules/

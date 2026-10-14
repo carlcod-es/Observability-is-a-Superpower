@@ -1,0 +1,17 @@
+{
+  "services": [
+    { "title": "Rubber Duck Debugging", "url": "/services/rubber-duck-debugging/", "image": "/img/rubber-duck-debugging.svg", "alt": "Rubber duck wearing a headset on a desk beside a laptop", "summary": "Explain your bug to a rubber duck. It sits on your desk, says nothing and the answer appears." },
+    { "title": "Active Listening Workshops", "url": "/services/rubber-duck-debugging/", "image": "/img/active-listening.svg", "alt": "Row of rubber ducks listening in a workshop", "summary": "A room full of rubber ducks and your whole team, learning to explain problems out loud." },
+    { "title": "The Silent Retainer", "url": "/services/rubber-duck-debugging/", "image": "/img/silent-retainer.svg", "alt": "Calm rubber duck with closed eyes on a bath mat", "summary": "We say nothing, you fix everything. A rubber duck on call, floating calmly in hot water." }
+  ],
+  "events": [
+    { "title": "Quack & Learn: Debugging Out Loud", "url": "/events/quack-and-learn/", "image": "/img/quack-and-learn.svg", "alt": "Rubber duck with a megaphone beside a Squeak speech bubble", "summary": "An afternoon of explaining real bugs to real rubber ducks. Squeaking encouraged.", "start": "2026-10-22T14:00", "startText": "Thu 22 Oct 2026, 14:00" },
+    { "title": "Bath Time Code Review", "url": "/events/quack-and-learn/", "image": "/img/bath-time-code-review.svg", "alt": "Two rubber ducks floating in a bathtub reviewing a page", "summary": "Bring a pull request, we fill the tub. Gentle feedback, no splashing.", "start": "2026-11-05T10:00", "startText": "Thu 5 Nov 2026, 10:00" },
+    { "title": "Squeaky Clean Open Mic", "url": "/events/quack-and-learn/", "image": "/img/squeaky-clean-open-mic.svg", "alt": "Rubber duck at a microphone under a stage light", "summary": "Five minutes each to talk through a problem you have not solved yet. The ducks will not heckle.", "start": "2026-11-19T18:30", "startText": "Thu 19 Nov 2026, 18:30" }
+  ],
+  "blog": [
+    { "title": "Why Explaining Your Bug Fixes It", "url": "/blog/why-explaining-your-bug-fixes-it/", "image": "/img/why-explaining-your-bug-fixes-it.svg", "alt": "Rubber duck in the bath listening to a bubble of tangled code", "summary": "Say the problem out loud to a rubber duck and the answer tends to surface by itself." },
+    { "title": "Rubber Ducks Never Interrupt", "url": "/blog/why-explaining-your-bug-fixes-it/", "image": "/img/rubber-ducks-never-interrupt.svg", "alt": "Rubber duck beside a quill and scroll", "summary": "Five habits of the best listeners, all learned in the bath." },
+    { "title": "How to Brief a Rubber Duck", "url": "/blog/why-explaining-your-bug-fixes-it/", "image": "/img/how-to-brief-a-rubber-duck.svg", "alt": "Rubber duck beside a checklist clipboard", "summary": "What to say, what to skip and when to stop squeaking." }
+  ]
+}

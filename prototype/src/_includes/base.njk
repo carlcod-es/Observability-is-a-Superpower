@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} | Rubber Duck Consulting</title>
+  <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="site-header__brand" href="/"><img src="/img/duck-mark.svg" alt="" width="40" height="27"> Rubber Duck Consulting</a>
+      <nav class="site-nav" aria-label="Main">
+        <ul class="site-nav__list">
+          {%- for item in nav %}
+          <li><a href="{{ item.url }}"{% if page.url == item.url %} aria-current="page"{% elif item.url != "/" and page.url.startsWith(item.url) %} aria-current="true"{% endif %}>{{ item.title }}</a></li>
+          {%- endfor %}
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <section class="banner">
+    <div class="container">
+      <h1 class="banner__heading">{{ banner or title }}</h1>
+      {%- if bannerText %}
+      <p class="banner__text">{{ bannerText }}</p>
+      {%- endif %}
+    </div>
+  </section>
+
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <ol class="container breadcrumb__list">
+      {%- if page.url != "/" %}
+      <li><a href="/">Home</a></li>
+      {%- endif %}
+      {%- for crumb in breadcrumbs %}
+      <li><a href="{{ crumb.url }}">{{ crumb.title }}</a></li>
+      {%- endfor %}
+      <li aria-current="page">{{ title }}</li>
+    </ol>
+  </nav>
+
+  <main class="container main">
+    {{ content | safe }}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; Rubber Duck Consulting. We listen. A fictional consultancy.</p>
+      <ul class="site-footer__list">
+        {%- for item in nav %}
+        <li><a href="{{ item.url }}">{{ item.title }}</a></li>
+        {%- endfor %}
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>
