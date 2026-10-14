@@ -28,10 +28,10 @@ references this file, so the on-stage agent may read it.
 - [x] `spike-grafana-dashboard` run 2026-10-14 (PO reviewed in the UI, hosts stopped). Result in its
   `findings.md` section 6: one custom JSON-first demo dashboard (request rate, 5xx rate, p95 with
   trace exemplars, form meters, Loki error logs), drill-down through the bundled Logs/Traces
-  Drilldown apps, JSON in the repo. Open: its task 4.4 (provisioning, not attempted).
+  Drilldown apps, JSON in the repo. Open: its task 4.4 (provisioning, not attempted), now FR-0001.
 - [ ] Architect: plan the demo dashboard from `spike-grafana-dashboard` `findings.md` section 6 —
-  ADR, then `/opsx:update add-demo-foundation` (dashboard JSON, provisioning mount in the AppHost,
-  demo traffic source) and form-meter panels in `add-form-emails`.
+  ADR, then `/opsx:update add-demo-foundation` (dashboard JSON, provisioning mount in the AppHost per
+  FR-0001, demo traffic source) and form-meter panels in `add-form-emails`.
 - [x] Spike closure (PO 2026-10-13): keep both spikes open for reference until pre-talk cleanup.
   Then: `spike-aspire-probe` task 3.4 and `spike-metrics-mcp` task 3.6 (delete `spikes/`, drop
   `Microsoft.Data.SqlClient` from `Directory.Packages.props`, keep the toolkit package — used by
@@ -123,7 +123,8 @@ Decided in ADRs; verified by `add-demo-foundation` tasks:
   issues; Aspire CLI must match the AppHost SDK (13.4.6 CLI vs 13.6.1 SDK kills the AppHost).
 - [ ] Grafana dashboard provisioning in `grafana/otel-lgtm` via bind mount
   (`/otel-lgtm/grafana/conf/provisioning/dashboards/`): unverified, `spike-grafana-dashboard`
-  task 4.4 not attempted.
+  task 4.4 not attempted. Tracked as FR-0001
+  (`docs/feature-requests/0001-grafana-dashboard-provisioning.md`).
 For `add-production-environment`, tunnel baseline:
 - [ ] Cloudflare tunnel to the local site: public URL for the QR code, only the site exposed
   (no dashboard, Grafana, smtp4dev or backoffice).
