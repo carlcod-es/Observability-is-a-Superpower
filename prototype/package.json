@@ -9,7 +9,8 @@
   },
   "scripts": {
     "build": "eleventy",
-    "serve": "eleventy --serve"
+    "serve": "eleventy --serve",
+    "sync": "node scripts/sync-to-site.mjs"
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.0.0",

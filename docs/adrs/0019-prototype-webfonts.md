@@ -1,7 +1,7 @@
 # ADR-0019: Self-hosted open-licence webfonts in the prototype
 
 ## Status
-Accepted (2026-10-14)
+Accepted (2026-10-14); prototype font path amended by ADR-0020 (2026-10-14)
 
 ## Context
 The PO rebranded the prototype to Rubber Duck Consulting (prototype-only; the Umbraco demo site
@@ -41,3 +41,7 @@ is published for attendees, so licences must permit redistribution.
   `prototype/` only.
 - Served from `/css/fonts/`, not `/fonts/`: `/css` is already excluded from telemetry
   (ADR-0008), so font requests add no traces.
+
+## Amendment (ADR-0020, 2026-10-14)
+- The prototype passthrough-copies the WOFF2 files to `css/fonts/`, so the shared stylesheet
+  declares `/css/fonts/` URLs that work in both the prototype and the site.

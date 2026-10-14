@@ -15,12 +15,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@title | Rubber Duck Agency</title>
     <link rel="stylesheet" href="/css/site.css">
+    <script src="/js/site.js" defer></script>
 </head>
 <body>
     <header class="site-header">
         <div class="container site-header__inner">
             <a class="site-header__brand" href="/">Rubber Duck Agency</a>
-            <nav class="site-nav" aria-label="Main">
+            <button class="site-nav__toggle" type="button" aria-controls="site-nav" hidden>Menu</button>
+            <nav class="site-nav" id="site-nav" aria-label="Main">
                 <ul class="site-nav__list">
                     @foreach (var item in nav)
                     {

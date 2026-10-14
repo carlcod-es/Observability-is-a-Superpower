@@ -11,6 +11,10 @@ references this file, so the on-stage agent may read it.
   in Claude memory. Remaining (`add-demo-foundation` tasks): PO content (6.3, 6.4), agent check (8.1, 8.2), fresh-database first
   boot (9.2, also closes 3.2), cross-platform (9.3), README and project-setup (9.1, 9.6),
   section 9 supervisor.
+- [ ] `add-mobile-responsive` (2026-10-14, branch `mobile-responsive` from `sample-site`):
+  applied 2026-10-14, sections 1-3 supervisor-approved (4/8 ticked); prototype is the
+  source of the site's CSS/JS (ADR-0020). Next: PO browser check (task 4.2), which closes 1.2, 1.3,
+  2.1; then PO commit.
 - [ ] `add-site-prototype`: complete and merged to `main` 2026-10-14; archiving is the PO's call.
 - [x] `spike-grafana-dashboard` run 2026-10-14 (PO reviewed in the UI, hosts stopped). Result in its
   `findings.md` section 6: one custom JSON-first demo dashboard (request rate, 5xx rate, p95 with
