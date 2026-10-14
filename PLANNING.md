@@ -7,8 +7,8 @@ Rule: no demo answers here (planted problems, their causes or fixes). CLAUDE.md
 references this file, so the on-stage agent may read it.
 
 ## Next step
-- [ ] `/opsx:apply add-demo-foundation` (21/30, 2026-10-14): resume from
-  `openspec/changes/add-demo-foundation/handover.md` "Resume here". Remaining (`add-demo-foundation` tasks): PO content (6.3, 6.4), agent check (8.1, 8.2), fresh-database first
+- [ ] `/opsx:apply add-demo-foundation` (21/30, 2026-10-14): Architect state
+  in Claude memory. Remaining (`add-demo-foundation` tasks): PO content (6.3, 6.4), agent check (8.1, 8.2), fresh-database first
   boot (9.2, also closes 3.2), cross-platform (9.3), README and project-setup (9.1, 9.6),
   section 9 supervisor.
 - [ ] `add-site-prototype`: complete and merged to `main` 2026-10-14; archiving is the PO's call.
