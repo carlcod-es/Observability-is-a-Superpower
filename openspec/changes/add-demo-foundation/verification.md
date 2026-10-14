@@ -141,3 +141,15 @@ the forms package that the re-plan removes (new task 3.1).
   <final state> ... Done" with no step executed. Fresh-volume / fresh-SQLite first boot: task 9.2.
 - Not scripted (PO 2026-10-14): Event booking post to a past event; done manually in the past-event
   session 2026-10-14 (see block 7A entry above): rejected, 0 rows.
+
+## PO change requests (2026-10-14 evening, uncommitted on e9bff8e)
+Brand rename to Rubber Duck Agency (views), breadcrumb alignment, Contact "Reply by phone?"
+removed, content (summary, `pageTitle`, `mainContent`) in uSync files, imported by the PO into
+SQL Server only.
+- `dotnet test`: 36 passed.
+- Smoke, fresh AppHost start (SQL Server): ALL CHECKS PASSED — 12 pages, three valid
+  submissions (rows 1029-1031), invalid submission 0 rows, Home first-load trace with 2 database
+  spans and linked log, mail baseline 291 ms / Slow 6054 ms / Break 1008 ms failed / Heal 11 ms.
+- Smoke `-- standalone` (SQLite): ALL CHECKS PASSED — 13 pages, Contact submission (row 14),
+  invalid submission. Page count differs because SQLite still holds older content (the past event
+  dated 29 Oct there, so it is listed); task 9.2 rebuilds both databases from the uSync files.
