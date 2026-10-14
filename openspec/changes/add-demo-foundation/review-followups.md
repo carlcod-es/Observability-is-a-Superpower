@@ -8,6 +8,15 @@ task numbers where it matters.
 
 ## Open
 
+- [ ] PO decision (task 6.2, 2026-10-14) Kept against the task text, by PO choice: the image
+  block in `compPage`'s `mainContent` Block List and the "products" media folder (PO plans
+  media pickers and content later; spec `agency-site` "No media library dependency" only
+  requires pages not to depend on media), and the unused duplicate data type "Date Time
+  Picker (with time zone)" (PO could not delete it in the backoffice). If media is added
+  later: demo content must still render with no missing images on a fresh database, and the
+  site stays script-free (spec `agency-site`).
+- [ ] note (task 6.2) `src/SuperPower.Web/Models/ood.flag` (ModelsBuilder out-of-date marker)
+  appeared untracked after the backoffice session; gitignored by the Architect 2026-10-14.
 - [ ] minor (block 1A, task 1.2) `src/SuperPower.ServiceDefaults/Extensions.cs:118`: `/health` and `/alive` are mapped only in Development (template behaviour); production returns 404. Decide in `add-production-environment` whether to map them in all environments (Container Apps probes).
 - [ ] nit (block 1A, task 1.2) Build warning NU1507: two package sources (nuget.org, Umbraco Prereleases) under central package management. Fix: root `nuget.config` with package source mapping (shared file; PO approval).
 - [ ] nit (block 1A, task 1.2) Build warnings NU1902/NU1903: SixLabors.ImageSharp 3.1.12 via Umbraco.Cms 17.7.1. No action unless Umbraco ships a patch before the freeze (ADR-0001).
