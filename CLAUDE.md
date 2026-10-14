@@ -79,7 +79,7 @@ runnable by attendees.
     submission: no booking status, places or limits.
   - Server-side validation only; no format rules beyond Email. Success text "Thank you,
     we'll be in touch."
-  - Rendering: ViewComponent; POST via SurfaceController with antiforgery.
+  - Rendering: one partial view per form (ADR-0016); POST via SurfaceController with antiforgery.
 - Submissions: one site-owned table. Stores form, page key, UTC timestamp, field values.
   No IP or browser info.
 - Must work on SQLite and SQL Server: no raw SQL, NPoco Sql<ISqlContext> builders,

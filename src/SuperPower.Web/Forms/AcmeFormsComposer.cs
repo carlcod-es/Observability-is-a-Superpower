@@ -13,6 +13,8 @@ public sealed class AcmeFormsComposer : IComposer
     public void Compose(IUmbracoBuilder builder)
     {
         builder.Services.TryAddSingleton(TimeProvider.System);
+        builder.Services.AddSingleton<SuperPower.Web.Events.IEventSchedule, SuperPower.Web.Events.EventSchedule>();
+        builder.Services.AddSingleton<SuperPower.Web.Events.IUpcomingEvents, SuperPower.Web.Events.UpcomingEvents>();
         builder.Services.AddScoped<IFormSubmissionRepository, FormSubmissionRepository>();
         builder.AddNotificationAsyncHandler<UmbracoApplicationStartingNotification, AcmeSiteMigrationRunner>();
     }
