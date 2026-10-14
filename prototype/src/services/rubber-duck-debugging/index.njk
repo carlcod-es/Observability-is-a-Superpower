@@ -1,0 +1,44 @@
+---
+layout: base.njk
+title: Rubber Duck Debugging
+banner: Rubber Duck Debugging
+bannerText: Explain your bug to a rubber duck. It sits on your desk, says nothing and the answer appears.
+breadcrumbs:
+  - title: Services
+    url: /services/
+---
+<section>
+  <h2>About this service</h2>
+  <p>Stuck on a bug? Put a rubber duck next to your keyboard and explain the code to it, line by
+  line. Somewhere around line twelve you will hear yourself say the wrong thing, and the fix is
+  suddenly obvious. The duck did nothing. That is the point.</p>
+  <p>Our ducks are trained professionals. They never interrupt, never judge and stay calm even
+  when the build is in hot water. Whatever you tell the duck stays with the duck.</p>
+</section>
+
+<section>
+  <h2>Ask about this service</h2>
+  <form class="form" method="get" novalidate action="/thank-you/">
+    <div class="form__field">
+      <label for="name">Name <span class="form__required">(required)</span></label>
+      <input type="text" id="name" name="name" required>
+    </div>
+    <div class="form__field">
+      <label for="email">Email <span class="form__required">(required)</span></label>
+      <input type="email" id="email" name="email" required>
+    </div>
+    <div class="form__field">
+      <label for="company">Company (optional)</label>
+      <input type="text" id="company" name="company">
+    </div>
+    <div class="form__field">
+      <label for="website">Website (optional)</label>
+      <input type="text" id="website" name="website">
+    </div>
+    <div class="form__field">
+      <label for="message">Message <span class="form__required">(required)</span></label>
+      <textarea id="message" name="message" rows="6" required></textarea>
+    </div>
+    <button class="form__submit" type="submit">Send enquiry</button>
+  </form>
+</section>

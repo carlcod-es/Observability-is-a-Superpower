@@ -7,6 +7,18 @@ Rule: no demo answers here (planted problems, their causes or fixes). CLAUDE.md
 references this file, so the on-stage agent may read it.
 
 ## Next step
+- [ ] `add-site-prototype` (2026-10-14): standalone static prototype (Eleventy, ADR-0018
+  Accepted) as the basis for the Umbraco views. PO decisions 2026-10-14: Blog and newsletter
+  signup are prototype-only (not demo scope); detail pages carry their forms as static markup;
+  forms are markup-only, submitting to a static thank-you page. Apply done through section 5,
+  all reviews closed (sections 1-3 supervisor-approved after fixes; section 5 theme
+  supervisor-approved 2026-10-14). PO sign-off task 4.1 (Acme-branded version) given 2026-10-14;
+  PO then commissioned the Rubber Duck Consulting theme (prototype-only, PO 2026-10-14; demo
+  scope stays Acme Agency): Baloo 2/Nunito self-hosted (ADR-0019), duck palette, 10 bath-toy SVG
+  illustrations, rebranded copy and slugs. PO task 6.1 sign-off given 2026-10-14; merged to
+  main on PO instruction 2026-10-14. Remaining: archive the change. Known
+  gap carried to `add-demo-foundation`: form error / past-event notice styles; Umbraco
+  integration re-brands back to Acme and must use POST forms (see review-followups.md).
 - [x] Architect (2026-10-13): ADR-0017 (Collector, LGTM, Grafana MCP, allow-list) written, ADR-0011
   superseded; ADR-0016 written, ADR-0004/0005/0006/0013/0015 removed; ADR-0002/0012/0014 revised;
   `/opsx:update add-demo-foundation` done — design.md, specs, tasks.md re-planned (sections 3-9),

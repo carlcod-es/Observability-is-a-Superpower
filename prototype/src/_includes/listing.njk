@@ -1,0 +1,9 @@
+---
+layout: base.njk
+---
+{% from "macros.njk" import card %}
+<ul class="card-list">
+  {%- for item in listings[listing] %}
+  <li>{{ card(item) }}</li>
+  {%- endfor %}
+</ul>

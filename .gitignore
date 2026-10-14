@@ -14,3 +14,7 @@ tests/**/umbraco-package-schema.json
 
 # ModelsBuilder out-of-date marker (SourceCodeManual; generated models stay committed)
 src/SuperPower.Web/Models/ood.flag
+
+# Static site prototype (Eleventy)
+prototype/_site/
+prototype/node_modules/

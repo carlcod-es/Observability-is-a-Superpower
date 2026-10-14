@@ -1,0 +1,35 @@
+---
+layout: base.njk
+title: Home
+banner: We listen.
+bannerText: Rubber Duck Consulting sits on your desk while you explain the problem. Squeak when ready.
+---
+{% from "macros.njk" import card %}
+{%- set sections = [
+  { id: "services", heading: "Services", all: "/services/", allText: "View all services" },
+  { id: "events", heading: "Events", all: "/events/", allText: "View all events" },
+  { id: "blog", heading: "Latest articles", all: "/blog/", allText: "View all articles" }
+] %}
+{%- for s in sections %}
+<section class="home-section" aria-labelledby="home-{{ s.id }}">
+  <h2 id="home-{{ s.id }}">{{ s.heading }}</h2>
+  <ul class="card-list">
+    {%- for item in listings[s.id] %}
+    {%- if loop.index <= 3 %}
+    <li>{{ card(item) }}</li>
+    {%- endif %}
+    {%- endfor %}
+  </ul>
+  <p class="home-section__all"><a href="{{ s.all }}">{{ s.allText }}</a></p>
+</section>
+{%- endfor %}
+
+<section class="newsletter" aria-labelledby="newsletter-heading">
+  <h2 id="newsletter-heading">Get pond updates</h2>
+  <p>One short email a month. Bath-time news only.</p>
+  <div class="newsletter__row">
+    <label for="newsletter-email">Email address</label>
+    <input id="newsletter-email" type="email" autocomplete="off">
+    <button type="button">Subscribe</button>
+  </div>
+</section>
