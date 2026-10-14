@@ -46,6 +46,7 @@ metrics tool, so the agent queries Grafana LGTM through the Grafana MCP instead 
 - Any booking workflow: an Event booking is an ordinary submission (PO 2026-10-13); no places,
   capacity, status or owner dashboard.
 - Demo branch creation (separate planning topic).
+- The demo Grafana dashboard, its provisioning and demo traffic (change `add-demo-dashboard`).
 
 ## Bar and test strategy
 
@@ -148,8 +149,10 @@ present, then Services and upcoming Events card sections — with the Blog secti
   during rehearsal; 3000 commonly clashes with Node dev servers.
 - [Date Time with time zone stored value shape unverified for 17.7.1] → read one stored value
   before writing the past-event check (task 3.4).
-- [LGTM stack unverified on Windows; spike ran on macOS] → verify during apply (task 9.3);
-  Docker Desktop in Linux-container mode, trusted dev certificate.
+- [LGTM stack unverified on Windows for this AppHost; `spike-metrics-mcp` ran on macOS,
+  `spike-grafana-dashboard` ran the spike stack on Windows 2026-10-14 without issues] → verify
+  during apply (task 9.3); Aspire CLI must match the AppHost SDK (a mismatched CLI kills the
+  AppHost); Docker Desktop in Linux-container mode, trusted dev certificate.
 - [~4.8 GB first image pull (LGTM alone 2.6 GB) stalls attendees and rehearsals] → pre-pull
   step in the README; presenter pulls before the talk.
 - [Leftover package element types and form document type in existing local databases] → reset

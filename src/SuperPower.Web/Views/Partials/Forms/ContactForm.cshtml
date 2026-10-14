@@ -21,9 +21,5 @@
         <textarea asp-for="Message"></textarea>
         <span asp-validation-for="Message" class="field-error"></span>
     </div>
-    <div class="form-field form-check">
-        <input asp-for="ReplyByPhone" />
-        <label asp-for="ReplyByPhone">@Html.DisplayNameFor(m => m.ReplyByPhone)</label>
-    </div>
     <button type="submit">Send</button>
 }

@@ -114,6 +114,9 @@ task numbers where it matters.
 - [ ] note (section 7 supervisor) `dotnet test SuperPower.slnx` fails on the .NET 10 SDK (MTP); briefs use `dotnet test --solution SuperPower.slnx` (or plain `dotnet test` at the root, as in README).
 - [ ] nit (backend clean-up review) `src/SuperPower.Web/Events/UpcomingEvents.cs:29`: pre-existing CS0618, `IPublishedContent.Children` obsolete (removed in Umbraco 18). Fix: `Children()` extension from `Umbraco.Extensions`. Optional.
 - [ ] note (backend clean-up block) Insert path changed (return type, UTC branch) without a runtime run; next smoke run (tasks 9.2/9.3) covers it.
+- [x] (Architect, done 2026-10-14) minor/nits (block 9D docs pass, tasks 9.1/9.6): `add-demo-dashboard` marked "(planned)" in `docs/project-setup.md`; Aspire version line reads SDK 13.6.0, hosting 13.6.x; README `--apphost` no longer justified by `spikes/`.
+- [ ] minor (block 9D, tasks 9.1/9.6) `README.md:71-72`, `docs/project-setup.md:86`: `wwwroot/media/` is empty and `uSync/v17/Media/` holds only `products.config`; docs describe the end state. Re-verify on the 9.1 fresh clone after task 6.4.
+- [ ] nit (block 9D) `README.md:139-140`: "Home makes database calls only on its first load after start" is a smoke-test constraint the on-stage agent can read; not a demo answer. PO: keep or soften.
 
 ## Superseded by the 2026-10-13 re-plan (ADR-0016, ADR-0017)
 

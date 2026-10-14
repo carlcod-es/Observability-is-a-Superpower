@@ -16,9 +16,12 @@ references this file, so the on-stage agent may read it.
   `findings.md` section 6: one custom JSON-first demo dashboard (request rate, 5xx rate, p95 with
   trace exemplars, form meters, Loki error logs), drill-down through the bundled Logs/Traces
   Drilldown apps, JSON in the repo. Open: its task 4.4 (provisioning, not attempted), now FR-0001.
-- [ ] Architect: plan the demo dashboard from `spike-grafana-dashboard` `findings.md` section 6 —
-  ADR, then `/opsx:update add-demo-foundation` (dashboard JSON, provisioning mount in the AppHost per
-  FR-0001, demo traffic source) and form-meter panels in `add-form-emails`.
+- [ ] Architect: `/opsx:propose add-demo-dashboard` (PO 2026-10-14: own change, after
+  `add-demo-foundation`, before `add-form-emails`). Inputs: `spike-grafana-dashboard`
+  `findings.md` section 6; FR-0001 (provisioning mount, fallback import on start); also provision
+  community dashboard 19924; demo traffic from a .NET 10 file-based app in `tests/` (ADR-0012)
+  that browses pages and posts no forms; ADR for the dashboard. Form-meter panels go in
+  `add-form-emails`.
 - [x] Spike closure (PO 2026-10-13): keep both spikes open for reference until pre-talk cleanup
   (Todos).
 
@@ -31,7 +34,7 @@ references this file, so the on-stage agent may read it.
   time; no format, capacity or places. Past events show "This event has ended", no form. No payment.
 - Forms (three; the event or service comes from the page, not a field). After a valid
   submission: "Thank you, we'll be in touch."
-  - Contact: Name, Email, Message, "Reply by phone?" checkbox. Owner notification only.
+  - Contact: Name, Email, Message ("Reply by phone?" dropped, PO 2026-10-14). Owner notification only.
   - Service enquiry: Name, Email, Company (optional), Website (optional), Message. Owner
     notification + submitter confirmation.
   - Event booking: Name, Email, Notes (optional), "Join mailing list" checkbox. Owner
@@ -59,8 +62,9 @@ references this file, so the on-stage agent may read it.
 
 ## Change order (2026-10-08, revised 2026-10-13)
 1. `add-demo-foundation`: agency site, events and services, three forms.
-2. `add-form-emails`: all emails.
-3. `add-production-environment`: tunnel baseline first; Azure only if time allows (see Open
+2. `add-demo-dashboard`: demo Grafana dashboard, provisioning, demo traffic (PO 2026-10-14).
+3. `add-form-emails`: all emails.
+4. `add-production-environment`: tunnel baseline first; Azure only if time allows (see Open
    decisions, prod hosting).
 `add-event-bookings` dropped 2026-10-13 (change directory removed).
 

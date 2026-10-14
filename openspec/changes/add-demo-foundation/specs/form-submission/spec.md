@@ -10,8 +10,8 @@ Decisions: ADR-0016 (fixed site forms); in `docs/adrs/`.
 
 ### Requirement: Site forms
 The site SHALL have exactly three forms with these fields:
-- Contact: Name (text, required), Email (email, required), Message (multi-line text, required),
-  Reply by phone? (checkbox).
+- Contact: Name (text, required), Email (email, required), Message (multi-line text, required).
+  No phone checkbox: no phone number is collected (PO 2026-10-14).
 - Service enquiry: Name (text, required), Email (email, required), Company (text, optional),
   Website (text, optional), Message (multi-line text, required).
 - Event booking: Name (text, required), Email (email, required), Notes (multi-line text,

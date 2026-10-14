@@ -26,7 +26,8 @@ openspec/                    planning: specs (openspec/specs) and changes (opens
 .claude/settings.json        pre-approved read-only Grafana MCP tools
 ```
 
-Layout decisions: ADR-0002. Versions: .NET 10, Umbraco 17.7.1, Aspire 13.6.0 (ADR-0001).
+Layout decisions: ADR-0002. Versions: .NET 10, Umbraco 17.7.1, Aspire 13.6 (SDK 13.6.0, hosting
+packages 13.6.x; ADR-0001).
 
 ## Two ways to run the site
 
@@ -150,7 +151,8 @@ SQLite and SQL Server.
 ## Planning and branches
 
 - OpenSpec: in-progress changes in `openspec/changes/` (proposal, design, specs, tasks);
-  their specs move to `openspec/specs/` when a change is archived. Change order: `add-demo-foundation`, `add-form-emails`,
+  their specs move to `openspec/specs/` when a change is archived.
+  Change order: `add-demo-foundation`, `add-demo-dashboard` (planned), `add-form-emails`,
   `add-production-environment`.
 - ADRs in `docs/adrs/`; `PLANNING.md` holds open decisions and todos (temporary).
 - Branches: `main` is the final state; `demo/act-N-*` are demo recovery points.

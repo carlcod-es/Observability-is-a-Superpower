@@ -33,7 +33,7 @@ var contactKey = Guid.Parse("a1c0f3d2-5b7e-4c81-9a2d-0e6f4b8c1a01");
 var serviceKey = Guid.Parse("a1c0f3d2-5b7e-4c81-9a2d-0e6f4b8c1a02");
 var eventKey = Guid.Parse("a1c0f3d2-5b7e-4c81-9a2d-0e6f4b8c1a03");
 // Raw stored JSON for the fixed Contact values below: quote (backslash-escaped), non-ASCII (stored unescaped), newline (backslash n).
-const string ExpectedContactJson = "{\"Name\":\"Smoke Test\",\"Email\":\"smoke@example.com\",\"Message\":\"Line one: \\\"quoted\\\" caf\u00e9 \u00fc\\nLine two\",\"ReplyByPhone\":\"true\"}";
+const string ExpectedContactJson = "{\"Name\":\"Smoke Test\",\"Email\":\"smoke@example.com\",\"Message\":\"Line one: \\\"quoted\\\" caf\u00e9 \u00fc\\nLine two\"}";
 
 var standalone = args.Contains("standalone");
 var failures = 0;
@@ -144,7 +144,7 @@ async Task ValidSubmission(string label, string url, Guid formKey, List<KeyValue
             if (Math.Abs((DateTime.UtcNow - row.SubmittedUtc).TotalMinutes) > 5) problems.Add($"SubmittedUtc {row.SubmittedUtc:O}");
             if (expectedJson is not null && !Encoding.UTF8.GetBytes(row.FieldsJson).SequenceEqual(Encoding.UTF8.GetBytes(expectedJson)))
                 problems.Add($"FieldsJson differs: {row.FieldsJson}");
-            if (expectedJson is null && !fields.Where(f => f.Key != "ReplyByPhone").All(f => JsonDocument.Parse(row.FieldsJson).RootElement.TryGetProperty(f.Key, out var v) && v.GetString() == f.Value))
+            if (expectedJson is null && !fields.All(f => JsonDocument.Parse(row.FieldsJson).RootElement.TryGetProperty(f.Key, out var v) && v.GetString() == f.Value))
                 problems.Add($"FieldsJson lacks posted values: {row.FieldsJson}");
         }
         Report(problems.Count == 0, label, problems.Count == 0 ? $"302, success text, row {row!.Id} {row.SubmittedUtc:HH:mm:ss}Z page {pageKey}" : string.Join("; ", problems));
@@ -186,7 +186,7 @@ catch (Exception e) { Report(false, "pages 200", e.Message); }
 // ---- 2. valid submissions
 await ValidSubmission("contact submission", "/contact-us/", contactKey, [
     new("Name", "Smoke Test"), new("Email", "smoke@example.com"),
-    new("Message", "Line one: \"quoted\" café ü\nLine two"), new("ReplyByPhone", "true")], ExpectedContactJson);
+    new("Message", "Line one: \"quoted\" café ü\nLine two")], ExpectedContactJson);
 if (!standalone)
 {
     await ValidSubmission("service enquiry submission", service, serviceKey, [

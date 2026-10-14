@@ -73,7 +73,7 @@ runnable by attendees.
 - Forms: three, fixed in the site code (no package, no editor-defined forms, fields or form
   text). The page type decides the form; the event or service comes from the page. Spec
   `form-submission`.
-  - Contact: Name, Email, Message, "Reply by phone?".
+  - Contact: Name, Email, Message ("Reply by phone?" dropped, PO 2026-10-14).
   - Service enquiry: Name, Email, Company (optional), Website (optional), Message.
   - Event booking: Name, Email, Notes (optional), "Join mailing list". An ordinary
     submission: no booking status, places or limits.
@@ -108,7 +108,7 @@ runnable by attendees.
 
 ## Repo conventions
 - Planning via OpenSpec in `openspec/`. Change order: `add-demo-foundation`,
-  `add-form-emails`, `add-production-environment`.
+  `add-demo-dashboard`, `add-form-emails`, `add-production-environment`.
 - Feature requests: `docs/feature-requests/NNNN-<slug>.md`, cited as FR-NNNN; sections: Status,
   Request, Why, Acceptance criteria, Notes. Recorded by the Architect; folded into a change via
   `/opsx:propose` or `/opsx:update`, then Status names that change.

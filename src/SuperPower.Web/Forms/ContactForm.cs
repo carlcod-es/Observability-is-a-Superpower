@@ -12,7 +12,4 @@ public class ContactForm
 
     [Required, DataType(DataType.MultilineText), Display(Name = "Message")]
     public string? Message { get; set; }
-
-    [Display(Name = "Reply by phone?")]
-    public bool ReplyByPhone { get; set; }
 }

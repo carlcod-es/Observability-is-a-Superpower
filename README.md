@@ -12,6 +12,7 @@ Decisions and their reasons: `docs/adrs/`.
 - .NET 10 SDK.
 - A container runtime: Docker Desktop (Windows: Linux containers mode) or Podman.
 - Aspire CLI 13.6 or later: install from https://aspire.dev, then check `aspire --version`.
+  An older CLI cannot connect to this AppHost and stops it during start-up.
 - A trusted HTTPS development certificate: `dotnet dev-certs https --trust`.
 - Optional: Claude Code, to let an agent query the telemetry (see "Connecting Claude Code").
 
@@ -40,7 +41,7 @@ docker pull grafana/mcp-grafana:2.0.2
 aspire run --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
 ```
 
-The explicit `--apphost` is needed while `spikes/` holds other AppHosts. The command prints a
+The explicit `--apphost` selects this AppHost. The command prints a
 login link for the Aspire dashboard. It starts SQL Server, smtp4dev behind Toxiproxy, the
 OpenTelemetry Collector, Grafana LGTM, the Grafana MCP server and the site. The site waits for
 its dependencies; first start installs Umbraco and imports the content (a minute or two).
@@ -93,7 +94,8 @@ Grafana: change `Serilog:MinimumLevel` in `src/SuperPower.Web/appsettings*.json`
 container in the AppHost). `.claude/settings.json` pre-approves its read-only tools.
 
 1. Start the full environment.
-2. Open Claude Code at the repo root; approve the project's `grafana` MCP server when asked.
+2. Open Claude Code at the repo root (trust the folder if asked). The project's `grafana` MCP
+   server is enabled by `.claude/settings.json`; `/mcp` shows it connected.
 3. Ask for telemetry, for example "show the latest trace for the Home page and its logs".
 
 The agent gets 22 read-only tools over traces, logs and metrics: no writes, no database
