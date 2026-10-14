@@ -196,8 +196,8 @@ README version is the expected fix (not tested; global tool left unchanged).
 `spikes/metrics-mcp/README.md` has a "Dashboards" section: files, UI import steps (select
 `Prometheus` for the two community files), Grafana URL and login pointer. The steps were
 checked through the same API endpoint as the UI upload (`/api/dashboards/import`, all three
-files render). A re-import following only the README in the UI was not done before shutdown
-(PO 2026-10-14: stop all hosts); task left open.
+files render). PO 2026-10-14: imported a dashboard in the Grafana UI following the README and saw
+results.
 
 ### Provisioning stretch (task 4.4)
 

@@ -16,8 +16,7 @@ references this file, so the on-stage agent may read it.
 - [x] `spike-grafana-dashboard` run 2026-10-14 (PO reviewed in the UI, hosts stopped). Result in its
   `findings.md` section 6: one custom JSON-first demo dashboard (request rate, 5xx rate, p95 with
   trace exemplars, form meters, Loki error logs), drill-down through the bundled Logs/Traces
-  Drilldown apps, JSON in the repo. Open: its tasks 4.3 (README re-import by the PO) and 4.4
-  (provisioning, not attempted).
+  Drilldown apps, JSON in the repo. Open: its task 4.4 (provisioning, not attempted).
 - [ ] Architect: plan the demo dashboard from `spike-grafana-dashboard` `findings.md` section 6 —
   ADR, then `/opsx:update add-demo-foundation` (dashboard JSON, provisioning mount in the AppHost,
   demo traffic source) and form-meter panels in `add-form-emails`.

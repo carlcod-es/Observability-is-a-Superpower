@@ -30,7 +30,7 @@ Owner: Architect, PO observing the dashboard. Depends on: 3 (uses the custom das
 
 - [x] 4.1 With the custom dashboard open, turn on the probe's `slow` then `fail` switches under `load.mjs` traffic (design D4); verify the dashboard visibly changes (p95 rise, error-rate rise, error logs appearing) and record in `findings.md` what was visible without the agent, with screenshots or notes per fault
 - [x] 4.2 Ensure every kept dashboard exists as JSON in `spikes/metrics-mcp/dashboards/` (the custom one is already there from 3.1; export the community imports if kept), restart the LGTM container, re-import from the files (design D3 step 1); verify the re-imported dashboards render with data and record in `findings.md` which JSON form handled datasource UIDs cleanly
-- [ ] 4.3 Add a "Dashboards" section to `spikes/metrics-mcp/README.md`: the files in `dashboards/`, how to import them, the Grafana URL and credentials pointer; verify a re-import following only the README succeeds
+- [x] 4.3 Add a "Dashboards" section to `spikes/metrics-mcp/README.md`: the files in `dashboards/`, how to import them, the Grafana URL and credentials pointer; verify a re-import following only the README succeeds
 - [ ] 4.4 Stretch, only if 4.2 was quick (design D3 step 2): provision the exported JSON via the LGTM image's Grafana provisioning directory so the dashboard exists after a plain start; verify it appears without manual import, or record the obstacle in `findings.md` and stop
 
 ## 5. Findings and sign-off (proposal question 5 and recommendation)
