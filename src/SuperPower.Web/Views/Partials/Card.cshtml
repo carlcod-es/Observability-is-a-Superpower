@@ -1,0 +1,20 @@
+@inherits UmbracoViewPage<ICompPage>
+@{
+    var title = string.IsNullOrWhiteSpace(Model.PageTitle) ? Model.Name : Model.PageTitle;
+    var url = Model.Url();
+}
+<article class="card">
+    @await Html.PartialAsync("Partials/Media", Model.MainBanner, new ViewDataDictionary(ViewData) { ["class"] = "card__image", ["alt"] = "" })
+    <div class="card__body">
+        <h3 class="card__title"><a href="@url">@title</a></h3>
+        @if (Model is Event ev && ev.StartDate is { } start)
+        {
+            <p class="card__meta">@await Html.PartialAsync("Partials/EventWhen", start)</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Summary))
+        {
+            <p class="card__summary">@Model.Summary</p>
+        }
+        <p class="card__link"><a href="@url">Read more<span class="visually-hidden"> about @title</span></a></p>
+    </div>
+</article>

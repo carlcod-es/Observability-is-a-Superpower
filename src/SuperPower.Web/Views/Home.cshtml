@@ -1,8 +1,34 @@
-﻿@using Umbraco.Cms.Web.Common.PublishedModels;
-@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Home>
-@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+﻿@inherits UmbracoViewPage<Home>
+@inject SuperPower.Web.Events.IUpcomingEvents UpcomingEvents
 @{
-	Layout = "master.cshtml";
+    Layout = "master.cshtml";
+    var services = Model.Children.OfType<Services>().FirstOrDefault();
+    var events = Model.Children.OfType<Events>().FirstOrDefault();
+    var serviceCards = services?.Children.OfType<Service>().Take(3).Cast<ICompPage>().ToList() ?? [];
+    var eventCards = events is null ? [] : UpcomingEvents.GetUpcoming(events).OfType<Event>().Take(3).Cast<ICompPage>().ToList();
 }
+@await Html.PartialAsync("Partials/MainContent", Model)
 
-<h1>Hello, World!</h1>
+@if (services is not null)
+{
+    <section class="home-section" aria-labelledby="home-services">
+        <h2 id="home-services">Services</h2>
+        @await Html.PartialAsync("Partials/CardList", serviceCards)
+        <p class="home-section__all"><a href="@services.Url()">View all services</a></p>
+    </section>
+}
+@if (events is not null)
+{
+    <section class="home-section" aria-labelledby="home-events">
+        <h2 id="home-events">Events</h2>
+        @if (eventCards.Count == 0)
+        {
+            <p>No upcoming events at the moment.</p>
+        }
+        else
+        {
+            @await Html.PartialAsync("Partials/CardList", eventCards)
+        }
+        <p class="home-section__all"><a href="@events.Url()">View all events</a></p>
+    </section>
+}

@@ -1,0 +1,17 @@
+@inherits UmbracoViewPage<MediaWithCrops?>
+@* Image when the media exists and has a URL; otherwise a plain single-colour block (no <img>). ViewData: "class", "alt". *@
+@{
+    var css = ViewData["class"]?.ToString() ?? "";
+    var alt = ViewData["alt"]?.ToString() ?? "";
+    var url = Model?.Url();
+}
+@if (!string.IsNullOrWhiteSpace(url))
+{
+    var width = Model!.Value<int>("umbracoWidth");
+    var height = Model.Value<int>("umbracoHeight");
+    <img class="@css" src="@url" alt="@alt" @(width > 0 && height > 0 ? Html.Raw($"width=\"{width}\" height=\"{height}\"") : null) loading="lazy">
+}
+else
+{
+    <div class="@css @(css)--empty" aria-hidden="true"></div>
+}

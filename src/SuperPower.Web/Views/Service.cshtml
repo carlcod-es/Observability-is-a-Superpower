@@ -1,6 +1,9 @@
-﻿@using Umbraco.Cms.Web.Common.PublishedModels;
-@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Service>
-@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+﻿@inherits UmbracoViewPage<Service>
 @{
-	Layout = "master.cshtml";
+    Layout = "master.cshtml";
 }
+@await Html.PartialAsync("Partials/MainContent", Model)
+<section>
+    <h2>Enquire about this service</h2>
+    @await Html.PartialAsync("Partials/Forms/ServiceEnquiryForm", new ServiceEnquiryForm())
+</section>

@@ -110,7 +110,7 @@ block once task 7.1 lands. Do as much or as little of this as you like before ha
 
 ## Hand-back
 
-- [ ] REQUIRED before task 7.1 (PO decision 2026-10-14, typed views): Settings > Models
+- [x] (done 2026-10-14, commit 6087999) REQUIRED before task 7.1 (PO decision 2026-10-14, typed views): Settings > Models
       Builder > Generate models (SourceCodeManual, namespace `SuperPower.Web.Models`, into
       `src/SuperPower.Web/Models/`). Expect one `.generated.cs` per document/element type.
       Note: pages will still 500 afterwards — the old views use a different namespace and are

@@ -1,0 +1,2 @@
+@inherits UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockListItem<ImageBlock>>
+@await Html.PartialAsync("Partials/Media", Model.Content.Image, new ViewDataDictionary(ViewData) { ["class"] = "content-image", ["alt"] = Model.Content.AltText ?? "" })

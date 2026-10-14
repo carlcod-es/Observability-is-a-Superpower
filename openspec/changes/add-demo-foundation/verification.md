@@ -65,3 +65,20 @@ the forms package that the re-plan removes (new task 3.1).
   reviewer) and a copy of the PO's database at `...4002`: root document type folder
   "SuperPower Forms" (key `...5001`) created once, six package types moved into it, data types
   untouched; restart: no migration, no duplicate folder.
+
+## Section 7 (and runtime checks for tasks 3.5, 4.1)
+
+- `add-demo-foundation` tasks 7.1/3.5/4.1, 2026-10-14, standalone SQLite site (fresh install, uSync
+  first boot), worker run and independent reviewer re-run:
+  - 13 pages (Home, About us, Events, Services, Contact us, 3 services, 5 events) return 200 with
+    the navigation; 0 `<script>`, 0 external resource URLs, exactly one stylesheet; fonts served
+    from `/css/fonts/` (telemetry-excluded path).
+  - No page has a `mainBanner` image: every banner and card renders the colour block, 0 `<img>`
+    (spec `agency-site` "Page without an image"). Image branch not exercised.
+  - Forms (Contact, SEO audit service, Umbraco Builders Day event): one
+    `__RequestVerificationToken` and one `ufprt` per form; `method="post"` + `novalidate`; no
+    `required`/`pattern`; `asp-*` expanded; valid post 302 then "Thank you, we'll be in touch." on
+    that form only, refresh stores nothing (rows +1 per valid post via `sqlite3 -readonly`);
+    invalid post 200 with entered values and field errors, nothing stored; post without token
+    400, nothing stored.
+  - Pending PO: past-event page check (and past-event post rejection), browser network panel.

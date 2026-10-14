@@ -1,6 +1,15 @@
-﻿@using Umbraco.Cms.Web.Common.PublishedModels;
-@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Events>
-@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+﻿@inherits UmbracoViewPage<Events>
+@inject SuperPower.Web.Events.IUpcomingEvents UpcomingEvents
 @{
-	Layout = "master.cshtml";
+    Layout = "master.cshtml";
+    var upcoming = UpcomingEvents.GetUpcoming(Model).OfType<Event>().ToList();
+}
+@await Html.PartialAsync("Partials/MainContent", Model)
+@if (upcoming.Count == 0)
+{
+    <p>No upcoming events at the moment.</p>
+}
+else
+{
+    @await Html.PartialAsync("Partials/CardList", upcoming.Cast<ICompPage>())
 }

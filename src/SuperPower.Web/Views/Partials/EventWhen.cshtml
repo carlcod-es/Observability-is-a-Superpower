@@ -1,0 +1,2 @@
+@model DateTimeOffset
+<time datetime="@Model.ToString("yyyy-MM-dd'T'HH:mm:sszzz", System.Globalization.CultureInfo.InvariantCulture)">@Model.ToString("ddd d MMM yyyy, HH:mm", System.Globalization.CultureInfo.InvariantCulture)</time>

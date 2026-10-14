@@ -5,6 +5,8 @@ Vision". Local Umbraco site with .NET Aspire, OpenTelemetry and read-only agent 
 telemetry over MCP. Full run instructions land with the attendee README (change
 `add-demo-foundation` task 9.1).
 
+How the repo, local environment, data and telemetry are set up: `docs/project-setup.md`.
+
 ## Stable ports and URLs
 
 Fixed ports are pinned in `launchSettings.json` files or the AppHost code; everything else

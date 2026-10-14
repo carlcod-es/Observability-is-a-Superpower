@@ -1,7 +1,6 @@
-﻿@using Umbraco.Cms.Web.Common.PublishedModels;
-@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Services>
-@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+﻿@inherits UmbracoViewPage<Services>
 @{
-	Layout = "master.cshtml";
+    Layout = "master.cshtml";
 }
-<b>Master</b>
+@await Html.PartialAsync("Partials/MainContent", Model)
+@await Html.PartialAsync("Partials/CardList", Model.Children.OfType<Service>())
