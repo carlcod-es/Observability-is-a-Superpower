@@ -76,6 +76,9 @@ references this file, so the on-stage agent may read it.
 3. `add-form-emails`: all emails.
 3a. `add-log-redaction` (PO 2026-10-15, ADR-0028): layer 1 logging rule + in-app log
    redaction processor; Serilog console sink removed. Proposed, not applied.
+3b. `improve-local-performance` (PO 2026-10-15, ADR-0029 proposed): stage run in Release,
+   views compiled at build, CMS debug off, M1 machine checklist; before/after telemetry.
+   Proposed, not applied.
 4. `add-production-environment`: Cloudflare tunnel and database reset only (Azure dropped, PO
    2026-10-15).
 `add-event-bookings` dropped 2026-10-13 (change directory removed). `add-talk-slides` dropped
