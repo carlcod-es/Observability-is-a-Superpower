@@ -12,7 +12,7 @@ Directory.Packages.props     central package versions, exact pins only (ADR-0001
 global.json                  test runner: Microsoft.Testing.Platform
 src/
   SuperPower.AppHost/        Aspire AppHost: every local resource (see "Local environment")
-    collector/config.yaml    OpenTelemetry Collector pipeline
+    collector/config.yaml    OpenTelemetry Collector pipelines
   SuperPower.ServiceDefaults/ OpenTelemetry, health checks, exporter switch, Serilog forwarding
   SuperPower.Web/            Umbraco 17 site (Acme Agency)
 tests/
@@ -20,8 +20,8 @@ tests/
   smoke/                     end-to-end smoke check, `dotnet run tests/smoke/smoke.cs` (ADR-0012)
 docs/adrs/                   architecture decision records
 openspec/                    planning: specs (openspec/specs) and changes (openspec/changes)
-.mcp.json                    MCP servers for Claude Code (Grafana MCP only, ADR-0017)
-.claude/settings.json        pre-approved read-only Grafana MCP tools
+.mcp.json                    MCP servers for Claude Code: aspire, grafana (ADR-0022)
+.claude/settings.json        pre-approved read tools on both servers
 ```
 
 Layout decisions: ADR-0002. Versions: .NET 10, Umbraco 17.7.1, Aspire 13.6 (SDK 13.6.0, hosting
@@ -34,7 +34,7 @@ packages 13.6.x; ADR-0001).
 | Command | `aspire run --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj` | `dotnet run --project src/SuperPower.Web` |
 | Database | SQL Server container | SQLite file |
 | Mail | Toxiproxy -> smtp4dev | not configured |
-| Telemetry | OTLP -> Collector -> Aspire dashboard + Grafana LGTM | none exported (no OTLP endpoint set) |
+| Telemetry | OTLP -> Collector -> Aspire dashboard + Grafana LGTM (once started) | none exported (no OTLP endpoint set) |
 | Use | demo, telemetry, agent | quick content or view work |
 
 The AppHost overrides the site's settings with environment variables, so the same site code
@@ -50,27 +50,34 @@ start, and nothing syncs them afterwards.
            sql (SQL Server)      toxiproxy --> smtp4dev      collector --+--> Aspire dashboard
                                  (Slow/Break/Heal)                       +--> lgtm (Grafana :3000)
                                                                                  ^
-                                                        Claude Code --> grafana-mcp :8091
+                                                                         grafana-mcp :8091
 ```
+
+Claude Code reads the Aspire dashboard through the `aspire` MCP (stdio) and Grafana through
+`grafana-mcp`. `lgtm` is explicit start; `grafana-mcp` waits for it.
 
 | Resource | Image / type | Ports | Persistence | ADR |
 |---|---|---|---|---|
 | `sql` / database `umbraco` | Azure SQL run as SQL Server container | dynamic | persistent container + data volume | ADR-0009 |
 | `smtp4dev` | `rnwood/smtp4dev:3.15.0` | dynamic (Inbox link in dashboard) | none (in-memory inbox) | ADR-0010 |
 | `toxiproxy` | `ghcr.io/shopify/toxiproxy:2.12.0` | 2525 (SMTP proxy), dynamic API | none; proxy created healed on start | ADR-0010 |
-| `lgtm` | `grafana/otel-lgtm:0.36.0` | 3000 (Grafana, admin/admin) | none: telemetry history lost on restart | ADR-0017 |
+| `lgtm` | `grafana/otel-lgtm:0.36.0`, explicit start | 3000 (Grafana, admin/admin) | none: telemetry history lost on restart | ADR-0017, ADR-0022 |
 | `collector` | OpenTelemetry Collector contrib 0.162.0 | dynamic | none | ADR-0017 |
-| `grafana-mcp` | `grafana/mcp-grafana:2.0.2` | 8091 (`/mcp`) | none | ADR-0017 |
+| `grafana-mcp` | `grafana/mcp-grafana:2.0.2`, waits for `lgtm` | 8091 (`/mcp`) | none | ADR-0017, ADR-0022 |
 | `site` | `SuperPower.Web` project | 44368 (https), 21258 (http) | - | ADR-0002 |
 
-Start order: the site waits for `sql`, `toxiproxy` and `collector`; the collector and
-`grafana-mcp` wait for `lgtm`. All fixed ports are listed in the root `README.md`.
+Start order: the site waits for `sql`, `toxiproxy` and `collector`. `lgtm` does not start with
+the AppHost: Start on `lgtm` in the dashboard (or `aspire resource lgtm start --apphost
+src/SuperPower.AppHost/SuperPower.AppHost.csproj`) starts it without restarting anything else,
+and `grafana-mcp`, waiting for `lgtm`, follows (go-live; ADR-0022). All fixed ports are listed
+in the root `README.md`.
 
 ### Mail path and fault injection
 The site sends SMTP to `localhost:2525`, Toxiproxy's `smtp` proxy, which forwards to smtp4dev.
 Three dashboard commands on the `toxiproxy` resource change the path: **Slow** (latency on
 every SMTP reply), **Break** (reset every connection), **Heal** (remove all faults).
-Presenter-only; the agent has no access to them.
+The presenter runs them; the agent can call them through the Aspire MCP only after approving
+each call (ADR-0022).
 
 ## Data: what persists and where
 
@@ -79,7 +86,7 @@ Presenter-only; the agent has no access to them.
 | SQL Server database | Docker volume `superpower.apphost-<hash>-sql-data` (inside Docker's VM; hash from the AppHost path) | yes; the container itself is persistent too | stop AppHost, remove the `sql` container, `docker volume rm <volume>` |
 | SQLite database | `src/SuperPower.Web/umbraco/Data/Umbraco.sqlite.db` (gitignored) | yes | delete `Umbraco.sqlite.db*` |
 | Umbraco cache/indexes | `src/SuperPower.Web/umbraco/Data/TEMP/` (shared by both modes) | yes | delete with either database reset |
-| Telemetry (LGTM) | inside the `lgtm` container | no | restart the AppHost |
+| Telemetry (LGTM) | inside the `lgtm` container; only from its start on | no | restart the AppHost |
 | Emails (smtp4dev) | in memory | no | restart the AppHost |
 | Content and media definitions | `src/SuperPower.Web/uSync/v17/` (committed) | source of truth | - |
 | Media files | `src/SuperPower.Web/wwwroot/media/` (committed) | source of truth | - |
@@ -105,16 +112,27 @@ Configured once in ServiceDefaults; identical locally and in production.
 - **Personal data**: form field values (name, email, message, notes, company, website) are
   never recorded; form, page and outcome are.
 
-The Collector sends every signal to both the Aspire dashboard and Grafana LGTM
-(`collector/config.yaml`).
+The Collector (`collector/config.yaml`) has two pipeline sets per signal, each with its own batch
+processor: `*/aspire` to the Aspire dashboard (always) and `*/lgtm` to Grafana LGTM. The LGTM
+exporter has retry and sending queue off: while `lgtm` is not started its batches are dropped,
+never replayed, so LGTM holds no traces or logs from before its start (metric counters are
+cumulative and include earlier totals); the Aspire path is unaffected (ADR-0022).
+Until then the collector logs an export error per batch.
 
 ## Agent access (Claude Code)
 
-`.mcp.json` registers one MCP server, `grafana` at `http://localhost:8091/mcp`. The Grafana MCP
-runs with writes disabled and only the Prometheus (metrics), Loki (logs), Tempo (traces) and
-datasource tools: 22 read-only tools. `.claude/settings.json` pre-approves them. The agent has
-no database access, no Aspire resource state and no resource commands (ADR-0017). The MCP
-server is reachable only while the AppHost runs.
+`.mcp.json` registers two MCP servers (ADR-0022):
+
+- `aspire` (stdio, `aspire agent mcp`; local stage): traces, structured logs, a trace's logs,
+  resource state and console logs from the running AppHost; no metrics. `.claude/settings.json`
+  pre-approves its 13 read tools by name; `execute_resource_command` prompts every call. While
+  `spikes/` holds other AppHosts the agent calls `select_apphost` first.
+- `grafana` (`http://localhost:8091/mcp`; production stage): the Grafana MCP with writes
+  disabled and only the Prometheus (metrics), Loki (logs), Tempo (traces) and datasource tools,
+  22 read-only tools, all pre-approved (ADR-0017). Reachable only after `lgtm` is started;
+  Claude Code shows it failed until then, `/mcp` reconnects it.
+
+The agent has no database access.
 
 ## The site (`src/SuperPower.Web`)
 
@@ -144,7 +162,9 @@ SQLite and SQL Server.
   mapping, past/upcoming event rules with a fake `TimeProvider`.
 - `dotnet run tests/smoke/smoke.cs` (full environment, run right after starting the AppHost) or
   `... -- standalone` (SQLite): pages, form submissions and stored rows, Home trace with database
-  spans and linked logs, Slow/Break/Heal (ADR-0012). No Umbraco or Aspire integration harness.
+  spans and linked logs, Slow/Break/Heal (ADR-0012). The full-environment run starts `lgtm` itself
+  and checks that Grafana has no telemetry from a request made before the start. No Umbraco or
+  Aspire integration harness.
 
 ## Planning and branches
 

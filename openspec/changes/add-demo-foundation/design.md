@@ -98,7 +98,8 @@ Test strategy that follows (ADR-0012):
    2.0.2 (port 8091, `--disable-write --enabled-tools prometheus,loki,tempo,datasource`,
    22 read-only tools) is the agent's only MCP server in `.mcp.json`, pre-approved in
    `.claude/settings.json`; no Aspire MCP, no DB access. Rejected: Prometheus MCP, Aspire MCP
-   alone or alongside. ADR-0017 (supersedes ADR-0011).
+   alone or alongside. ADR-0017 (supersedes ADR-0011). Partly superseded by ADR-0022
+   (`rework-aspire-first`): Aspire MCP added for the local stage, Grafana started on demand.
 10. **Testing** - xUnit v3 in `tests/SuperPower.Web.Tests`; scripted smoke checks in
     `tests/smoke/`. See "Bar and test strategy". ADR-0012.
 11. **Event content model** - one document type `event` (`compPage` + `startDate`, Date Time

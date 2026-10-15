@@ -150,4 +150,5 @@ task 3.1 or replaced by the new task texts. Kept for the record.
 - nit (block 5A) `EventBookingRepository.cs:21`: `DateTimeKind.Unspecified` — booking repository deleted.
 - Architect (block 5A) Pending checks before ticking 5.1 (booking table) — booking table dropped.
 - nit (block 3H, folder step) `MoveTypesToFolderStep.cs`: missing type logs a warning — code deleted.
-- Architect (section 2 supervisor) Task 8.2: inspect Aspire MCP `list_resources` for the `umbracoDbDSN` connection string — the Aspire MCP is dropped (ADR-0017); the agent has no resource tool.
+- Architect (section 2 supervisor) Task 8.2: inspect Aspire MCP `list_resources` for the `umbracoDbDSN` connection string — the Aspire MCP is dropped (ADR-0017); the agent has no resource tool. Reopened by ADR-0022 (Aspire MCP back): checked as
+  `rework-aspire-first` task 6.2.

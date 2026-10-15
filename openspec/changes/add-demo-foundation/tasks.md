@@ -62,8 +62,8 @@ Owner: worker-frontend. Depends on: 6.2 (document types, templates), 4.1, 5.1.
 
 Owner: Architect (shared files `.mcp.json`, `.claude/settings.json`). Depends on: 2.5.
 
-- [ ] 8.1 Commit `.mcp.json` with the single `grafana` server (streamable HTTP, `http://localhost:8091/mcp`) and `.claude/settings.json` pre-approving the Grafana MCP tools (ADR-0017); verify in Claude Code with the AppHost running that the agent retrieves a Home page trace with spans, that trace's logs, and a request-duration metric, all without approval prompts
-- [ ] 8.2 Verify the agent's tool surface: `tools/list` shows only the 22 read-only telemetry tools (no write tools, no resource state or commands, no database tool; spec `agent-telemetry-access`), and no other MCP server is configured in the repo
+- [ ] 8.1 (Replaced by `rework-aspire-first` section 6; closed when that change is accepted.) Commit `.mcp.json` with the single `grafana` server (streamable HTTP, `http://localhost:8091/mcp`) and `.claude/settings.json` pre-approving the Grafana MCP tools (ADR-0017); verify in Claude Code with the AppHost running that the agent retrieves a Home page trace with spans, that trace's logs, and a request-duration metric, all without approval prompts
+- [ ] 8.2 (Replaced by `rework-aspire-first` section 6; closed when that change is accepted.) Verify the agent's tool surface: `tools/list` shows only the 22 read-only telemetry tools (no write tools, no resource state or commands, no database tool; spec `agent-telemetry-access`), and no other MCP server is configured in the repo
 
 ## 9. Documentation and integration checks
 

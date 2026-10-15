@@ -43,18 +43,36 @@ aspire run --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
 
 The explicit `--apphost` selects this AppHost. The command prints a
 login link for the Aspire dashboard. It starts SQL Server, smtp4dev behind Toxiproxy, the
-OpenTelemetry Collector, Grafana LGTM, the Grafana MCP server and the site. The site waits for
-its dependencies; first start installs Umbraco and imports the content (a minute or two).
+OpenTelemetry Collector and the site. The site waits for its dependencies; first start installs
+Umbraco and imports the content (a minute or two). `lgtm` shows in the dashboard as not started
+and `grafana-mcp` as waiting for it (see "Start Grafana").
 
 - Site: https://localhost:44368 (backoffice `/umbraco`; login in
   `src/SuperPower.Web/appsettings.Development.json`, Unattended user).
 - Aspire dashboard: logs, traces and metrics; the smtp4dev inbox link; the Slow, Break and Heal
   commands on the `toxiproxy` resource.
+
+The Aspire dashboard has all telemetry from the start. The SQL Server database persists between
+runs.
+
+## Start Grafana
+
+Grafana LGTM (the production-stage platform, ADR-0022) is not started with the AppHost. Start
+it from the Aspire dashboard (Start action on the `lgtm` resource) or the CLI:
+
+```sh
+aspire resource lgtm start --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
+```
+
+`grafana-mcp` waits for `lgtm` and starts by itself; Grafana is up in about 15 s with the image
+pulled (see "Pre-pull the container images"; a first start without it is slow). The site is not
+restarted.
+
 - Grafana: http://localhost:3000 (admin/admin), Explore for Tempo (traces), Loki (logs) and
   Prometheus (metrics).
-
-Telemetry in Grafana is kept only while the AppHost runs; after a restart, load a few pages
-before querying. The SQL Server database persists between runs.
+- Grafana holds only telemetry produced after `lgtm` started; earlier traces and logs are dropped,
+  not replayed, and metric counters are cumulative, so their first values include earlier totals.
+  Load a few pages before querying. Grafana data is lost when the AppHost stops.
 
 ## Run the site on its own (SQLite)
 
@@ -90,16 +108,29 @@ Grafana: change `Serilog:MinimumLevel` in `src/SuperPower.Web/appsettings*.json`
 
 ## Connecting Claude Code
 
-`.mcp.json` registers one MCP server, `grafana`, at http://localhost:8091/mcp (the Grafana MCP
-container in the AppHost). `.claude/settings.json` pre-approves its read-only tools.
+`.mcp.json` registers two MCP servers; `.claude/settings.json` enables them and pre-approves
+their read tools.
 
-1. Start the full environment.
-2. Open Claude Code at the repo root (trust the folder if asked). The project's `grafana` MCP
-   server is enabled by `.claude/settings.json`; `/mcp` shows it connected.
-3. Ask for telemetry, for example "show the latest trace for the Home page and its logs".
+| Server | Transport | Gives the agent |
+|---|---|---|
+| `aspire` | stdio, `aspire agent mcp` (Aspire CLI on PATH) | Resource state, console logs, structured logs and traces from the Aspire dashboard; resource commands |
+| `grafana` | http://localhost:8091/mcp (Grafana MCP container, read-only) | Traces, logs and metrics from Grafana |
 
-The agent gets 22 read-only tools over traces, logs and metrics: no writes, no database
-access, no control of the environment. The server is reachable only while the AppHost runs.
+1. Start the full environment. `aspire` works from then on.
+2. Open Claude Code at the repo root (trust the folder if asked). `/mcp` shows `aspire`
+   connected and `grafana` failed: nothing answers on its port until Grafana is started.
+3. Start Grafana (see "Start Grafana"), wait for `grafana-mcp` to be running, then run `/mcp`
+   and reconnect `grafana`.
+4. Ask for telemetry, for example "show the latest trace for the Home page and its logs".
+
+Notes:
+
+- Several AppHosts live under the repo (`spikes/`), so the agent must call `select_apphost` first;
+  it is pre-approved.
+- Pre-approved: the Aspire read tools and all `grafana` tools. Aspire `execute_resource_command`
+  is not pre-approved: Claude Code prompts on each call.
+- The Aspire MCP has no metrics tool; metrics come from Grafana.
+- The agent has no database tool and no write access to Grafana.
 
 ## Stable ports and URLs
 
@@ -113,12 +144,13 @@ Aspire dashboard.
 | Site (http) | http://localhost:21258 | `src/SuperPower.Web/Properties/launchSettings.json` |
 | Umbraco backoffice | https://localhost:44368/umbraco (https only; login over http fails with OpenIddict ID2083) | - |
 | Aspire dashboard | https://localhost:17210 | `src/SuperPower.AppHost/Properties/launchSettings.json` |
-| Grafana | http://localhost:3000 (admin/admin) | AppHost code (ADR-0017) |
-| Grafana MCP | http://localhost:8091/mcp | AppHost code (ADR-0017) |
+| Grafana (reachable after start) | http://localhost:3000 (admin/admin) | AppHost code (ADR-0017) |
+| Grafana MCP (reachable after start) | http://localhost:8091/mcp | AppHost code (ADR-0017) |
 | SMTP (site -> Toxiproxy) | localhost:2525 | AppHost code (ADR-0010) |
 | Public site (Cloudflare tunnel) | https://observability.carlcod.es/ | Cloudflare; origin is the local site |
 
-Ports 3000, 8091 and 2525 must be free; 3000 often clashes with Node dev servers.
+Ports 3000, 8091 and 2525 must be free (the AppHost binds them at start, before Grafana is
+started); 3000 often clashes with Node dev servers.
 
 ## Tests
 

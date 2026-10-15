@@ -61,18 +61,19 @@ toxiproxy
             IconName = "Heart"
         });
 
-// Telemetry: apps -> collector -> Aspire dashboard + Grafana LGTM (ADR-0017).
+// Telemetry: apps -> collector -> Aspire dashboard + Grafana LGTM (ADR-0017, ADR-0022).
+// LGTM is started on demand (explicit start) and receives only post-start telemetry; grafana-mcp waits for it.
 // WithAppForwarding re-points the projects' OTLP endpoint at the collector.
 var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "0.36.0")
     .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "grafana")
     .WithHttpEndpoint(targetPort: 4318, name: "otlp-http")
-    .WithHttpHealthCheck("/api/health", endpointName: "grafana");
+    .WithHttpHealthCheck("/api/health", endpointName: "grafana")
+    .WithExplicitStart();
 
 var collector = builder.AddOpenTelemetryCollector("collector", c => c.CollectorTag = "0.162.0")
     .WithConfig("./collector/config.yaml")
     .WithAppForwarding()
-    .WithEnvironment("LGTM_OTLP_URL", lgtm.GetEndpoint("otlp-http"))
-    .WaitFor(lgtm);
+    .WithEnvironment("LGTM_OTLP_URL", lgtm.GetEndpoint("otlp-http"));
 
 // Read-only Grafana MCP for the agent. Host validation defaults to loopback variants of --address,
 // so allow the published host port.
