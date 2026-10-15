@@ -42,7 +42,8 @@ instrumentation code.
 - Excluded request paths live in `TelemetryPaths` (`/health`, `/alive`, `/umbraco/backoffice`,
   `/css`, `/js`), shared by the ASP.NET Core trace filter and the log forwarding sink
   (ADR-0007). `/media` and `/favicon.ico` added 2026-10-14 (change `add-demo-foundation` design.md
-  Decision 12, task 2.6). Backoffice page loads (`/umbraco`, `/umbraco/login`) and
+  Decision 12, task 2.6). `/assets` (site image assets, header logo) added 2026-10-15 (change
+  `add-demo-dashboard`). Backoffice page loads (`/umbraco`, `/umbraco/login`) and
   `/umbraco/management/api` calls are still traced.
 - Background database spans measured at ~76 per minute with the site idle (distributed jobs,
   cache instructions, locks, webhooks), so they are filtered: a SqlClient span is kept only when

@@ -1,7 +1,7 @@
 # FR-0003: Request metrics per page type
 
 ## Status
-Open (2026-10-15). Source: `rework-aspire-first` task 6.3 (`verification.md` finding F1). To be
+Planned in change `add-demo-dashboard` (2026-10-15; ADR-0024). Source: `rework-aspire-first` task 6.3 (`verification.md` finding F1). To be
 built in change `add-demo-dashboard`, together with the dashboard (PO 2026-10-15); not on its own.
 
 ## Request

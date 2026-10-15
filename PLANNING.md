@@ -19,7 +19,7 @@ references this file, so the on-stage agent may read it.
   `findings.md` section 6: one custom JSON-first demo dashboard (request rate, 5xx rate, p95 with
   trace exemplars, form meters, Loki error logs), drill-down through the bundled Logs/Traces
   Drilldown apps, JSON in the repo. Open: its task 4.4 (provisioning, not attempted), now FR-0001.
-- [ ] Architect: `/opsx:propose add-demo-dashboard` (PO 2026-10-14: own change, after
+- [ ] `add-demo-dashboard` proposed 2026-10-15 (branch `add-demo-dashboard` from `main`; ADR-0023, ADR-0024; FR-0001, FR-0003); next `/opsx:apply add-demo-dashboard`. Original note: `/opsx:propose add-demo-dashboard` (PO 2026-10-14: own change, after
   `add-demo-foundation`, before `add-form-emails`). Inputs: `spike-grafana-dashboard`
   `findings.md` section 6; FR-0001 (provisioning mount, fallback import on start); also provision
   community dashboard 19924; demo traffic from a .NET 10 file-based app in `tests/` (ADR-0012)

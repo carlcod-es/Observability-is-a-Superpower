@@ -1,7 +1,7 @@
 # FR-0001: Grafana dashboards present after start, no manual import
 
 ## Status
-Open (2026-10-14). Source: `spike-grafana-dashboard` task 4.4 (stretch, not attempted).
+Planned in change `add-demo-dashboard` (2026-10-15; ADR-0023). Source: `spike-grafana-dashboard` task 4.4 (stretch, not attempted).
 
 ## Request
 The demo's Grafana dashboards exist as soon as the local environment is up. No import step
