@@ -90,6 +90,9 @@ public sealed class AcmeFormsController(
             return CurrentUmbracoPage();
         }
 
+        // Demo code
+        logger.LogInformation("Form Submitted {@Model}", model);
+
         try
         {
             var submittedUtc = timeProvider.GetUtcNow().UtcDateTime;
