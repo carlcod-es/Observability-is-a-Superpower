@@ -130,7 +130,7 @@ a:hover { color: var(--color-primary-dark); }
   padding: 0;
   color: var(--color-text);
   background: var(--color-bg);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-text);
   border-radius: 0.25rem;
   cursor: pointer;
 }
