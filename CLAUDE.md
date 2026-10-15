@@ -54,16 +54,17 @@ runnable by attendees.
 
 ## Stack
 - .NET 10, Umbraco 17 LTS, .NET Aspire (AppHost + ServiceDefaults), OpenTelemetry.
-- Agent: Claude Code CLI. Local: Grafana MCP (read-only) over Grafana LGTM, fed by an
-  OpenTelemetry Collector alongside the Aspire dashboard; logs, traces and metrics. No Aspire
-  MCP: the agent gets no resource state or commands (PO 2026-10-13).
-- Prod hosting (PO 2026-10-13; final choice open, made by the PO before it is needed):
-  - Baseline, built first, and the fallback: the local environment exposed to attendees
-    through a Cloudflare tunnel.
-  - Stretch, only if time allows: Azure Container Apps (1 replica, min replicas 1), Azure SQL,
-    Application Insights, Azure Communication Services Email (SMTP), Azure MCP Server
-    (read-only).
-  - Do not build Azure-only work ahead of the baseline.
+- Agent: Claude Code CLI with two MCP servers (ADR-0022, PO 2026-10-15):
+  - Local stage: Aspire MCP over the Aspire dashboard; traces, structured logs, resource state
+    and console logs, read tools pre-approved; resource commands prompt every call. No metrics
+    (the presenter shows them in the dashboard).
+  - Production stage: Grafana MCP (read-only) over Grafana LGTM, fed by an OpenTelemetry
+    Collector alongside the Aspire dashboard; logs, traces and metrics. LGTM and its MCP server
+    are explicit-start resources, started on demand at go-live; LGTM holds only traces and logs
+    from then on (no replay); metric counters are cumulative.
+- Prod hosting (PO 2026-10-15): the whole talk runs locally; "production" is the local
+  environment exposed to attendees through a Cloudflare tunnel, with Grafana playing the
+  production observability platform. Azure dropped.
 
 ## Demo site
 - Acme Agency (fictional marketing agency): Home, About us, Contact us, Events list, event
@@ -92,7 +93,8 @@ runnable by attendees.
 - SQL Server: AddAzureSqlServer(...).RunAsContainer() - container locally, Azure SQL deployed.
   Set umbracoDbDSN and umbracoDbDSN_ProviderName.
 - SMTP: Umbraco -> Toxiproxy -> smtp4dev (container). Toxiproxy injects latency /
-  failures; exposed as Aspire dashboard resource commands, run by the presenter only.
+  failures; exposed as Aspire dashboard resource commands, run by the presenter; the agent
+  only with per-call approval (ADR-0022).
 - ServiceDefaults: OTLP locally; Azure Monitor exporter when
   APPLICATIONINSIGHTS_CONNECTION_STRING is set. Instrumentation code identical in both.
 
@@ -129,9 +131,9 @@ Ownership:
 - worker-backend: `src/SuperPower.AppHost/`, `src/SuperPower.ServiceDefaults/`,
   `src/SuperPower.Web/` C# code (Program.cs, migrations, repositories, controllers, view
   models), `tests/SuperPower.*.Tests/`.
-- worker-frontend: `src/SuperPower.Web/Views/`, `src/SuperPower.Web/wwwroot/`, `prototype/`,
+- worker-frontend: `src/SuperPower.Web/Views/`, `src/SuperPower.Web/wwwroot/`,
   any client-side script and its tests. `wwwroot/css/site.css` and `wwwroot/js/site.js` are
-  edited in `prototype/src/` and copied with `npm run sync` (ADR-0020).
+  edited in place (ADR-0021).
 - PO: `src/SuperPower.Web/uSync/` (backoffice export; tasks marked "(PO)").
 - Shared, changed only when the Architect assigns them in a brief: `SuperPower.slnx`,
   `Directory.*.props`, `.gitignore`, `appsettings*.json`, `launchSettings.json`, `.mcp.json`,

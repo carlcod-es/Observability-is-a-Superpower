@@ -7,15 +7,21 @@ Rule: no demo answers here (planted problems, their causes or fixes). CLAUDE.md
 references this file, so the on-stage agent may read it.
 
 ## Next step
-- [ ] `/opsx:apply add-demo-foundation` (21/30, 2026-10-14): Architect state
-  in Claude memory. Remaining (`add-demo-foundation` tasks): PO content (6.3, 6.4), agent check (8.1, 8.2), fresh-database first
+- [ ] `rework-aspire-first` (2026-10-15, branch `aspire-first` from `sample-site` `bedd4c0`,
+  ADR-0022 Accepted): Aspire MCP for the local stage, Grafana LGTM + Grafana MCP started on
+  demand as production (no replay). 12/12, accepted by the PO 2026-10-15; merge into
+  `sample-site`. Closes `add-demo-foundation` tasks 8.1, 8.2. Archive after
+  `add-demo-foundation` (its delta specs modify that change's specs).
+- [ ] `/opsx:apply add-demo-foundation` (24/30, 2026-10-15): Architect state
+  in Claude memory. Remaining (`add-demo-foundation` tasks): PO content (6.4 deferred, FR-0002), fresh-database first
   boot (9.2, also closes 3.2), cross-platform (9.3), README and project-setup (9.1, 9.6),
   section 9 supervisor.
 - [ ] `add-mobile-responsive` (2026-10-14, branch `mobile-responsive` from `sample-site`):
-  applied 2026-10-14, sections 1-3 supervisor-approved (4/8 ticked); prototype is the
-  source of the site's CSS/JS (ADR-0020). Next: PO browser check (task 4.2), which closes 1.2, 1.3,
-  2.1; then PO commit.
-- [ ] `add-site-prototype`: complete and merged to `main` 2026-10-14; archiving is the PO's call.
+  applied and merged to `main` (PR #3), 5/9 ticked. PO removed `prototype/` 2026-10-14
+  (ADR-0021 supersedes ADR-0020): `wwwroot` is the only CSS/JS source, drift test removed
+  (task 3.2). Next: PO site-only browser check (task 4.2), which closes 1.2, 1.3, 2.1.
+- [ ] `add-site-prototype`: complete and merged to `main` 2026-10-14; `prototype/` deleted by the PO
+  2026-10-14 (ADR-0021); archiving is the PO's call.
 - [x] `spike-grafana-dashboard` run 2026-10-14 (PO reviewed in the UI, hosts stopped). Result in its
   `findings.md` section 6: one custom JSON-first demo dashboard (request rate, 5xx rate, p95 with
   trace exemplars, form meters, Loki error logs), drill-down through the bundled Logs/Traces
@@ -24,7 +30,8 @@ references this file, so the on-stage agent may read it.
   `add-demo-foundation`, before `add-form-emails`). Inputs: `spike-grafana-dashboard`
   `findings.md` section 6; FR-0001 (provisioning mount, fallback import on start); also provision
   community dashboard 19924; demo traffic from a .NET 10 file-based app in `tests/` (ADR-0012)
-  that browses pages and posts no forms; ADR for the dashboard. Form-meter panels go in
+  that browses pages and posts no forms; ADR for the dashboard. FR-0003 (per-page-type label
+  on request metrics) is built in the same change, together with the dashboard (PO 2026-10-15). Form-meter panels go in
   `add-form-emails`.
 - [x] Spike closure (PO 2026-10-13): keep both spikes open for reference until pre-talk cleanup
   (Todos).
@@ -46,8 +53,9 @@ references this file, so the on-stage agent may read it.
     confirmation link, waiting list or limit per email (PO 2026-10-13).
 - Stored submission: field values, form, page, UTC timestamp. No IP or browser info.
 - Agent never accesses the database; demo personal data is in telemetry only.
-- Agent reads logs, traces and metrics via the Grafana MCP only; no resource state or commands
-  (presenter runs fault commands in the dashboard). PO 2026-10-13.
+- Agent telemetry by stage (PO 2026-10-15, ADR-0022, replaces PO 2026-10-13 "Grafana MCP only"):
+  local stage Aspire MCP (traces, logs, resource state, console logs; commands prompt);
+  production stage Grafana MCP (read-only logs, traces, metrics), Grafana started at go-live.
 - Never recorded in telemetry: Name, Message, Notes, Company, Website, email address. Fine:
   form, event or service, outcome.
 - Owner dashboard of bookings: stretch goal.
@@ -68,12 +76,13 @@ references this file, so the on-stage agent may read it.
 1. `add-demo-foundation`: agency site, events and services, three forms.
 2. `add-demo-dashboard`: demo Grafana dashboard, provisioning, demo traffic (PO 2026-10-14).
 3. `add-form-emails`: all emails.
-4. `add-production-environment`: tunnel baseline first; Azure only if time allows (see Open
-   decisions, prod hosting).
+4. `add-production-environment`: Cloudflare tunnel and database reset only (Azure dropped, PO
+   2026-10-15).
 `add-event-bookings` dropped 2026-10-13 (change directory removed).
 
 ## Open decisions
-- [ ] Prod hosting (PO 2026-10-13): working assumption is the local environment behind a
+- [x] Prod hosting (PO 2026-10-15): local environment behind the Cloudflare tunnel; Grafana
+  plays production; Azure dropped. Earlier notes (PO 2026-10-13): working assumption is the local environment behind a
   Cloudflare tunnel as baseline and fallback, built first; Azure built only if time allows. PO
   makes the final choice before it is needed. Implications of the tunnel baseline, to resolve
   in `add-production-environment`:
@@ -93,8 +102,9 @@ references this file, so the on-stage agent may read it.
   and telemetry.
 - [x] Telemetry MCP (PO 2026-10-13): logs, traces and metrics queries go to the Grafana MCP
   (covers all three, `spike-metrics-mcp` findings). Architect: revise ADR-0011.
-- [x] Aspire MCP (PO 2026-10-13): dropped. Presenter runs Toxiproxy commands in the dashboard;
-  no console logs or resource state for the agent.
+- [x] Aspire MCP (PO 2026-10-13): dropped; reinstated 2026-10-15 for the local stage
+  (`rework-aspire-first`, ADR-0022). Resource commands prompt each call; the presenter runs
+  them in the dashboard.
 - [x] Event bookings (PO 2026-10-13): Event booking is an ordinary submission; `add-event-bookings`
   dropped.
 
@@ -116,7 +126,7 @@ Decided in ADRs; verified by `add-demo-foundation` tasks:
 For `add-production-environment`, tunnel baseline:
 - [ ] Cloudflare tunnel to the local site: public URL for the QR code, only the site exposed
   (no dashboard, Grafana, smtp4dev or backoffice).
-For `add-production-environment`, Azure stretch (only if time allows):
+Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
 - [ ] Azure MCP Server: read-only mode, Monitor/App Insights query tools, running under a limited identity (Monitoring Reader + Log Analytics Reader).
 - [ ] Azure Communication Services Email via SMTP from Umbraco IEmailSender.
 - [ ] Umbraco 17 on Azure Container Apps: deploy via azd / `aspire deploy`, cold start, Examine/temp on local disk.
@@ -140,10 +150,12 @@ For `add-production-environment`, Azure stretch (only if time allows):
   leave them, and `.claude/commands/opsx/`, off demo branches and `main`; on stage they make
   the agent role-play and route fixes through sub-agents. PO decides separately whether
   attendees see the OpenSpec planning.
-- [ ] Script and rehearse agent prompts; rehearse with `/fast`.
+- [ ] Script and rehearse agent prompts; rehearse with `/fast`. Present in default permission
+  mode: auto mode approves Aspire resource commands without a prompt (`rework-aspire-first`
+  task 6.1, 2026-10-15).
 - [ ] Record fallback videos of agent segments.
 - [ ] Tunnel baseline: start the environment and tunnel before the talk; smoke test the public
-  URL the morning of. Azure (if built): deploy the day before; min replicas 1.
+  URL the morning of.
 - [ ] Stage layout: VSCodium + Claude CLI terminal, browser tabs (dashboard, smtp4dev, site).
 - [ ] Venue network plan: everything local except the LLM.
 - [ ] Before the talk: remove demo-plan entries from Claude memory, or run the demo

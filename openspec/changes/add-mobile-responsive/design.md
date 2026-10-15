@@ -1,3 +1,7 @@
+> Amended 2026-10-14 (PO, ADR-0021): `prototype/` removed. D1 superseded (no sync, no drift
+> test; edit `wwwroot` in place); D2 and D5 prototype parts obsolete; D3 and D4 stand for the
+> site. Bar: `dotnet build`, `dotnet test`, PO check on the site only.
+
 ## Context
 
 See proposal.md - Why. Current state (branch `sample-site`):

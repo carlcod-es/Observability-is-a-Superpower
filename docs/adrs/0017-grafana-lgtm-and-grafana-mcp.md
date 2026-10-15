@@ -1,7 +1,10 @@
 # ADR-0017: Grafana LGTM and Grafana MCP for agent telemetry
 
 ## Status
-Accepted (2026-10-13). Supersedes ADR-0011.
+Accepted (2026-10-13). Supersedes ADR-0011. Partly superseded by ADR-0022 (2026-10-15, change
+`rework-aspire-first`): two MCP servers (Aspire MCP for the local stage, Grafana MCP for the
+production stage) instead of one, and LGTM plus Grafana MCP started on demand instead of from
+start-up. Collector, LGTM and Grafana MCP versions and flags stand.
 
 ## Context
 The talk promises the agent reads logs, traces and metrics via MCP. The Aspire MCP has no

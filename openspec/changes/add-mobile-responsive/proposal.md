@@ -1,3 +1,7 @@
+> Amended 2026-10-14 (PO, ADR-0021): `prototype/` removed. The site's `wwwroot` holds the only
+> stylesheet and script; the copy step and drift check are dropped. Prototype items below are
+> historical.
+
 ## Why
 
 Attendees open the demo site on their phones (QR code to the forms during the talk), and the

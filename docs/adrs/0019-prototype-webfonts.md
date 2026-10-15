@@ -1,7 +1,7 @@
 # ADR-0019: Self-hosted open-licence webfonts in the prototype
 
 ## Status
-Accepted (2026-10-14); prototype font path amended by ADR-0020 (2026-10-14)
+Accepted (2026-10-14); prototype font path amended by ADR-0020 (2026-10-14); prototype removed (ADR-0021), site outcome below stands
 
 ## Context
 The PO rebranded the prototype to Rubber Duck Consulting (prototype-only; the Umbraco demo site

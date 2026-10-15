@@ -1,7 +1,7 @@
 # ADR-0018: Static site prototype built with Eleventy
 
 ## Status
-Accepted (2026-10-14); typography point superseded by ADR-0019 (2026-10-14); "deletable wholesale" consequence amended by ADR-0020 (2026-10-14)
+Accepted (2026-10-14); typography point superseded by ADR-0019 (2026-10-14); "deletable wholesale" consequence amended by ADR-0020 (2026-10-14); prototype removed, ADR-0021 (2026-10-14)
 
 ## Context
 Change `add-site-prototype` delivers a standalone static prototype of the Acme Agency site (four

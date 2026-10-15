@@ -1,7 +1,7 @@
 # ADR-0020: Prototype is the source of the site's stylesheet and script
 
 ## Status
-Accepted (2026-10-14, PO)
+Superseded by ADR-0021 (2026-10-14, PO: prototype removed)
 
 ## Context
 Change `add-mobile-responsive` makes the demo site and the static prototype responsive and adds

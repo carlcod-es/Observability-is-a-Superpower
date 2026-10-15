@@ -117,6 +117,9 @@ task numbers where it matters.
 - [x] (Architect, done 2026-10-14) minor/nits (block 9D docs pass, tasks 9.1/9.6): `add-demo-dashboard` marked "(planned)" in `docs/project-setup.md`; Aspire version line reads SDK 13.6.0, hosting 13.6.x; README `--apphost` no longer justified by `spikes/`.
 - [ ] minor (block 9D, tasks 9.1/9.6) `README.md:71-72`, `docs/project-setup.md:86`: `wwwroot/media/` is empty and `uSync/v17/Media/` holds only `products.config`; docs describe the end state. Re-verify on the 9.1 fresh clone after task 6.4.
 - [ ] nit (block 9D) `README.md:139-140`: "Home makes database calls only on its first load after start" is a smoke-test constraint the on-stage agent can read; not a demo answer. PO: keep or soften.
+- [x] (Architect, fixed 2026-10-14) minor (block 9E, task 6.3) `uSync/v17/Content/umbraco-builders-day.config`: "Bring a laptop… Lunch and coffee are on us" implied an in-person format (spec `agency-site`: no format). Reworded; nit `events.config` summary "Book a place" reworded too. PO: uSync import + commit.
+- [ ] nit (block 9E) `events.config` mainContent "Free talks and workshops" / "session" name event kinds; acceptable marketing copy, brushes against "no format".
+- [ ] nit (block 9E) Services `seo-audit`, `adwords-audit`, `umbraco-upgrade`: `summary` repeated as the first body sentence, so banner and first paragraph read the same. PO: keep or reword.
 
 ## Superseded by the 2026-10-13 re-plan (ADR-0016, ADR-0017)
 
@@ -147,4 +150,5 @@ task 3.1 or replaced by the new task texts. Kept for the record.
 - nit (block 5A) `EventBookingRepository.cs:21`: `DateTimeKind.Unspecified` — booking repository deleted.
 - Architect (block 5A) Pending checks before ticking 5.1 (booking table) — booking table dropped.
 - nit (block 3H, folder step) `MoveTypesToFolderStep.cs`: missing type logs a warning — code deleted.
-- Architect (section 2 supervisor) Task 8.2: inspect Aspire MCP `list_resources` for the `umbracoDbDSN` connection string — the Aspire MCP is dropped (ADR-0017); the agent has no resource tool.
+- Architect (section 2 supervisor) Task 8.2: inspect Aspire MCP `list_resources` for the `umbracoDbDSN` connection string — the Aspire MCP is dropped (ADR-0017); the agent has no resource tool. Reopened by ADR-0022 (Aspire MCP back): checked as
+  `rework-aspire-first` task 6.2.

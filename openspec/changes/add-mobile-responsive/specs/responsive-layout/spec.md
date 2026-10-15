@@ -1,12 +1,12 @@
 ## Purpose
 
-Makes the demo site and the static prototype usable from phone to desktop widths, with one
-stylesheet and one script shared unchanged between them.
+Makes the demo site usable from phone to desktop widths, with one stylesheet and one script
+served by the site itself.
 
 ## ADDED Requirements
 
 ### Requirement: Layout fits every screen width
-Every page of the demo site and of the prototype SHALL fit the viewport from 320 CSS pixels
+Every page of the demo site SHALL fit the viewport from 320 CSS pixels
 wide upwards: no horizontal scrolling, text readable without zooming, content images and
 embedded media no wider than the screen, long words and URLs wrapping instead of overflowing.
 Listings SHALL show one card per row on narrow screens and several per row on wide screens.
@@ -16,7 +16,7 @@ Listings SHALL show one card per row on narrow screens and several per row on wi
 - **THEN** the page has no horizontal scroll and all content is visible by scrolling down only
 
 #### Scenario: Tablet and desktop widths
-- **WHEN** a visitor opens a listing page (Services, Events, or the prototype's Blog) at 768
+- **WHEN** a visitor opens a listing page (Services or Events) at 768
   and at 1280 CSS pixels wide
 - **THEN** cards sit several per row and the page has no horizontal scroll
 
@@ -69,21 +69,9 @@ SHALL show and the full navigation SHALL be visible at every width.
   works
 
 ### Requirement: Shared stylesheet and script
-The demo site SHALL use the prototype's stylesheet and script byte-for-byte (line endings
-aside), authored once in the prototype and copied to the site (ADR-0020). An automated check in
-the site's test suite SHALL fail when the site's copy of either file differs from the
-prototype's. Fonts SHALL be requested from the same paths in both. The script SHALL be served
-by the site itself and SHALL NOT add traces for its own request (ADR-0008 excluded paths).
-
-#### Scenario: Copy is in sync
-- **WHEN** the site's test suite runs after the prototype's stylesheet or script changed and
-  the copy step ran
-- **THEN** the check passes
-
-#### Scenario: Copy drifted
-- **WHEN** the site's stylesheet or script is edited directly, or the prototype's is changed
-  without running the copy step
-- **THEN** the check fails and names the file that differs
+The demo site SHALL use one stylesheet and one script for every page, kept in the site
+(ADR-0021). Fonts SHALL be served by the site. The script SHALL be served by the site itself
+and SHALL NOT add traces for its own request (ADR-0008 excluded paths).
 
 #### Scenario: No third-party or traced requests
 - **WHEN** a visitor loads any demo site page
