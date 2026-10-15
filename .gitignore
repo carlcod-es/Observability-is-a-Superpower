@@ -17,3 +17,6 @@ src/SuperPower.Web/Models/ood.flag
 
 # Claude Code worktrees
 .claude/worktrees/
+
+# Local scratch notes (never committed)
+.temp/
