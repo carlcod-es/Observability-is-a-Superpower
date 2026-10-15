@@ -1,7 +1,7 @@
 # FR-0002: Images on the site
 
 ## Status
-Open (2026-10-14). Source: `add-demo-foundation` task 6.4, deferred by the PO.
+Done (2026-10-15) in `add-demo-foundation` task 6.4. Source: `add-demo-foundation` task 6.4, deferred by the PO 2026-10-14.
 
 ## Request
 Pages show banner and card images from the media library instead of the plain colour block.

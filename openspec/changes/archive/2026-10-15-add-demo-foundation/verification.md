@@ -165,3 +165,22 @@ SQL Server only.
   fallback); second start with no duplicated content or media; fresh SQLite standalone run.
 - Open for 3.2: second start changes nothing (plan-skipped log line); byte-identical `FieldsJson`
   round-trip on SQL Server and fresh SQLite (PO SQL query); fresh SQLite first boot.
+
+## PO acceptance 2026-10-15 (tasks 9.2, 9.3, 3.2, 6.4)
+- PO, verbatim: "3 has been done, so I'm happy with that" (task 9.2 fresh-database first boot,
+  open items above) and "4 has been tested on windows so I'm happy with that, and this also
+  tested 3 again" (task 9.3 Windows fresh clone, repeating 9.2).
+- Task 9.3: Windows only from a fresh clone. macOS ran throughout development but not from a
+  fresh clone; Linux container not run. Accepted by the PO.
+- Task 6.4 / FR-0002: media uploaded and exported by the PO (6f02cd8); banner images reworked to
+  1600x500 the same day; PO checked the UI on desktop and mobile.
+- Still open: task 9.1 (README fresh-clone follow-through), task 9.6 (project-setup re-check),
+  section 9 supervisor.
+- Task 9.1: PO confirmed 2026-10-15 that the Windows fresh-clone run (task 9.3) followed the README.
+- Task 9.6 (Architect, 2026-10-15): `docs/project-setup.md` checked against `main`: package and SDK versions (Umbraco 17.7.1, AppHost SDK 13.6.0, Aspire.Hosting.Azure.Sql 13.6.1), image tags and ports in `AppHost.cs`, launch ports 44368/21258, `ModelsMode` `SourceCodeManual`, 13 Aspire tools in `.claude/settings.json`, content tree in uSync. Fixed: brand name, `banners/`, `wwwroot/assets/`, `/assets` still traced (fixed by `add-demo-dashboard`).
+- Task 9.3 follow-up (section 9 supervisor minor): PO 2026-10-15, verbatim: "yes, windows worked
+  just fine" — the Windows run started `lgtm` and Grafana/agent showed data. Linux scenario of
+  spec `local-environment` "Cross-platform": not met, accepted by the PO.
+- Flagged, not recorded: Home trace in the Aspire dashboard (spec `local-environment` "Page
+  request trace", `*/aspire` pipelines) has no observation since ADR-0022; smoke checks Grafana
+  only. Open in review-followups.md "Section 9 supervisor"; not blocking archive.

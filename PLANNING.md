@@ -7,21 +7,14 @@ Rule: no demo answers here (planted problems, their causes or fixes). CLAUDE.md
 references this file, so the on-stage agent may read it.
 
 ## Next step
-- [ ] `rework-aspire-first` (2026-10-15, branch `aspire-first` from `sample-site` `bedd4c0`,
-  ADR-0022 Accepted): Aspire MCP for the local stage, Grafana LGTM + Grafana MCP started on
-  demand as production (no replay). 12/12, accepted by the PO 2026-10-15; merge into
-  `sample-site`. Closes `add-demo-foundation` tasks 8.1, 8.2. Archive after
-  `add-demo-foundation` (its delta specs modify that change's specs).
-- [ ] `/opsx:apply add-demo-foundation` (24/30, 2026-10-15): Architect state
-  in Claude memory. Remaining (`add-demo-foundation` tasks): PO content (6.4 deferred, FR-0002), fresh-database first
-  boot (9.2, also closes 3.2), cross-platform (9.3), README and project-setup (9.1, 9.6),
-  section 9 supervisor.
-- [ ] `add-mobile-responsive` (2026-10-14, branch `mobile-responsive` from `sample-site`):
-  applied and merged to `main` (PR #3), 5/9 ticked. PO removed `prototype/` 2026-10-14
-  (ADR-0021 supersedes ADR-0020): `wwwroot` is the only CSS/JS source, drift test removed
-  (task 3.2). Next: PO site-only browser check (task 4.2), which closes 1.2, 1.3, 2.1.
-- [ ] `add-site-prototype`: complete and merged to `main` 2026-10-14; `prototype/` deleted by the PO
-  2026-10-14 (ADR-0021); archiving is the PO's call.
+- [x] `add-demo-foundation` (30/30, section 9 supervisor APPROVED) and `rework-aspire-first` (12/12,
+  ADR-0022) archived 2026-10-15 to `openspec/changes/archive/2026-10-15-*`; specs synced to
+  `openspec/specs/` (agency-site, agent-telemetry-access, form-submission, local-environment).
+  Open items carried to Todos below and FR-0004.
+- [x] `add-mobile-responsive` (2026-10-14): applied and merged to `main` (PR #3), 9/9; task 4.2
+  PO browser check done 2026-10-15; archived 2026-10-15, spec `responsive-layout` synced.
+- [x] `add-site-prototype`: complete and merged to `main` 2026-10-14; `prototype/` deleted by the PO
+  2026-10-14 (ADR-0021); archived 2026-10-15 without spec sync (prototype removed).
 - [x] `spike-grafana-dashboard` run 2026-10-14 (PO reviewed in the UI, hosts stopped). Result in its
   `findings.md` section 6: one custom JSON-first demo dashboard (request rate, 5xx rate, p95 with
   trace exemplars, form meters, Loki error logs), drill-down through the bundled Logs/Traces
@@ -158,6 +151,19 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
   URL the morning of.
 - [ ] Stage layout: VSCodium + Claude CLI terminal, browser tabs (dashboard, smtp4dev, site).
 - [ ] Venue network plan: everything local except the LLM.
+- [ ] Carried from `add-demo-foundation` review-followups.md before archive (2026-10-15):
+  - PO decisions: trace backoffice page loads `/umbraco`, `/umbraco/login` or not; replace the
+    Umbraco default `favicon.ico`; replace Umbraco's default 404 page (umbra.co links), visible
+    to attendees through the tunnel.
+  - Stage PII rules: never lower Umbraco/Serilog levels to Debug while forms are submitted
+    (failed inserts log `FieldsJson`); keep personal data out of query strings (Development
+    "Request starting" logs log the full query); do not show `aspire describe` output (SQL sa
+    password).
+  - `add-production-environment`: `/health` and `/alive` mapped only in Development;
+    possible duplicate logs/spans and filter bypass with `UseAzureMonitor` (moot if Azure stays
+    dropped); `.WithExternalHttpEndpoints()` on smtp4dev.
+- [ ] FR-0004 (2026-10-15): review nits from `add-demo-foundation` (31 items, code, views, tests,
+  README, content); after the talk unless the PO pulls items forward.
 - [ ] Before the talk: remove demo-plan entries from Claude memory, or run the demo
   from a different clone path (memory is keyed to the folder path and loads on stage).
 
