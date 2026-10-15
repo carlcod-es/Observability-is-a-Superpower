@@ -87,12 +87,6 @@
     <footer class="site-footer">
         <div class="container">
             <p>&copy; Rubber Duck Agency. A fictional marketing agency.</p>
-            <ul class="site-footer__list">
-                @foreach (var item in nav)
-                {
-                    <li><a href="@item.Url()">@(item.Id == root.Id ? "Home" : item.Name)</a></li>
-                }
-            </ul>
         </div>
     </footer>
 </body>
