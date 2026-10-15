@@ -1,7 +1,7 @@
 # ADR-0023: Demo dashboards as JSON in the repo, provisioned into Grafana LGTM on start
 
 ## Status
-Proposed (2026-10-15, change `add-demo-dashboard`). Closes FR-0001.
+Accepted (2026-10-15, change `add-demo-dashboard`, PO sign-off). Closes FR-0001.
 
 ## Context
 Grafana LGTM (`grafana/otel-lgtm:0.36.0`, Grafana 13.2.3) plays production and is started on

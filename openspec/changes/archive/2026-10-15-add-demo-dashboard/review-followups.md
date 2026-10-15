@@ -70,3 +70,10 @@ still satisfy it (accepted, prototype bar).
 - [x] minor README "Run the demo" step 8: no `/mcp` reconnect for attendees who skip step 6. Fixed.
 - [x] minor README "Run the demo" step 5: where the metric is. Fixed (Metrics > `site` > `http.server.request.duration`).
 - [ ] nit README "Run the demo" steps 5 and 8: lines exceed the file's wrap width.
+
+## PO acceptance on Windows (section 6), 2026-10-15
+- [ ] major `tests/smoke/smoke.cs:486` `Run()`: `Process.Start("aspire")` cannot start the .NET-tool shim
+  `aspire.cmd` on Windows ("The system cannot find the file specified"). lgtm pre-start, telemetry, dashboard checks,
+  mail setup and mail heal fail. PO accepted as pass for this change. Fix: on Windows start via `cmd.exe /c aspire ...`.
+- [ ] minor README "Connect to the database": says server `localhost,<port>`; the SQL container publishes on
+  127.0.0.1 only and the smoke check now uses `127.0.0.1` (PO fix, `smoke.cs:74`). Align the README.

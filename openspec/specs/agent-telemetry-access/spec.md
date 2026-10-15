@@ -10,6 +10,8 @@ Decisions: ADR-0017 (Grafana LGTM and Grafana MCP; supersedes ADR-0011); in `doc
 Decisions: ADR-0022 (Aspire MCP for the local stage, Grafana MCP for the production stage;
 supersedes part of ADR-0017); in `docs/adrs/`.
 
+Decisions: ADR-0024 (page-type label on request metrics); in `docs/adrs/`.
+
 ## Requirements
 
 ### Requirement: Agent reads local telemetry
@@ -79,9 +81,8 @@ Metric counters MAY include totals from before the start (cumulative; PO 2026-10
 #### Scenario: Agent checks a metric
 - **WHEN** the agent is asked how long requests to a page take, after the platform started
   and the page was requested
-- **THEN** it can retrieve the site's request-duration metric from the platform, and that
-  page's request durations from its traces (the metric has no page label; per-page metrics in
-  FR-0003, PO 2026-10-15)
+- **THEN** it can retrieve that page type's request durations from the site's request-duration
+  metric, filtered by page type (FR-0003, ADR-0024)
 
 #### Scenario: Nothing from before go-live
 - **WHEN** the agent searches the platform for a request made before the platform started

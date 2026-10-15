@@ -16,7 +16,7 @@ run in parallel; the contract between them is the tag `acme.page_type` / label
 
 ## 3. Traffic source (worker-backend; `tests/traffic/`; depends on nothing, checked against section 2)
 
-- [ ] 3.1 Write `tests/traffic/traffic.cs` per design.md D5 (GET only, ~1 req/s round-robin over pages found on Home, Events list and Services list, per-minute summary, optional site URL argument); verify `dotnet run tests/traffic/traffic.cs` against a running AppHost prints its page list including at least one event and one service page and a summary line with failures=0 after a minute, and that the stored submission count is unchanged (PO runs the count query, CLAUDE.md "Scope")
+- [x] 3.1 Write `tests/traffic/traffic.cs` per design.md D5 (GET only, ~1 req/s round-robin over pages found on Home, Events list and Services list, per-minute summary, optional site URL argument); verify `dotnet run tests/traffic/traffic.cs` against a running AppHost prints its page list including at least one event and one service page and a summary line with failures=0 after a minute, and that the stored submission count is unchanged (PO runs the count query, CLAUDE.md "Scope")
 
 ## 4. Smoke check (worker-backend, shared file assigned by the Architect; `tests/smoke/smoke.cs`; depends on sections 1 and 2)
 
@@ -29,14 +29,14 @@ run in parallel; the contract between them is the tag `acme.page_type` / label
 
 ## 6. Acceptance (PO, recorded by the Architect in `verification.md`; depends on sections 1-5 and 7)
 
-- [ ] 6.1 (PO) On Windows, fresh AppHost, `lgtm` started, traffic source running: both dashboards listed under Demo without import; demo dashboard panels show page-type series, 0 % errors, empty or real error logs; clicking a p95 exemplar opens a trace of that page type; ASP.NET Core dashboard with job `site` shows request duration, error rate and total requests; verify by observation
-- [ ] 6.2 (PO) Stop and restart the AppHost, start `lgtm` again: both dashboards still listed and fill with data once traffic runs; verify by observation
-- [ ] 6.3 (PO) Claude Code session at repo root after go-live: ask "how long do requests to the Home page take, from metrics?"; the agent answers from the request-duration metric filtered by `acme_page_type="home"` without approval prompts (spec `agent-telemetry-access` "Agent checks a metric"); verify by observation
+- [x] 6.1 (PO) On Windows, fresh AppHost, `lgtm` started, traffic source running: both dashboards listed under Demo without import; demo dashboard panels show page-type series, 0 % errors, empty or real error logs; clicking a p95 exemplar opens a trace of that page type; ASP.NET Core dashboard with job `site` shows request duration, error rate and total requests; verify by observation
+- [x] 6.2 (PO) Stop and restart the AppHost, start `lgtm` again: both dashboards still listed and fill with data once traffic runs; verify by observation
+- [x] 6.3 (PO) Claude Code session at repo root after go-live: ask "how long do requests to the Home page take, from metrics?"; the agent answers from the request-duration metric filtered by `acme_page_type="home"` without approval prompts (spec `agent-telemetry-access` "Agent checks a metric"); verify by observation
 
 ## 7. README run-through and database login (design.md D8; worker-backend for `src/SuperPower.AppHost/appsettings.json`, `tests/smoke/smoke.cs` and `README.md` (shared, assigned in briefs); Architect for docs; before section 6)
 
 PO 2026-10-15: the fixed password (FR-0005) is dropped; the generated password stays and the README says how to find it. The first plan's 7.2 (fixed password, reviewer APPROVED) is reverted by 7.1.
 
 - [x] 7.1 Revert the fixed password: remove `Parameters` from `src/SuperPower.AppHost/appsettings.json`; `tests/smoke/smoke.cs` reads the password from AppHost user secrets again (`Parameters:sql-password`, as on `main`), header to match; verify `git diff main -- src/SuperPower.AppHost/appsettings.json` is empty, `dotnet build SuperPower.slnx` and `dotnet build tests/smoke/smoke.cs` pass
-- [ ] 7.2 README "Run the demo" (numbered run-through for attendees linking the existing sections, no planted problems or fixes) and "Connect to the database" (server `127.0.0.1,<port>`, user `sa`, password from AppHost user secrets `Parameters:sql-password`, port from the Aspire dashboard, `TrustServerCertificate=True`) via a brief; verify by following both sections on a running AppHost (Architect)
+- [x] 7.2 README "Run the demo" (numbered run-through for attendees linking the existing sections, no planted problems or fixes) and "Connect to the database" (server `127.0.0.1,<port>`, user `sa`, password from AppHost user secrets `Parameters:sql-password`, port from the Aspire dashboard, `TrustServerCertificate=True`) via a brief; verify by following both sections on a running AppHost (Architect)
 - [x] 7.3 (Architect) FR-0005 Status, ADR-0009 amendment removed, proposal and spec `local-environment` delta updated; verify `grep -rn "FR-0005\|SuperPower!Demo" docs openspec/changes/add-demo-dashboard README.md src tests` shows only the FR, its Status and this re-plan

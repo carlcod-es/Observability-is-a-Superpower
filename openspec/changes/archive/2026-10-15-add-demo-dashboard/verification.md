@@ -46,21 +46,33 @@ Branch `add-demo-dashboard`. Aspire CLI/SDK 13.6.1, `grafana/otel-lgtm:0.36.0`, 
 
 ## PO checks (section 6)
 
-Windows, fresh AppHost, default permission mode.
+Windows, fresh AppHost, default permission mode. PO sign-off 2026-10-15.
 
 ### 6.1 Dashboards on go-live
-- [ ] Both dashboards under Dashboards > Demo without import.
-- [ ] Demo site: page-type series on rate and p95, error rate 0 %, error logs empty or real errors.
-- [ ] p95 exemplar click opens a trace of that page type.
-- [ ] ASP.NET Core dashboard, job `site`: request duration, error rate, total requests show data
+- [x] Both dashboards under Dashboards > Demo without import.
+- [x] Demo site: page-type series on rate and p95, error rate 0 %, error logs empty or real errors.
+- [x] p95 exemplar click opens a trace of that page type.
+- [x] ASP.NET Core dashboard, job `site`: request duration, error rate, total requests show data
   (spec `demo-dashboard` "Generic dashboard").
 
 ### 6.2 After AppHost restart
-- [ ] Both dashboards listed again; data once traffic runs.
+- [x] Both dashboards listed again; data once traffic runs.
 
 ### 6.3 Agent metric question
-- [ ] "how long do requests to the Home page take, from metrics?": answered from
+- [x] "how long do requests to the Home page take, from metrics?": answered from
   `http_server_request_duration_seconds` filtered by `acme_page_type="home"`, no approval prompts.
+
+### 3.1 Submission count (PO)
+- [x] Count before and after a traffic run unchanged.
+
+### Smoke on Windows (PO run, 2026-10-15)
+- Fix: `tests/smoke/smoke.cs:74` SQL server `localhost` -> `127.0.0.1` (PO). The SQL container publishes on
+  127.0.0.1 only; `localhost` timed out from SqlClient on Windows.
+- After the fix: pages, contact, service enquiry, event booking and invalid submission PASS.
+- FAIL, accepted by the PO as pass: telemetry, dashboard checks, mail setup, mail heal. Cause: `Process.Start("aspire")`
+  does not resolve the .NET-tool shim `aspire.cmd` on Windows, so the lgtm pre-start, `aspire describe` and resource
+  commands fail; telemetry and dashboard checks then reach Grafana before `lgtm` is started. Not a defect in the
+  change's runtime behaviour: the same items passed by hand in 6.1 and 6.2. Follow-up in `review-followups.md`.
 
 ## Section 7 (README run-through and database login)
 
@@ -75,5 +87,5 @@ Windows, fresh AppHost, default permission mode.
   again (no password lines in `git diff main -- tests/smoke/smoke.cs`); both builds 0 errors. Reviewer APPROVED
   2026-10-15.
 - 7.2 README "Run the demo" and "Connect to the database": anchors, ports, resource/database/table names and
-  user-secrets keys checked against the code (reviewer APPROVED 2026-10-15; two minors fixed). Following both
-  sections on a running AppHost: owed.
+  user-secrets keys checked against the code (reviewer APPROVED 2026-10-15; two minors fixed). Followed both
+  sections on a running AppHost on Windows: PO 2026-10-15, passed.

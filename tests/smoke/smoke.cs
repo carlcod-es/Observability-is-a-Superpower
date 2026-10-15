@@ -71,7 +71,7 @@ DbConnection OpenDb()
     {
         var secrets = Run("dotnet", "user-secrets", "list", "--project", Path.Combine(root, "src", "SuperPower.AppHost"))
             .Split('\n').Select(l => l.Split(" = ", 2)).Where(p => p.Length == 2).ToDictionary(p => p[0].Trim(), p => p[1].Trim());
-        cs = $"Server=localhost,{secrets["Resources:sql:tcp:port"]};User Id=sa;Password={secrets["Parameters:sql-password"]};Database=umbraco;TrustServerCertificate=True";
+        cs = $"Server=127.0.0.1,{secrets["Resources:sql:tcp:port"]};User Id=sa;Password={secrets["Parameters:sql-password"]};Database=umbraco;TrustServerCertificate=True";
     }
     var s = new SqlConnection(cs);
     s.Open();

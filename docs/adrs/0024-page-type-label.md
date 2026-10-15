@@ -1,7 +1,7 @@
 # ADR-0024: Page-type label on request metrics and spans
 
 ## Status
-Proposed (2026-10-15, change `add-demo-dashboard`). Closes FR-0003.
+Accepted (2026-10-15, change `add-demo-dashboard`, PO sign-off). Closes FR-0003.
 
 ## Context
 Umbraco serves every content page through one catch-all route, so the ASP.NET Core
