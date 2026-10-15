@@ -100,7 +100,8 @@ runnable by attendees.
 ## Telemetry
 - The site's forms code emits its own ActivitySource and Meter `Acme.Forms` (ADR-0027): spans
   `acme.forms.submit` / `acme.forms.notify`, counter `acme.forms.submissions` by form and
-  outcome, log `Form {Form} stored as {Reference}`.
+  outcome, log `Form {Form} for {Page} stored as {Reference}` (`Page`: page name, e.g. the event
+  or service title).
 - Never recorded: Name, Message, Notes, Company, Website, email address. Fine: form, event or
   service, outcome.
 - Log what happened (form, outcome, reference), never the submitted model or field values; the

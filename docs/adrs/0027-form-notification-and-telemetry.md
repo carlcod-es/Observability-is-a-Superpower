@@ -23,7 +23,8 @@ already registers both. Umbraco 17 sends mail through `IEmailSender` (MailKit) u
 - Counter `acme.forms.submissions` (Prometheus `acme_forms_submissions_total`), tags
   `acme.form` (`contact`, `service_enquiry`, `event_booking`) and `acme.form.outcome`
   (`stored`, `invalid`, `failed`).
-- Log: Information `Form {Form} stored as {Reference}` per stored submission. No field values
+- Log: Information `Form {Form} for {Page} stored as {Reference}` per stored submission (`Page`
+  = page name, added by the PO 2026-10-16 to filter by event or service). No field values
   in tags, span names, metrics or logs.
 - MailKit's own `MailKit.Net.SmtpClient` activity source is not enabled: the notify span is
   enough at demo scale.

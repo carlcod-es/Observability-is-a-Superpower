@@ -64,7 +64,7 @@ public static class Extensions
             logging.IncludeFormattedMessage = true;
             logging.IncludeScopes = true;
             // Demo Code
-            //logging.AddProcessor(new PersonalDataLogProcessor(redactionKey)); // ADR-0028: log redaction - comment out to show raw values in a demo
+            // logging.AddProcessor(new PersonalDataLogProcessor(redactionKey)); // ADR-0028: log redaction - comment out to show raw values in a demo
         });
 
         builder.Services.AddOpenTelemetry()

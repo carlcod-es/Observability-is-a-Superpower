@@ -91,7 +91,7 @@ public sealed class AcmeFormsController(
         }
 
         // Demo code
-        logger.LogInformation("Form Submitted {@Model}", model);
+        // logger.LogInformation("Form Submitted {@Model}", model);
 
         try
         {
@@ -105,7 +105,7 @@ public sealed class AcmeFormsController(
 
             var reference = SubmissionReference.Format(number);
             activity?.SetTag("acme.submission.reference", reference);
-            logger.LogInformation("Form {Form} stored as {Reference}", form, reference);
+            logger.LogInformation("Form {Form} for {Page} stored as {Reference}", form, CurrentPage.Name, reference);
 
             await Notify(form, formName, reference, submittedUtc, model);
 

@@ -138,7 +138,8 @@ Configured once in ServiceDefaults; the site code does not depend on the exporte
   `service`) or `none` (ADR-0024).
 - **Logs**: Umbraco logs through Serilog. A sink in ServiceDefaults forwards Serilog events to
   the OpenTelemetry logger, so logs keep named properties and link to their trace (ADR-0007).
-  The forms code logs `Form {Form} stored as {Reference}` per stored submission.
+  The forms code logs `Form {Form} for {Page} stored as {Reference}` per stored submission
+  (`Page`: the page name, e.g. the event or service title).
   Destructured objects (`{@Model}`) become dotted attributes (`Model.Email`).
   Log levels are set in the site's Serilog configuration only; `Logging:LogLevel` has no effect.
   No Serilog console sink: log entries leave the site only through OpenTelemetry (raw values
