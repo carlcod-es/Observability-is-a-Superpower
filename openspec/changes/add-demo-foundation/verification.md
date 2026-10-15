@@ -153,3 +153,15 @@ SQL Server only.
 - Smoke `-- standalone` (SQLite): ALL CHECKS PASSED — 13 pages, Contact submission (row 14),
   invalid submission. Page count differs because SQLite still holds older content (the past event
   dated 29 Oct there, so it is listed); task 9.2 rebuilds both databases from the uSync files.
+
+## Task 9.2 / 3.2 fresh SQL volume, first boot (2026-10-15, PO run, `sample-site` after `rework-aspire-first` merge)
+- Wiped: AppHost stopped, container `sql-d0adb38c` and volume `superpower.apphost-d0adb38ccd-sql-data`
+  removed, `umbraco/Data/TEMP` deleted (PO, per Architect steps).
+- First boot, then `dotnet run tests/smoke/smoke.cs` before any browser request: ALL CHECKS PASSED.
+  pages 200 (12 pages); Contact/Service enquiry/Event booking rows 1, 2, 3 (new table, "Acme.Site"
+  plan ran on SQL Server); invalid submission 0 rows; Home first-load trace 1 server span, 9
+  database spans, linked log; no pre-start telemetry in Grafana; mail baseline/slow/break/heal.
+- Open for 9.2: browser check of all page types, events, services, forms, media/images (or colour
+  fallback); second start with no duplicated content or media; fresh SQLite standalone run.
+- Open for 3.2: second start changes nothing (plan-skipped log line); byte-identical `FieldsJson`
+  round-trip on SQL Server and fresh SQLite (PO SQL query); fresh SQLite first boot.
