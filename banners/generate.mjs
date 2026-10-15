@@ -1,5 +1,7 @@
-// Generates rubber-duck banner SVGs (1600x900, 16:9; subjects kept in the vertical middle so the
-// 18rem-high banner crop and the 16:9 card crop both show them). File names = page node names.
+// Generates rubber-duck banner SVGs (1600x500). Each scene is drawn on a 1600x900 layout, then
+// scaled into a centre safe zone (~600x300) so the wide desktop banner crop (top/bottom), the
+// mobile banner crop and the 16:9 card crop (sides) all show it. Water spans the full width.
+// File names = page node names.
 // Usage: node banners/generate.mjs banners
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -27,13 +29,15 @@ function duck(x, y, s = 1, { flip = false, extra = "", hat = "" } = {}) {
 ${hat}${extra}</g>`;
 }
 
-const waves = (y, color, amp = 18) => {
+const W = 1600, H = 500, K = 0.45; // canvas, scene scale
+const TX = W / 2 - K * 800, TY = H / 2 - K * 460; // maps scene point (800, 460) to canvas centre
+const waves = (y, color, amp) => {
   let d = `M0 ${y}`;
-  for (let x = 0; x < 1600; x += 100) d += ` q25 ${-amp} 50 0 t50 0`;
-  return `<path d="${d} V900 H0Z" fill="${color}"/>`;
+  for (let x = 0; x < W; x += 100) d += ` q25 ${-amp} 50 0 t50 0`;
+  return `<path d="${d} V${H} H0Z" fill="${color}"/>`;
 };
-let front = "";
-const water = (y = 600) => { front = waves(y + 45, C.waterDark, 14); return waves(y, C.water); };
+let waterY = null; // scene y of the water line, drawn full width by svg()
+const water = (y = 600) => { waterY = y; return ""; };
 const bubbles = (pts) => pts.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${C.white}" opacity=".6"/>`).join("");
 
 // Small reusable props.
@@ -54,7 +58,10 @@ const bunting = (y) => {
 };
 
 function svg(bg, body) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900"><rect width="1600" height="900" fill="${bg}"/>${body}${front}</svg>\n`;
+  const y = TY + K * waterY;
+  waterY = null;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="${bg}"/>`
+    + waves(y, C.water, 18 * K) + `<g transform="translate(${TX} ${TY}) scale(${K})">${body}</g>` + waves(y + 45 * K, C.waterDark, 14 * K) + "</svg>\n";
 }
 
 const scenes = {
