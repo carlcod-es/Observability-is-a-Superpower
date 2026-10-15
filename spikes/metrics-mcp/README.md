@@ -1,6 +1,6 @@
 # metrics-mcp spike
 
-Throwaway spike: can a coding agent read logs, traces and metrics through one MCP server? Aspire MCP has no metrics tool. The AppHost runs the `../aspire-probe` projects (`Probe.Api`, `Probe.Web`, SQL Server container, unchanged) and fans telemetry out through an OpenTelemetry Collector to the Aspire dashboard plus one candidate backend (Grafana LGTM) queried through one MCP server (Grafana MCP) for logs, traces and metrics. Scope and questions: [`proposal.md`](../../openspec/changes/spike-metrics-mcp/proposal.md); design: [`design.md`](../../openspec/changes/spike-metrics-mcp/design.md).
+Throwaway spike: can a coding agent read logs, traces and metrics through one MCP server? Aspire MCP has no metrics tool. The AppHost runs the `../aspire-probe` projects (`Probe.Api`, `Probe.Web`, SQL Server container, unchanged) and fans telemetry out through an OpenTelemetry Collector to the Aspire dashboard plus one candidate backend (Grafana LGTM) queried through one MCP server (Grafana MCP) for logs, traces and metrics. Scope and questions: [`proposal.md`](../../openspec/changes/archive/2026-10-15-spike-metrics-mcp/proposal.md); design: [`design.md`](../../openspec/changes/archive/2026-10-15-spike-metrics-mcp/design.md).
 
 ## Prerequisites
 

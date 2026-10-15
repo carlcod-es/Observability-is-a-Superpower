@@ -139,8 +139,8 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
   reference until then): `spike-aspire-probe` task 3.4 and `spike-metrics-mcp` task 3.6 —
   delete `spikes/` (includes `spikes/metrics-mcp/dashboards/` from `spike-grafana-dashboard`;
   copy any dashboard JSON the demo adopts out first), remove `Microsoft.Data.SqlClient` from `Directory.Packages.props` (keep the
-  toolkit package, used by `add-demo-foundation` task 2.5), root build; archive both changes and
-  `spike-grafana-dashboard`.
+  toolkit package, used by `add-demo-foundation` task 2.5), root build. All three spike changes
+  archived 2026-10-15 to `openspec/changes/archive/2026-10-15-spike-*` with these tasks open.
   Keep `spikes/` off `demo/act-N-*` branches and out of the published repo.
 - [ ] Plan and create `demo/act-N-*` fallback branches. Keep `docs/research/` and any OpenSpec
   artifacts that describe later-act fixes off earlier demo branches.
