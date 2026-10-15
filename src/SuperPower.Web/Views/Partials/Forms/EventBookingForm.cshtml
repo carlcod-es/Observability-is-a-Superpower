@@ -1,7 +1,8 @@
 @model EventBookingForm
 @if (TempData[AcmeFormsController.SuccessTempDataKey]?.ToString() == AcmeFormKeys.EventBooking.ToString())
 {
-    <p class="form-success" role="status">@AcmeFormsController.SuccessMessage</p>
+    var reference = TempData[AcmeFormsController.ReferenceTempDataKey]?.ToString();
+    <p class="form-success" role="status">@AcmeFormsController.SuccessMessage Your reference is @reference.</p>
 }
 
 @using (Html.BeginUmbracoForm<AcmeFormsController>(nameof(AcmeFormsController.SubmitEventBooking), new { }, new { novalidate = "novalidate" }, FormMethod.Post))

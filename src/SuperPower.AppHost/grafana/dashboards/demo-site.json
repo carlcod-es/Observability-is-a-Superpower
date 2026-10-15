@@ -71,6 +71,22 @@
           "queryType": "range"
         }
       ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Form submissions by outcome",
+      "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (acme_form, acme_form_outcome) (increase(acme_forms_submissions_total{job=\"site\"}[1m]))",
+          "legendFormat": "{{acme_form}} {{acme_form_outcome}}"
+        }
+      ]
     }
   ]
 }

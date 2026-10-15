@@ -30,7 +30,6 @@ docker pull mcr.microsoft.com/mssql/server:2022-latest
 docker pull grafana/otel-lgtm:0.36.0
 docker pull ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.162.0
 docker pull rnwood/smtp4dev:3.15.0
-docker pull ghcr.io/shopify/toxiproxy:2.12.0
 docker pull grafana/mcp-grafana:2.0.2
 ```
 
@@ -42,13 +41,19 @@ docker pull grafana/mcp-grafana:2.0.2
 2. [Run the full environment](#run-the-full-environment); open the Aspire dashboard
    (https://localhost:17210) and the site (https://localhost:44368).
 3. Browse the site: Home, an event, a service.
-4. Submit a form: Contact, a service enquiry or an upcoming event booking. Use made-up data.
+4. Submit a form: Contact, a service enquiry or an upcoming event booking. Use made-up data. The
+   success text shows the submission reference `ACME-nnnn` (ADR-0026). The owner notification
+   email `New <form> submission ACME-nnnn` is in the smtp4dev inbox (Inbox link on the `smtp4dev`
+   resource in the Aspire dashboard; ADR-0027).
 5. In the Aspire dashboard find the page request and form post traces, their structured logs and
-   the request-duration metric (Metrics > `site` > `http.server.request.duration`). Form field values never appear in telemetry.
+   the request-duration metric (Metrics > `site` > `http.server.request.duration`). The form post
+   trace has an `acme.forms.submit` span with a child `acme.forms.notify`. Form field values never
+   appear in telemetry.
 6. Optional: [connect Claude Code](#connecting-claude-code) and ask, for example, "show the latest
    trace for the Home page and its logs".
-7. Go live: [start Grafana](#start-grafana), then the [demo traffic](#demo-traffic). Open
-   Dashboards > Demo > Demo site (http://localhost:3000/d/demo-site).
+7. Go live: [start Grafana](#start-grafana), then the [demo traffic](#demo-traffic) and the
+   [submission burst](#submission-burst). Open Dashboards > Demo > Demo site
+   (http://localhost:3000/d/demo-site); the "Form submissions by outcome" panel follows the burst.
 8. Ask Claude Code a metrics question through Grafana (reconnect `grafana` via `/mcp` once `grafana-mcp` is running; see
    [Connecting Claude Code](#connecting-claude-code)), for example "how long do requests to the
    Home page take, from metrics?".
@@ -62,15 +67,14 @@ aspire run --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
 ```
 
 The explicit `--apphost` selects this AppHost. The command prints a
-login link for the Aspire dashboard. It starts SQL Server, smtp4dev behind Toxiproxy, the
+login link for the Aspire dashboard. It starts SQL Server, smtp4dev, the
 OpenTelemetry Collector and the site. The site waits for its dependencies; first start installs
 Umbraco and imports the content (a minute or two). `lgtm` shows in the dashboard as not started
 and `grafana-mcp` as waiting for it (see "Start Grafana").
 
 - Site: https://localhost:44368 (backoffice `/umbraco`; login in
   `src/SuperPower.Web/appsettings.Development.json`, Unattended user).
-- Aspire dashboard: logs, traces and metrics; the smtp4dev inbox link; the Slow, Break and Heal
-  commands on the `toxiproxy` resource.
+- Aspire dashboard: logs, traces and metrics; the smtp4dev inbox link.
 
 The Aspire dashboard has all telemetry from the start. The SQL Server database persists between
 runs.
@@ -95,7 +99,8 @@ restarted.
   Load a few pages before querying. Grafana data is lost when the AppHost stops.
 - Dashboards are provisioned on every `lgtm` start, under Dashboards > Demo (Demo site:
   http://localhost:3000/d/demo-site):
-  - "Demo site": request rate and p95 duration per page type, 5xx share, error logs. Click a p95
+  - "Demo site": request rate and p95 duration per page type, 5xx share, error logs, form
+    submissions per minute by form and outcome ("Form submissions by outcome"). Click a p95
     exemplar point to open its trace.
   - "ASP.NET Core": community dashboard 19924; pick job `site`.
   - UI edits are not saved: change the JSON in `src/SuperPower.AppHost/grafana/dashboards/` and
@@ -111,6 +116,19 @@ Default site URL `https://localhost:44368`. GET requests only, about one page pe
 posts a form. Prints `requests=<n> failures=<n>` each minute. Stop with Ctrl+C. Start it after
 go-live (after `lgtm` is started); earlier it only clutters the local traces.
 
+### Submission burst
+
+```sh
+dotnet run tests/traffic/burst.cs                          # optional: -- <site-url> --count 50 --parallel 10
+```
+
+Default site URL `https://localhost:44368`, 50 submissions, 10 in parallel. Posts valid forms
+concurrently, round-robin over Contact, Service enquiry and Event booking, with made-up data
+(`Burst Visitor <n>`, `burst<n>@example.com`). These are real submissions: each stores a row and
+sends a notification email to smtp4dev. Prints `ok=<n> failed=<n>`, the references, the distinct
+reference count and any failures; exit code 1 on any failure. Run it after go-live to load the
+production stage.
+
 ## Run the site on its own (SQLite)
 
 ```sh
@@ -118,7 +136,7 @@ dotnet run --project src/SuperPower.Web
 ```
 
 Uses `src/SuperPower.Web/umbraco/Data/Umbraco.sqlite.db`, created and filled on first start. No
-mail and no telemetry export (no OTLP endpoint is set); use it for content and view work. The
+mail (no notification email) and no telemetry export (no OTLP endpoint is set); use it for content and view work. The
 SQLite and SQL Server databases are independent of each other.
 
 ## Reset the databases
@@ -191,7 +209,7 @@ Notes:
 ## Stable ports and URLs
 
 Fixed ports are pinned in `launchSettings.json` files or the AppHost code; everything else
-(smtp4dev inbox, Toxiproxy API, SQL Server) gets a dynamic port per run - reach those via the
+(smtp4dev inbox, SQL Server) gets a dynamic port per run - reach those via the
 Aspire dashboard.
 
 | What | URL | Pinned in |
@@ -202,7 +220,7 @@ Aspire dashboard.
 | Aspire dashboard | https://localhost:17210 | `src/SuperPower.AppHost/Properties/launchSettings.json` |
 | Grafana (reachable after start) | http://localhost:3000 (admin/admin) | AppHost code (ADR-0017) |
 | Grafana MCP (reachable after start) | http://localhost:8091/mcp | AppHost code (ADR-0017) |
-| SMTP (site -> Toxiproxy) | localhost:2525 | AppHost code (ADR-0010) |
+| SMTP (site -> smtp4dev) | localhost:2525 | AppHost code (ADR-0025) |
 | Public site (Cloudflare tunnel) | https://observability.carlcod.es/ | Cloudflare; origin is the local site |
 
 Ports 3000, 8091 and 2525 must be free (the AppHost binds them at start, before Grafana is
@@ -214,10 +232,12 @@ started); 3000 often clashes with Node dev servers.
 dotnet test
 ```
 
-Unit tests for form validation, stored field values and the event date rules.
+Unit tests for form validation, stored field values, the event date rules, the reference format and
+the notification subject and body.
 
-End-to-end smoke check (pages, form submissions, stored rows, Home trace with database spans
-and linked logs, Slow/Break/Heal, provisioned dashboards, page-type label `acme.page_type`,
+End-to-end smoke check (pages, form submissions, stored rows, the reference on the success page
+matching the stored row, the notification email in smtp4dev (full environment), Home trace with
+database spans and linked logs, provisioned dashboards, page-type label `acme.page_type`,
 `/assets` exclusion):
 
 ```sh

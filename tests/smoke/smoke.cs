@@ -6,7 +6,7 @@
 //
 // Run from inside the repo. Exit code is non-zero if any check FAILs. Submissions are fake and never deleted.
 // apphost: SQL Server login comes from the AppHost user secrets (Parameters:sql-password, Resources:sql:tcp:port);
-//   override with env SMOKE_SQL_CONNECTION. smtp4dev and Toxiproxy are reached through the `aspire` CLI.
+//   override with env SMOKE_SQL_CONNECTION. smtp4dev is reached through the `aspire` CLI (web UI URL) and its HTTP API.
 //   Telemetry is read through Grafana (http://localhost:3000, admin/admin), the same path the agent uses.
 //   Grafana (`lgtm`) is on demand (ADR-0022): the check requests the unknown page /smoke-pre/?smoke-pre=<marker>
 //   (404 but logged; a real page such as About us warms the content cache and hides the Home DB spans), starts `lgtm` via the
@@ -16,6 +16,9 @@
 //   Home span and service-enquiry post span (Tempo), and /assets/rubber-duck.svg excluded from tracing.
 //   These checks read Grafana, so `lgtm` must be running (the telemetry section starts it).
 // standalone: SQLite file src/SuperPower.Web/umbraco/Data/Umbraco.sqlite.db, opened read-only. Pages and forms only.
+//   add-form-emails task 5.1: the success page shows "Your reference is ACME-nnnn" matching the stored ReferenceNumber (both targets);
+//   apphost: smtp4dev holds the owner notification (to owner@acme-agency.example, subject ending in that reference) for each valid submission.
+//   standalone sends no email.
 // Not scripted (PO 2026-10-14): Event booking post to a past event; check it manually (verification.md).
 // Passing both targets also proves the raw FieldsJson is identical on SQL Server and SQLite.
 #:package Microsoft.Data.SqlClient
@@ -34,7 +37,8 @@ using Microsoft.Data.SqlClient;
 
 const string Site = "https://localhost:44368";
 const string Grafana = "http://localhost:3000";
-const string Success = "Thank you, we'll be in touch.";
+const string Success = "Thank you, we'll be in touch. Your reference is";
+var submitted = new List<(string Label, string Reference)>(); // valid submissions, for the notification email check
 // SuperPower.Web.Forms.AcmeFormKeys
 var contactKey = Guid.Parse("a1c0f3d2-5b7e-4c81-9a2d-0e6f4b8c1a01");
 var serviceKey = Guid.Parse("a1c0f3d2-5b7e-4c81-9a2d-0e6f4b8c1a02");
@@ -83,7 +87,7 @@ List<Row> ReadRows()
 {
     using var c = OpenDb();
     using var cmd = c.CreateCommand();
-    cmd.CommandText = "SELECT Id, FormKey, PageKey, SubmittedUtc, FieldsJson FROM acmeFormSubmission ORDER BY Id";
+    cmd.CommandText = "SELECT Id, FormKey, PageKey, SubmittedUtc, FieldsJson, ReferenceNumber FROM acmeFormSubmission ORDER BY Id";
     using var r = cmd.ExecuteReader();
     var rows = new List<Row>();
     while (r.Read())
@@ -91,7 +95,7 @@ List<Row> ReadRows()
         var ts = r.GetValue(3);
         var utc = ts is DateTime dt ? DateTime.SpecifyKind(dt, DateTimeKind.Utc)
             : DateTime.Parse(ts.ToString()!, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
-        rows.Add(new Row(Convert.ToInt32(r.GetValue(0)), Guid.Parse(r.GetValue(1).ToString()!), Guid.Parse(r.GetValue(2).ToString()!), utc, r.GetString(4)));
+        rows.Add(new Row(Convert.ToInt32(r.GetValue(0)), Guid.Parse(r.GetValue(1).ToString()!), Guid.Parse(r.GetValue(2).ToString()!), utc, r.GetString(4), Convert.ToInt32(r.GetValue(5))));
     }
     return rows;
 }
@@ -143,9 +147,13 @@ async Task ValidSubmission(string label, string url, Guid formKey, List<KeyValue
         var problems = new List<string>();
         if (status != 302) problems.Add($"status {status}");
         if (!after.Contains(Success)) problems.Add("no success text");
+        var reference = Regex.Match(after, @"ACME-\d+").Value;
         if (added.Count != 1) problems.Add($"{added.Count} new rows");
         if (row is not null)
         {
+            var expectedRef = $"ACME-{row.ReferenceNumber:D4}";
+            if (reference != expectedRef) problems.Add($"reference on page '{reference}' != stored {expectedRef}");
+            else submitted.Add((label, reference));
             if (row.FormKey != formKey) problems.Add($"FormKey {row.FormKey}");
             if (row.PageKey != pageKey) problems.Add($"PageKey {row.PageKey} != {pageKey}");
             if (Math.Abs((DateTime.UtcNow - row.SubmittedUtc).TotalMinutes) > 5) problems.Add($"SubmittedUtc {row.SubmittedUtc:O}");
@@ -154,7 +162,7 @@ async Task ValidSubmission(string label, string url, Guid formKey, List<KeyValue
             if (expectedJson is null && !fields.All(f => JsonDocument.Parse(row.FieldsJson).RootElement.TryGetProperty(f.Key, out var v) && v.GetString() == f.Value))
                 problems.Add($"FieldsJson lacks posted values: {row.FieldsJson}");
         }
-        Report(problems.Count == 0, label, problems.Count == 0 ? $"302, success text, row {row!.Id} {row.SubmittedUtc:HH:mm:ss}Z page {pageKey}" : string.Join("; ", problems));
+        Report(problems.Count == 0, label, problems.Count == 0 ? $"302, success text, reference {reference}, row {row!.Id} {row.SubmittedUtc:HH:mm:ss}Z page {pageKey}" : string.Join("; ", problems));
     }
     catch (Exception e) { Report(false, label, e.Message); }
 }
@@ -247,7 +255,7 @@ if (!standalone)
 {
     await TelemetryCheck();
     await DashboardCheck();
-    await MailCheck();
+    await NotificationCheck();
 }
 
 Console.WriteLine(failures == 0 ? "ALL CHECKS PASSED" : $"{failures} CHECK(S) FAILED");
@@ -394,91 +402,40 @@ async Task DashboardCheck()
     catch (Exception e) { Report(false, "dashboard checks", e.Message); }
 }
 
-// ---- 5. Slow / Break / Heal on the SMTP path (localhost:2525 -> Toxiproxy -> smtp4dev)
-async Task MailCheck()
+// ---- 5. Owner notification in smtp4dev (add-form-emails task 5.1)
+async Task NotificationCheck()
 {
-    string? inbox = null;
+    string inbox;
     try
     {
         var json = Run("aspire", "describe", "smtp4dev", "--apphost", appHostProject, "--non-interactive", "--nologo", "--format", "json");
         inbox = JsonDocument.Parse(json[json.IndexOf('{')..]).RootElement.GetProperty("resources")[0].GetProperty("urls")
-            .EnumerateArray().First(u => u.GetProperty("name").GetString() == "http").GetProperty("url").GetString();
+            .EnumerateArray().First(u => u.GetProperty("name").GetString() == "http").GetProperty("url").GetString()!;
     }
-    catch (Exception e) { Console.WriteLine($"note: smtp4dev inbox URL not found ({e.Message}); delivery = SMTP 250 after DATA"); }
+    catch (Exception e) { Report(false, "notification email", $"smtp4dev inbox URL not found ({e.Message})"); return; }
 
-    // Same commands as the dashboard buttons (AppHost.cs).
-    void Command(string name) => Run("aspire", "resource", "toxiproxy", name, "--apphost", appHostProject, "--non-interactive", "--nologo");
-
-    async Task<(bool Ok, long Ms, string Detail)> Send(string subject)
+    using var h = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
+    foreach (var (label, reference) in submitted)
     {
-        var sw = Stopwatch.StartNew();
         try
         {
-            using var tcp = new TcpClient();
-            tcp.ReceiveTimeout = tcp.SendTimeout = 60_000;
-            await tcp.ConnectAsync("localhost", 2525);
-            using var reader = new StreamReader(tcp.GetStream(), Encoding.ASCII);
-            using var writer = new StreamWriter(tcp.GetStream(), Encoding.ASCII) { NewLine = "\r\n", AutoFlush = true };
-            async Task<string> Reply(string expect)
+            string? found = null;
+            for (var i = 0; i < 10 && found is null; i++)
             {
-                string line;
-                do { line = await reader.ReadLineAsync() ?? throw new IOException("connection closed"); } while (line.Length > 3 && line[3] == '-');
-                if (!line.StartsWith(expect)) throw new IOException($"expected {expect}, got {line}");
-                return line;
+                var results = JsonDocument.Parse(await h.GetStringAsync(inbox + "/api/messages?pageSize=500")).RootElement.GetProperty("results");
+                foreach (var m in results.EnumerateArray())
+                {
+                    var subject = m.GetProperty("subject").GetString() ?? "";
+                    var to = m.GetProperty("to").EnumerateArray().Select(t => t.GetString() ?? "");
+                    if (subject.EndsWith(reference) && to.Any(t => t.Contains("owner@acme-agency.example"))) { found = subject; break; }
+                }
+                if (found is null) await Task.Delay(1000);
             }
-            async Task Cmd(string text, string expect) { await writer.WriteLineAsync(text); await Reply(expect); }
-            await Reply("220");
-            await Cmd("EHLO smoke.local", "250");
-            await Cmd("MAIL FROM:<smoke@example.com>", "250");
-            await Cmd("RCPT TO:<owner@example.com>", "250");
-            await Cmd("DATA", "354");
-            await Cmd($"Subject: {subject}\r\nFrom: smoke@example.com\r\nTo: owner@example.com\r\n\r\nSmoke test.\r\n.", "250");
-            await writer.WriteLineAsync("QUIT");
-            return (true, sw.ElapsedMilliseconds, "250 after DATA");
+            Report(found is not null, $"notification email {label}", found is not null ? $"smtp4dev has '{found}' to owner@acme-agency.example" : $"no email to owner@acme-agency.example with subject ending {reference}");
         }
-        catch (Exception e) { return (false, sw.ElapsedMilliseconds, e.GetType().Name + ": " + e.Message); }
+        catch (Exception e) { Report(false, $"notification email {label}", e.Message); }
     }
-
-    async Task<bool> Delivered(string subject)
-    {
-        if (inbox is null) return true; // fall back to the SMTP 250
-        using var h = new HttpClient();
-        for (var i = 0; i < 5; i++)
-        {
-            if ((await h.GetStringAsync(inbox + "/api/messages")).Contains(subject)) return true;
-            await Task.Delay(1000);
-        }
-        return false;
-    }
-
-    async Task Step(string name, string? command, bool expectOk, Func<long, bool> timing, string timingText)
-    {
-        var subject = $"smoke {name} {Guid.NewGuid():N}";
-        try
-        {
-            if (command is not null) Command(command);
-            var (ok, ms, detail) = await Send(subject);
-            var delivered = ok && await Delivered(subject);
-            Report(ok == expectOk && delivered == expectOk && timing(ms), $"mail {name}",
-                $"{ms} ms (expect {(expectOk ? "delivered" : "failure")}, {timingText}): {(ok ? "sent" : "failed")}, {(delivered ? "delivered" : "not delivered")} [{detail}]");
-        }
-        catch (Exception e) { Report(false, $"mail {name}", e.Message); }
-    }
-
-    try
-    {
-        Command("heal"); // known starting point
-        await Step("baseline", null, true, ms => ms < 2000, "< 2000 ms");
-        await Step("slow", "slow", true, ms => ms > 3000, "> 3000 ms");
-        await Step("break", "break", false, ms => ms < 2000, "< 2000 ms");
-    }
-    catch (Exception e) { Report(false, "mail setup", e.Message); }
-    finally
-    {
-        // Heal always runs, then must work again.
-        try { await Step("heal", "heal", true, ms => ms < 2000, "< 2000 ms"); }
-        catch { Console.WriteLine("heal failed"); }
-    }
+    if (submitted.Count == 0) Report(false, "notification email", "no valid submission to check");
 }
 
 static string Run(string file, params string[] arguments)
@@ -493,4 +450,4 @@ static string Run(string file, params string[] arguments)
     return stdout.Result;
 }
 
-record Row(int Id, Guid FormKey, Guid PageKey, DateTime SubmittedUtc, string FieldsJson);
+record Row(int Id, Guid FormKey, Guid PageKey, DateTime SubmittedUtc, string FieldsJson, int ReferenceNumber);

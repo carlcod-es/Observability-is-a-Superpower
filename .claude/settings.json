@@ -16,6 +16,10 @@
       "mcp__aspire__search_docs",
       "mcp__aspire__get_doc",
       "mcp__grafana"
+    ],
+    "deny": [
+      "Read(./docs/presenter/**)",
+      "Read(/docs/presenter/**)"
     ]
   }
 }

@@ -26,6 +26,12 @@ public sealed class FormSubmissionDto
     [Column("SubmittedUtc")]
     public DateTime SubmittedUtc { get; set; }
 
+    // Nullable in the database so the column can be added to tables with rows; the migration backfills it.
+    [Column("ReferenceNumber")]
+    [NullSetting(NullSetting = NullSettings.Null)]
+    [Index(IndexTypes.UniqueNonClustered, Name = "IX_acmeFormSubmission_ReferenceNumber")]
+    public int ReferenceNumber { get; set; }
+
     [Column("FieldsJson")]
     [SpecialDbType(SpecialDbTypes.NVARCHARMAX)]
     public string FieldsJson { get; set; } = "{}";

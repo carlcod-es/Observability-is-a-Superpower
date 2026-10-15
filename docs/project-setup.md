@@ -20,11 +20,12 @@ banners/                     banner SVG generator `generate.mjs` (Node) and its 
 tests/
   SuperPower.Web.Tests/      xUnit v3 unit tests (ADR-0012)
   smoke/                     end-to-end smoke check, `dotnet run tests/smoke/smoke.cs` (ADR-0012)
-  traffic/                   demo traffic source, `dotnet run tests/traffic/traffic.cs` (ADR-0012)
+  traffic/                   demo traffic source `traffic.cs` (GET only) and submission burst
+                             `burst.cs` (ADR-0012)
 docs/adrs/                   architecture decision records
 openspec/                    planning: specs (openspec/specs) and changes (openspec/changes)
 .mcp.json                    MCP servers for Claude Code: aspire, grafana (ADR-0022)
-.claude/settings.json        pre-approved read tools on both servers
+.claude/settings.json        pre-approved read tools on both servers; denies reading `docs/presenter/`
 ```
 
 Layout decisions: ADR-0002. Versions: .NET 10, Umbraco 17.7.1, Aspire 13.6 (SDK 13.6.0, hosting
@@ -36,7 +37,7 @@ packages 13.6.x, Community Toolkit collector hosting 13.4.0; ADR-0001).
 |---|---|---|
 | Command | `aspire run --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj` | `dotnet run --project src/SuperPower.Web` |
 | Database | SQL Server container | SQLite file |
-| Mail | Toxiproxy -> smtp4dev | not configured |
+| Mail | smtp4dev (owner notifications) | not configured: no email sent |
 | Telemetry | OTLP -> Collector -> Aspire dashboard + Grafana LGTM (once started) | none exported (no OTLP endpoint set) |
 | Use | demo, telemetry, agent | quick content or view work |
 
@@ -50,8 +51,8 @@ start, and nothing syncs them afterwards.
  browser --> site ------------------+---------------------------+
              |  umbracoDbDSN        | SMTP localhost:2525       | OTLP
              v                      v                           v
-           sql (SQL Server)      toxiproxy --> smtp4dev      collector --+--> Aspire dashboard
-                                 (Slow/Break/Heal)                       +--> lgtm (Grafana :3000)
+           sql (SQL Server)      smtp4dev                    collector --+--> Aspire dashboard
+                                                                         +--> lgtm (Grafana :3000)
                                                                                  ^
                                                                          grafana-mcp :8091
 ```
@@ -62,14 +63,13 @@ Claude Code reads the Aspire dashboard through the `aspire` MCP (stdio) and Graf
 | Resource | Image / type | Ports | Persistence | ADR |
 |---|---|---|---|---|
 | `sql` / database `umbraco` | Azure SQL run as SQL Server container | dynamic | persistent container + data volume | ADR-0009 |
-| `smtp4dev` | `rnwood/smtp4dev:3.15.0` | dynamic (Inbox link in dashboard) | none (in-memory inbox) | ADR-0010 |
-| `toxiproxy` | `ghcr.io/shopify/toxiproxy:2.12.0` | 2525 (SMTP proxy), dynamic API | none; proxy created healed on start | ADR-0010 |
+| `smtp4dev` | `rnwood/smtp4dev:3.15.0` | 2525 (SMTP), dynamic web UI (Inbox link in dashboard) | none (in-memory inbox) | ADR-0010, ADR-0025 |
 | `lgtm` | `grafana/otel-lgtm:0.36.0`, explicit start; read-only mounts `grafana/acme-dashboards.yaml`, `grafana/dashboards/` | 3000 (Grafana, admin/admin) | none: telemetry history lost on restart; dashboards reloaded from the repo on every start | ADR-0017, ADR-0022, ADR-0023 |
 | `collector` | OpenTelemetry Collector contrib 0.162.0 | dynamic | none | ADR-0017 |
 | `grafana-mcp` | `grafana/mcp-grafana:2.0.2`, waits for `lgtm` | 8091 (`/mcp`) | none | ADR-0017, ADR-0022 |
 | `site` | `SuperPower.Web` project | 44368 (https), 21258 (http) | - | ADR-0002 |
 
-Start order: the site waits for `sql`, `toxiproxy` and `collector`. `lgtm` does not start with
+Start order: the site waits for `sql`, `smtp4dev` and `collector`. `lgtm` does not start with
 the AppHost: Start on `lgtm` in the dashboard (or `aspire resource lgtm start --apphost
 src/SuperPower.AppHost/SuperPower.AppHost.csproj`) starts it without restarting anything else,
 and `grafana-mcp`, waiting for `lgtm`, follows (go-live; ADR-0022). All fixed ports are listed
@@ -79,18 +79,24 @@ in the root `README.md`.
 
 On every `lgtm` start Grafana provisions the JSON files in
 `src/SuperPower.AppHost/grafana/dashboards/` into folder "Demo": `demo-site.json` (Demo site:
-request rate and p95 per page type with trace exemplars, 5xx share, error logs) and
+request rate and p95 per page type with trace exemplars, 5xx share, error logs, form
+submissions per minute by form and outcome) and
 `aspnetcore-19924.json` (community ASP.NET Core dashboard, MIT, source in the README there). UI
 edits cannot be saved; change the JSON and restart `lgtm` (ADR-0023).
 `tests/traffic/traffic.cs` requests the site's pages (GET only, about one per second) until
 Ctrl+C; optional argument: site URL (default `https://localhost:44368`). Start it after go-live.
+`tests/traffic/burst.cs` posts valid forms concurrently, round-robin over the three forms, with
+made-up names and `@example.com` addresses: `dotnet run tests/traffic/burst.cs [-- <site-url>]
+[--count 50] [--parallel 10]`. Prints `ok=<n> failed=<n>` and the references; exit 1 on any
+failure. Each post stores a row and sends a notification email (design D6 of `add-form-emails`).
 
-### Mail path and fault injection
-The site sends SMTP to `localhost:2525`, Toxiproxy's `smtp` proxy, which forwards to smtp4dev.
-Three dashboard commands on the `toxiproxy` resource change the path: **Slow** (latency on
-every SMTP reply), **Break** (reset every connection), **Heal** (remove all faults).
-The presenter runs them; the agent can call them through the Aspire MCP only after approving
-each call (ADR-0022).
+### Mail path
+The site sends SMTP to `localhost:2525`, smtp4dev's SMTP port (no TLS, not proxied by Aspire;
+ADR-0025). Each stored submission sends one owner notification to `Acme:Forms:OwnerEmail` (AppHost:
+`owner@acme-agency.example`), subject `New <form> submission ACME-nnnn`, plain-text body with the
+form, page, reference, UTC time and field values (ADR-0027). Personal data stays in the local
+inbox. Without an owner address or SMTP host (standalone) no email is sent. Agent resource
+commands (start, stop, restart) prompt every call (ADR-0022).
 
 ## Data: what persists and where
 
@@ -112,15 +118,20 @@ media on first start (`ImportOnFirstBoot`, ADR-0003).
 Configured once in ServiceDefaults; identical locally and in production.
 
 - **Traces**: ASP.NET Core, HttpClient and SqlClient instrumentation, plus the site's
-  `Acme.Forms` ActivitySource. SQL spans are kept only under a recorded parent, which drops
+  `Acme.Forms` ActivitySource: `acme.forms.submit` per form post (`acme.form`,
+  `acme.form.outcome` stored/invalid/failed, `acme.submission.reference` when stored) and child
+  `acme.forms.notify` (ADR-0027). SQL spans are kept only under a recorded parent, which drops
   Umbraco's background database noise (ADR-0008).
-- **Metrics**: ASP.NET Core, HttpClient, .NET runtime, plus the site's `Acme.Forms` Meter.
+- **Metrics**: ASP.NET Core, HttpClient, .NET runtime, plus the site's `Acme.Forms` Meter:
+  counter `acme.forms.submissions` (Prometheus `acme_forms_submissions_total`, labels `acme_form`
+  `contact`/`service_enquiry`/`event_booking`, `acme_form_outcome`) (ADR-0027).
 - **Page type**: `PageTypeTelemetryMiddleware` tags the request span and
   `http.server.request.duration` with `acme.page_type` (Prometheus `acme_page_type`): the
   rendered content type alias (`home`, `page`, `contact`, `events`, `event`, `services`,
   `service`) or `none` (ADR-0024).
 - **Logs**: Umbraco logs through Serilog. A sink in ServiceDefaults forwards Serilog events to
   the OpenTelemetry logger, so logs keep named properties and link to their trace (ADR-0007).
+  The forms code logs `Form {Form} stored as {Reference}` per stored submission.
   Log levels are set in the site's Serilog configuration only; `Logging:LogLevel` has no effect.
 - **Filtered out**: `/health`, `/alive`, `/umbraco/backoffice`, `/css`, `/js`, `/media`,
   `/assets`, `/favicon.ico` leave neither spans nor request logs (`TelemetryPaths.cs`, ADR-0008);
@@ -128,7 +139,7 @@ Configured once in ServiceDefaults; identical locally and in production.
 - **Exporter switch**: `APPLICATIONINSIGHTS_CONNECTION_STRING` set -> Azure Monitor; else
   `OTEL_EXPORTER_OTLP_ENDPOINT` set (by Aspire) -> OTLP; else nothing.
 - **Personal data**: form field values (name, email, message, notes, company, website) are
-  never recorded; form, page and outcome are.
+  never recorded; form, page, outcome and reference are.
 
 The Collector (`collector/config.yaml`) has two pipeline sets per signal, each with its own batch
 processor: `*/aspire` to the Aspire dashboard (always) and `*/lgtm` to Grafana LGTM. The LGTM
@@ -178,10 +189,12 @@ SQLite and SQL Server.
 ## Tests
 
 - `dotnet test` at the root runs `tests/SuperPower.Web.Tests`: form validation, field-to-JSON
-  mapping, past/upcoming event rules with a fake `TimeProvider`, page-type tag values.
+  mapping, past/upcoming event rules with a fake `TimeProvider`, page-type tag values, reference
+  format, notification subject and body.
 - `dotnet run tests/smoke/smoke.cs` (full environment, run right after starting the AppHost) or
   `... -- standalone` (SQLite): pages, form submissions and stored rows, Home trace with database
-  spans and linked logs, Slow/Break/Heal (ADR-0012). The full-environment run starts `lgtm` itself
+  spans and linked logs, reference on the success page matching the stored row, and (full
+  environment) a notification email with that reference in smtp4dev (ADR-0012). The full-environment run starts `lgtm` itself
   and checks that Grafana has no telemetry from a request made before the start, both dashboards
   are provisioned, `acme.page_type` is on the Home metric, span and the service-enquiry post, and
   `/assets` leaves no span. No Umbraco or Aspire integration harness.
@@ -190,7 +203,7 @@ SQLite and SQL Server.
 
 - OpenSpec: in-progress changes in `openspec/changes/` (proposal, design, specs, tasks);
   their specs move to `openspec/specs/` when a change is archived.
-  Change order: `add-demo-foundation`, `add-demo-dashboard` (planned), `add-form-emails`,
+  Change order: `add-demo-foundation`, `add-demo-dashboard`, `add-form-emails`,
   `add-production-environment`.
 - ADRs in `docs/adrs/`; `PLANNING.md` holds open decisions and todos (temporary).
 - Branches: `main` is the final state; `demo/act-N-*` are demo recovery points.

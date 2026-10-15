@@ -22,7 +22,8 @@ PO 2026-10-14: provision 19924 too, with `${DS_PROMETHEUS}` replaced by the lite
 - Demo dashboard: request rate and p95 duration per page type (label from ADR-0024), 5xx share
   with an `or 0 *` guard for "no data", Loki error-level logs for `service_name="site"`; fixed
   `[1m]` rate windows; exemplars on the p95 query; literal datasource UIDs; window `now-15m`,
-  refresh 10 s. Form panels are added by `add-form-emails`.
+  refresh 10 s. Form panel (added 2026-10-15, `add-form-emails`): submissions per minute by
+  form and outcome from `acme_forms_submissions_total` (ADR-0027).
 - Provisioning: a provider file `src/SuperPower.AppHost/grafana/acme-dashboards.yaml`
   (folder "Demo", `allowUiUpdates: false`) and the dashboards directory bind-mounted read-only
   into the `lgtm` container by the AppHost. Load on start only; no live reload.

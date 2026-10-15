@@ -78,29 +78,29 @@ runnable by attendees.
   - Service enquiry: Name, Email, Company (optional), Website (optional), Message.
   - Event booking: Name, Email, Notes (optional), "Join mailing list". An ordinary
     submission: no booking status, places or limits.
-  - Server-side validation only; no format rules beyond Email. Success text "Thank you,
-    we'll be in touch."
+  - Server-side validation only; no format rules beyond Email.
   - Rendering: one partial view per form (ADR-0016); POST via SurfaceController with antiforgery.
-- Submissions: one site-owned table. Stores form, page key, UTC timestamp, field values.
-  No IP or browser info.
+- Submissions: one site-owned table. Stores form, page key, UTC timestamp, reference
+  (`ACME-nnnn`, ADR-0026), field values. No IP or browser
+  info. Success text "Thank you, we'll be in touch. Your reference is ACME-nnnn."
 - Must work on SQLite and SQL Server: no raw SQL, NPoco Sql<ISqlContext> builders,
   NVARCHARMAX for JSON columns. Demo uses SQL Server container via Aspire.
-- Later (change `add-form-emails`): owner notification on all forms, submitter confirmation on
-  Service enquiry and Event booking, via Umbraco IEmailSender. Owner address is an environment
-  setting; subjects and bodies are fixed text.
+- Owner notification on all forms via Umbraco IEmailSender (ADR-0027); no submitter emails
+  (dropped, PO 2026-10-15). Owner address is an environment setting (`Acme:Forms:OwnerEmail`);
+  subject and body are fixed text.
 
 ## Local environment (AppHost)
 - SQL Server: AddAzureSqlServer(...).RunAsContainer() - container locally, Azure SQL deployed.
   Set umbracoDbDSN and umbracoDbDSN_ProviderName.
-- SMTP: Umbraco -> Toxiproxy -> smtp4dev (container). Toxiproxy injects latency /
-  failures; exposed as Aspire dashboard resource commands, run by the presenter; the agent
-  only with per-call approval (ADR-0022).
+- SMTP: Umbraco -> smtp4dev (container, SMTP on localhost:2525). No fault injection
+  (Toxiproxy removed, ADR-0025). Agent resource commands need per-call approval (ADR-0022).
 - ServiceDefaults: OTLP locally; Azure Monitor exporter when
   APPLICATIONINSIGHTS_CONNECTION_STRING is set. Instrumentation code identical in both.
 
 ## Telemetry
-- The site's forms code emits its own ActivitySource and Meter (spans and instruments in
-  change `add-form-emails`).
+- The site's forms code emits its own ActivitySource and Meter `Acme.Forms` (ADR-0027): spans
+  `acme.forms.submit` / `acme.forms.notify`, counter `acme.forms.submissions` by form and
+  outcome, log `Form {Form} stored as {Reference}`.
 - Never recorded: Name, Message, Notes, Company, Website, email address. Fine: form, event or
   service, outcome.
 

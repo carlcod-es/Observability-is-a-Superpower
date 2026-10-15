@@ -1,7 +1,8 @@
 # ADR-0010: Local mail path and fault injection
 
 ## Status
-Accepted (2026-10-07)
+Accepted (2026-10-07). Toxiproxy and the Slow / Break / Heal commands superseded by ADR-0025
+(2026-10-15); smtp4dev decision still holds.
 
 ## Context
 Spec `local-environment` requires a local mail catcher and Slow / Break / Heal controls on

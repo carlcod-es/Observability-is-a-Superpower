@@ -20,3 +20,6 @@ src/SuperPower.Web/Models/ood.flag
 
 # Local scratch notes (never committed)
 .temp/
+
+# Presenter notes (demo answers; never committed, denied to the agent)
+docs/presenter/

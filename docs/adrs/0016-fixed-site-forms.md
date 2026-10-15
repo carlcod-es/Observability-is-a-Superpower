@@ -29,7 +29,8 @@ CLAUDE.md principle: keep it simple.
   `acmeFormSubmission` (same columns as the package's table); NPoco `Sql<ISqlContext>` builders
   (works on SQLite and SQL Server).
 - Telemetry names `Acme.Forms` for the site's `ActivitySource` and `Meter`; ServiceDefaults
-  registers them. Spans and instruments arrive in `add-form-emails`.
+  registers them. Spans and instruments: ADR-0027 (`add-form-emails`). Submission reference:
+  ADR-0026.
 - The page type decides the form: new document type `contact` (template Contact) shows the
   Contact form; the Event template shows Event booking; the Service template shows Service
   enquiry. No form picker, no form content nodes.

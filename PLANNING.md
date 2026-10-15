@@ -24,7 +24,11 @@ references this file, so the on-stage agent may read it.
   `openspec/changes/archive/2026-10-15-add-demo-dashboard`, specs synced (new `demo-dashboard`). Commit pending.
   Built: dashboards provisioned from the repo into `lgtm` (folder Demo: Demo site, ASP.NET Core 19924), page-type label `acme.page_type`, `/assets` excluded, `tests/traffic/traffic.cs`.
   Smoke checks and README done. Smoke `aspire` launch fails on Windows (.NET-tool shim), accepted by the PO;
-  follow-up in its `review-followups.md`. Form-meter panels go in `add-form-emails`.
+  follow-up in its `review-followups.md`. Form panel added in `add-form-emails`.
+- [ ] `add-form-emails` (PO 2026-10-15, simplified acts; ADR-0025/0026/0027): reference `ACME-nnnn`,
+  owner notification, form spans/counter/log, dashboard form panel, `tests/traffic/burst.cs`,
+  Toxiproxy removed, `docs/presenter/` denied to the agent. Applying on `main`; progress in its
+  `tasks.md` / `verification.md`. Section 6 (demo branches, rehearsal) is the PO's.
 - [x] Spike closure (PO 2026-10-13): keep both spikes open for reference until pre-talk cleanup
   (Todos).
 
@@ -36,14 +40,14 @@ references this file, so the on-stage agent may read it.
 - Events (e.g. "How to get the most out of your CMS"): free; title, description, start date and
   time; no format, capacity or places. Past events show "This event has ended", no form. No payment.
 - Forms (three; the event or service comes from the page, not a field). After a valid
-  submission: "Thank you, we'll be in touch."
-  - Contact: Name, Email, Message ("Reply by phone?" dropped, PO 2026-10-14). Owner notification only.
+  submission: "Thank you, we'll be in touch. Your reference is ACME-nnnn."
+  - Contact: Name, Email, Message ("Reply by phone?" dropped, PO 2026-10-14). Owner notification.
   - Service enquiry: Name, Email, Company (optional), Website (optional), Message. Owner
-    notification + submitter confirmation.
+    notification (submitter confirmations dropped, PO 2026-10-15).
   - Event booking: Name, Email, Notes (optional), "Join mailing list" checkbox. Owner
-    notification + submitter confirmation. An ordinary submission: no booking status,
+    notification. An ordinary submission: no booking status,
     confirmation link, waiting list or limit per email (PO 2026-10-13).
-- Stored submission: field values, form, page, UTC timestamp. No IP or browser info.
+- Stored submission: field values, form, page, UTC timestamp, reference. No IP or browser info.
 - Agent never accesses the database; demo personal data is in telemetry only.
 - Agent telemetry by stage (PO 2026-10-15, ADR-0022, replaces PO 2026-10-13 "Grafana MCP only"):
   local stage Aspire MCP (traces, logs, resource state, console logs; commands prompt);
@@ -55,13 +59,15 @@ references this file, so the on-stage agent may read it.
   failures, all forms, bookings across events), plus attendees submitting live via QR code.
 - Prod attendee handling: notice on all forms (live demo, deleted within 7 days); any form may use
   a made-up email; delete prod submissions within 7 days of 16 Oct (or by taking prod down); one
-  presenter switch closes every form; real emails sent.
+  presenter switch closes every form; real emails sent (superseded PO 2026-10-15: no submitter
+  emails).
 - Prod owner mailbox: presenter-owned demo alias (prod settings only, never in the repo).
 - Forms simplified (2026-10-10): no separate forms package; the talk no longer promises a
   custom package. Three fixed forms in the site; the page type decides the form. No editor-
   defined forms, fields or form text. No format rules beyond Email.
 - Email settings (`add-form-emails`): owner address is an environment setting; subjects and
-  bodies are fixed text. No backoffice settings.
+  bodies are fixed text. No backoffice settings. Each submission gets a reference `ACME-nnnn`
+  shown on the success message (PO 2026-10-15).
 - Act 4 split: resolved (presenter-only notes).
 
 ## Change order (2026-10-08, revised 2026-10-13)
@@ -70,7 +76,8 @@ references this file, so the on-stage agent may read it.
 3. `add-form-emails`: all emails.
 4. `add-production-environment`: Cloudflare tunnel and database reset only (Azure dropped, PO
    2026-10-15).
-`add-event-bookings` dropped 2026-10-13 (change directory removed).
+`add-event-bookings` dropped 2026-10-13 (change directory removed). `add-talk-slides` dropped
+2026-10-15 (PO; change directory removed, not archived).
 
 ## Open decisions
 - [x] Prod hosting (PO 2026-10-15): local environment behind the Cloudflare tunnel; Grafana
@@ -80,11 +87,12 @@ references this file, so the on-stage agent may read it.
   in `add-production-environment`:
   - "Read-only AI access to production observability": prod telemetry is the same local stack
     the agent already reads; decide what is shown as production and how access is controlled.
-  - Real emails to attendees: smtp4dev catches everything; needs a real mail route or the
-    confirmations are not sent.
+  - Real emails to attendees: moot; submitter confirmations dropped (PO 2026-10-15), owner
+    notifications stay in smtp4dev.
   - Scripted prod submissions over the days before the talk: needs the laptop running for days,
     or generate the history shortly before.
-  - Faults injected on stage also reach attendees submitting via QR code.
+  - Load on stage (burst tool) shares the site with attendees submitting via QR code (fault
+    injection removed, ADR-0025).
   - Venue network: adds a public inbound dependency ("everything local except the LLM" no
     longer holds).
   - Architect: ADR-0008 (Azure Monitor exporter) and ADR-0009 (Azure SQL for deploy parity)
@@ -106,7 +114,7 @@ Decided in ADRs; verified by `add-demo-foundation` tasks:
 - [x] SqlClient spans for Umbraco's NPoco queries; background span volume (ADR-0008): task 2.4,
   passed 2026-10-09 (`verification.md`).
 - [x] smtp4dev and Toxiproxy in the AppHost, Slow/Break/Heal commands (ADR-0010): tasks 2.2, 2.3,
-  passed 2026-10-09 (`verification.md`).
+  passed 2026-10-09 (`verification.md`). Toxiproxy removed 2026-10-15 (ADR-0025).
 - [x] Date Time with time zone stored value shape (ADR-0014): task 3.4, confirmed.
 - [ ] LGTM stack, Collector and Grafana MCP on Windows (ADR-0017; spike ran on macOS): task 9.3.
   `spike-grafana-dashboard` ran the spike stack on Windows 2026-10-14 without Windows-specific
@@ -162,6 +170,7 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
     dropped); `.WithExternalHttpEndpoints()` on smtp4dev.
 - [ ] FR-0004 (2026-10-15): review nits from `add-demo-foundation` (31 items, code, views, tests,
   README, content); after the talk unless the PO pulls items forward.
+- [ ] After the talk (PO): add the slides to the repo for attendees.
 - [ ] Before the talk: remove demo-plan entries from Claude memory, or run the demo
   from a different clone path (memory is keyed to the folder path and loads on stage).
 
@@ -171,7 +180,8 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
 - NPoco + PackageMigrationPlan over EF Core: provider-agnostic from one migration;
   EF Core needs per-provider migration sets. SqlClient instrumentation gives DB spans on
   SQL Server (including Umbraco's own queries); SQLite gets none.
-- smtp4dev over MailPit: presenter familiarity; MailPit's fault injection is covered by Toxiproxy.
+- smtp4dev over MailPit: presenter familiarity. Toxiproxy fault injection removed 2026-10-15
+  (ADR-0025).
 - Claude Code CLI on stage: presenter's normal workflow; Copilot is not available in VSCodium.
 - Prod (either hosting): runs the finished build; Act 4 prod segment is about PII not
   reaching the observability platform. Tunnel first because it is the shorter route to a

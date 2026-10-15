@@ -6,6 +6,7 @@ namespace SuperPower.Web.Forms.Storage;
 /// </summary>
 public interface IFormSubmissionRepository
 {
-    Task InsertAsync(
+    /// <summary>Allocates the next reference number under a write lock, inserts, returns the number.</summary>
+    Task<int> InsertAsync(
         Guid formKey, Guid pageKey, DateTime submittedUtc, IReadOnlyList<KeyValuePair<string, string>> fields);
 }
