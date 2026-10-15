@@ -108,6 +108,7 @@ a:hover { color: var(--color-primary-dark); }
   text-decoration: none;
   color: var(--color-text);
 }
+.site-header__logo { width: auto; height: 1.2em; }
 .site-nav { flex-basis: 100%; }
 .site-nav__list {
   display: flex;
