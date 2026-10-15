@@ -20,7 +20,7 @@
 <body>
     <header class="site-header">
         <div class="container site-header__inner">
-            <a class="site-header__brand" href="/">Rubber Duck Agency</a>
+            <a class="site-header__brand" href="/"><img class="site-header__logo" src="~/assets/rubber-duck.svg" alt="" width="38" height="28">Rubber Duck Agency</a>
             <button class="site-nav__toggle" type="button" aria-controls="site-nav" aria-label="Menu" hidden>
                 <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
@@ -87,12 +87,6 @@
     <footer class="site-footer">
         <div class="container">
             <p>&copy; Rubber Duck Agency. A fictional marketing agency.</p>
-            <ul class="site-footer__list">
-                @foreach (var item in nav)
-                {
-                    <li><a href="@item.Url()">@(item.Id == root.Id ? "Home" : item.Name)</a></li>
-                }
-            </ul>
         </div>
     </footer>
 </body>

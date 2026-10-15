@@ -24,3 +24,8 @@ only the media and the page selections are missing.
 ## Notes
 - PO 2026-10-14: skipped for now; may come back later.
 - Until then the colour-block fallback covers every page (task 9.2 checks it).
+- 2026-10-15 (PO request): banner illustrations generated as SVG, one per page, in `banners/`
+  (`banners/generate.mjs`, Node, no dependencies; file name = page node name). SVG is the
+  smallest format Umbraco 17 handles (default "Vector Graphics (SVG)" media type; AVIF is not
+  processed by ImageSharp). Next: PO uploads them in the backoffice and picks `mainBanner` per
+  page; uSync exports the media and content.

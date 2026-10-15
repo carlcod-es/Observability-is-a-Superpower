@@ -48,7 +48,11 @@
 
 img, svg, video { max-width: 100%; height: auto; }
 
+/* Column layout: main grows so the footer sits at the bottom of short pages. */
 body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   margin: 0;
   font-family: var(--font-body);
   line-height: 1.6;
@@ -71,16 +75,16 @@ a:hover { color: var(--color-primary-dark); }
 /* List reset for component lists only; body content keeps default bullets and numbering */
 .site-nav__list,
 .breadcrumb__list,
-.site-footer__list,
 .card-list {
   padding: 0;
   margin: 0;
   list-style: none;
 }
 
-/* Header and navigation: below 48em brand and Menu button share a row, the nav wraps below
-   (hidden while the button reports aria-expanded="false"); from 48em one row, no button.
-   Without JavaScript the button stays hidden and the nav is always shown. */
+/* Header and navigation: below 48em the header scrolls away and the Menu button stays fixed
+   top right; the nav opens as a panel below it (hidden while the button reports
+   aria-expanded="false"). From 48em one row, no button, header sticky.
+   Without JavaScript the button stays hidden and the nav is always shown in the header. */
 .site-header {
   background: var(--color-bg);
   border-bottom: 4px solid var(--color-duck);
@@ -91,8 +95,8 @@ a:hover { color: var(--color-primary-dark); }
   align-items: center;
   justify-content: space-between;
   gap: var(--space-s);
-  padding-top: var(--space-m);
-  padding-bottom: var(--space-m);
+  padding-top: var(--space-xs);
+  padding-bottom: var(--space-xs);
 }
 .site-header__brand {
   display: inline-flex;
@@ -104,6 +108,7 @@ a:hover { color: var(--color-primary-dark); }
   text-decoration: none;
   color: var(--color-text);
 }
+.site-header__logo { width: auto; height: 1.2em; }
 .site-nav { flex-basis: 100%; }
 .site-nav__list {
   display: flex;
@@ -124,7 +129,7 @@ a:hover { color: var(--color-primary-dark); }
   height: 2.75rem;
   padding: 0;
   color: var(--color-text);
-  background: transparent;
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 0.25rem;
   cursor: pointer;
@@ -133,6 +138,25 @@ a:hover { color: var(--color-primary-dark); }
 .site-nav__toggle:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 .site-nav__toggle[aria-expanded="true"] { background: var(--color-surface); }
 @media (max-width: 47.99em) {
+  .site-header__inner { min-height: calc(2.75rem + 2 * var(--space-xs)); }
+  .site-nav__toggle {
+    position: fixed;
+    top: var(--space-xs);
+    right: var(--space-m);
+    z-index: 20;
+  }
+  .site-nav__toggle:not([hidden]) + .site-nav {
+    position: fixed;
+    top: calc(2.75rem + 2 * var(--space-xs));
+    right: var(--space-m);
+    z-index: 20;
+    min-width: 12rem;
+    padding: 0 var(--space-m);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+    box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 0.15);
+  }
   .site-nav__toggle[aria-expanded="false"] + .site-nav { display: none; }
 }
 .site-nav a:hover,
@@ -143,9 +167,21 @@ a:hover { color: var(--color-primary-dark); }
 
 /* Banner */
 .banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   background: var(--color-primary);
   color: var(--color-on-primary);
-  padding: var(--space-l) 0;
+  padding: calc(var(--space-l) * 1.25) 0;
+}
+/* Scrim over the banner image keeps white text at >= 4.5:1 on the light SVGs. */
+.banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-primary-dark);
+  opacity: 0.75;
 }
 .banner__heading { margin: 0; font-size: 1.75rem; line-height: 1.2; }
 .banner__text { margin: var(--space-s) 0 0; font-size: 1.1rem; }
@@ -166,17 +202,16 @@ a:hover { color: var(--color-primary-dark); }
 .breadcrumb__list [aria-current] { color: var(--color-muted); }
 
 /* Main */
-.main { padding-top: var(--space-l); padding-bottom: var(--space-xl); overflow-wrap: anywhere; }
+.main { flex-grow: 1; padding-top: var(--space-l); padding-bottom: var(--space-xl); overflow-wrap: anywhere; }
 
 /* Footer */
 .site-footer {
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);
-  padding: var(--space-l) 0;
+  padding: calc(var(--space-l) * 0.6) 0;
   color: var(--color-muted);
 }
-.site-footer p { margin: 0 0 var(--space-s); }
-.site-footer__list { display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--space-m); }
+.site-footer p { margin: 0; }
 
 /* Listings and cards */
 .visually-hidden {
@@ -211,13 +246,12 @@ a:hover { color: var(--color-primary-dark); }
 .card__image { aspect-ratio: 16 / 9; object-fit: cover; }
 .card__image--empty { background: var(--color-duck); }
 .banner__image {
-  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   width: 100%;
-  height: auto;
-  max-height: 18rem;
+  height: 100%;
   object-fit: cover;
-  margin-top: var(--space-m);
-  border-radius: 0.25rem;
 }
 .content-image { max-width: 100%; height: auto; }
 .content-image--empty { aspect-ratio: 16 / 9; background: var(--color-duck); border-radius: 0.25rem; }
@@ -310,11 +344,12 @@ form button[type="submit"]:hover { background: var(--color-primary-dark); }
 @media (min-width: 48em) {
   .newsletter__row { flex-direction: row; align-items: center; }
   .newsletter input { flex: 1; }
+  .site-header { position: sticky; top: 0; z-index: 10; }
   .site-header__inner { flex-wrap: nowrap; }
   .site-nav { flex-basis: auto; }
   .site-nav__toggle { display: none; }
   .site-nav__list { flex-direction: row; flex-wrap: wrap; gap: var(--space-xs) var(--space-m); }
   .site-nav a { display: inline-flex; min-height: 0; padding: var(--space-xs) 0; }
-  .banner { padding: var(--space-xl) 0; }
+  .banner { padding: calc(var(--space-xl) * 1.15) 0; }
   .banner__heading { font-size: 2.5rem; }
 }
