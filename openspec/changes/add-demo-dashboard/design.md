@@ -123,7 +123,7 @@ note "Aspire MCP has no metrics tool" unchanged.
 ### D8: README run-through and database login (PO 2026-10-15)
 Generated `sa` password unchanged: Aspire creates it on first run and keeps it in AppHost user
 secrets (`Parameters:sql-password`); port dynamic (`Resources:sql:tcp:port`, Aspire dashboard).
-README "Connect to the database": server `localhost,<port>`, user `sa`, password via
+README "Connect to the database": server `127.0.0.1,<port>` (not `localhost`: IPv4-only container, `::1` first on Windows), user `sa`, password via
 `dotnet user-secrets list --project src/SuperPower.AppHost`, `TrustServerCertificate=True`.
 README "Run the demo": numbered run-through linking the existing sections (start, browse and
 submit a form, local telemetry, Grafana go-live, traffic, Claude Code); no

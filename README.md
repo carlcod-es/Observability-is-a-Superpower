@@ -141,14 +141,15 @@ Content, document types and media live in `src/SuperPower.Web/uSync/` and
 
 The full environment's SQL Server, with any SQL client:
 
-- Server: `localhost,<port>`; the port is dynamic: the `sql` resource in the Aspire dashboard
-  (also `Resources:sql:tcp:port` in the AppHost user secrets).
-- Database: `umbraco`. User: `sa`.
-- Password: Aspire generates it on first run and keeps it in the AppHost user secrets, key
-  `Parameters:sql-password`:
+- Password and port: Aspire generates the password on first run; both are in the AppHost user
+  secrets, keys `Parameters:sql-password` and `Resources:sql:tcp:port`:
   ```sh
   dotnet user-secrets list --project src/SuperPower.AppHost
   ```
+  The port is also on the `sql` resource in the Aspire dashboard.
+- Server: `127.0.0.1,<port>`. Not `localhost`: the container listens on IPv4 only, and where
+  `localhost` resolves to `::1` first (Windows) the connection times out.
+- Database: `umbraco`. User: `sa`.
 - `TrustServerCertificate=True` (client option "Trust server certificate").
 - Table `acmeFormSubmission` holds the form submissions.
 
