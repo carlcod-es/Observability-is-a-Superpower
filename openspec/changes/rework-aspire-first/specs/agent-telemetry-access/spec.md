@@ -72,7 +72,9 @@ Metric counters MAY include totals from before the start (cumulative; PO 2026-10
 #### Scenario: Agent checks a metric
 - **WHEN** the agent is asked how long requests to a page take, after the platform started
   and the page was requested
-- **THEN** it can retrieve that page's request-duration metric from the platform
+- **THEN** it can retrieve the site's request-duration metric from the platform, and that
+  page's request durations from its traces (the metric has no page label; per-page metrics in
+  FR-0003, PO 2026-10-15)
 
 #### Scenario: Nothing from before go-live
 - **WHEN** the agent searches the platform for a request made before the platform started

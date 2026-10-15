@@ -35,27 +35,43 @@ Branch `aspire-first`. Aspire CLI/SDK 13.6.1, macOS.
 Fresh AppHost, `lgtm` not started, new Claude Code session at repo root, default permission
 mode. Do not run the smoke check first (it starts `lgtm`).
 
+Run 2026-10-15, PO session; outputs pasted to the Architect.
+
 ### 6.1 Local stage
-- `/mcp`: aspire = ; grafana =
-- `select_apphost` needed? (review-followups n2):
-- Latest Home trace with spans and durations:
-- That trace's logs:
-- Resource list with state:
-- Site console output:
-- Approval prompts on the above (expect none):
-- Toxiproxy Slow via agent: prompt shown? (decline):
+- Contact POST trace from Aspire (before go-live): trace d86b6655…, POST /contact-us/ 97 ms
+  302, child SQL span INSERT INTO [acmeFormSubmission] 5 ms; the trace's two log lines read.
+  Agent also read site console output (Umbraco telemetry POST seen there).
+- No form values in telemetry: SQL span parameterised, request log gives content type/size only.
+- PO confirmed: /mcp aspire connected / grafana failed, resource list with state, no prompts on
+  read tools.
+- Toxiproxy Slow: NO prompt; command ran (08:18:20 UTC, "Command 'slow' executed successfully").
+  Cause: the PO session ran in permission mode `auto` (session transcript), not default as
+  task 6 requires; committed allow list excludes `execute_resource_command`. Re-run in default
+  mode pending. Slow toxic left active; Heal needed.
+- Re-run 2026-10-15, PO healed `toxiproxy`, new session in default mode: "run the Toxiproxy Slow
+  command" showed the approval prompt for `aspire — Execute Resource Command` (toxiproxy, slow).
+  After the prompt the proxy had no toxics (`GET /proxies/smtp/toxics` -> `[]`): not executed.
+  Met. Note: option 2 "don't ask again" would write a local allow rule; decline it on stage.
 
 ### 6.2 No credentials
-- `list_resources` for `site` and `sql`: password / connection string present?
-- Site console output: password / connection string present?
-- (Other secrets seen, outside spec: `collector` API key, `grafana-mcp` password?)
+- PO: no database password or connection string in `list_resources` (site, sql) or console
+  output; only the Aspire dashboard login token, accepted by the PO. Tool description states
+  "Environment variable values aren't provided because they could contain sensitive
+  information." Met.
 
 ### 6.3 Go live
-- Contact form submitted at (UTC):
-- `lgtm` Start clicked at; `grafana-mcp` Running at:
-- `/mcp` reconnect `grafana`:
-- Home request-duration metric (no prompt):
-- Home trace from Grafana (no prompt):
-- Trace or log for the earlier Contact submission (expect none; metric counters may include it):
-- `grafana` tool count (expect 22, read-only):
-- Stored submissions request: database tool available? (expect none):
+- Contact submitted 08:23:10 UTC, before `lgtm` start. Oldest site log in Loki 08:26:44 UTC.
+- Home trace from Grafana (Tempo): 26dd5b05…, GET / 27.5 ms 200, one server span (cached).
+- Earlier Contact submission in Grafana: Tempo POST search no traces; Loki "contact-us" no
+  lines. Prometheus POST 302 count 1 (cumulative, allowed by spec).
+- Request-duration metric: `http_server_request_duration_seconds` retrieved, but has no
+  `http_route`/path label, so not per page (Home not separable). See findings.
+- Stored submissions: agent has no database tool (answered from rule; tool list not shown).
+- PO: `grafana` 22 tools, all read-only; no prompts. Met except F1.
+
+### Findings
+- F1 (spec gap): spec `agent-telemetry-access` "Agent checks a metric" (THEN: that page's
+  request-duration metric) not met: the HTTP server metric has no route/page label under
+  Umbraco's catch-all routing. Page durations are available from traces only. Resolved
+  (PO 2026-10-15): scenario reworded to site-wide metric + per-page durations from traces;
+  per-page label recorded as FR-0003, built with `add-demo-dashboard`.

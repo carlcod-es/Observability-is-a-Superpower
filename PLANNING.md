@@ -8,11 +8,12 @@ references this file, so the on-stage agent may read it.
 
 ## Next step
 - [ ] `rework-aspire-first` (2026-10-15, branch `aspire-first` from `sample-site` `bedd4c0`,
-  ADR-0022 Proposed): Aspire MCP for the local stage, Grafana LGTM + Grafana MCP started on
-  demand as production (no replay). In apply. PO evaluates after its section 6: accept = merge
-  into `sample-site`, reject = delete the branch. Replaces `add-demo-foundation` tasks 8.1, 8.2.
-- [ ] `/opsx:apply add-demo-foundation` (22/30, 2026-10-14): Architect state
-  in Claude memory. Remaining (`add-demo-foundation` tasks): PO content (6.4 deferred, FR-0002), agent check (8.1, 8.2), fresh-database first
+  ADR-0022 Accepted): Aspire MCP for the local stage, Grafana LGTM + Grafana MCP started on
+  demand as production (no replay). 12/12, accepted by the PO 2026-10-15; merge into
+  `sample-site`. Closes `add-demo-foundation` tasks 8.1, 8.2. Archive after
+  `add-demo-foundation` (its delta specs modify that change's specs).
+- [ ] `/opsx:apply add-demo-foundation` (24/30, 2026-10-15): Architect state
+  in Claude memory. Remaining (`add-demo-foundation` tasks): PO content (6.4 deferred, FR-0002), fresh-database first
   boot (9.2, also closes 3.2), cross-platform (9.3), README and project-setup (9.1, 9.6),
   section 9 supervisor.
 - [ ] `add-mobile-responsive` (2026-10-14, branch `mobile-responsive` from `sample-site`):
@@ -29,7 +30,8 @@ references this file, so the on-stage agent may read it.
   `add-demo-foundation`, before `add-form-emails`). Inputs: `spike-grafana-dashboard`
   `findings.md` section 6; FR-0001 (provisioning mount, fallback import on start); also provision
   community dashboard 19924; demo traffic from a .NET 10 file-based app in `tests/` (ADR-0012)
-  that browses pages and posts no forms; ADR for the dashboard. Form-meter panels go in
+  that browses pages and posts no forms; ADR for the dashboard. FR-0003 (per-page-type label
+  on request metrics) is built in the same change, together with the dashboard (PO 2026-10-15). Form-meter panels go in
   `add-form-emails`.
 - [x] Spike closure (PO 2026-10-13): keep both spikes open for reference until pre-talk cleanup
   (Todos).
@@ -148,7 +150,9 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
   leave them, and `.claude/commands/opsx/`, off demo branches and `main`; on stage they make
   the agent role-play and route fixes through sub-agents. PO decides separately whether
   attendees see the OpenSpec planning.
-- [ ] Script and rehearse agent prompts; rehearse with `/fast`.
+- [ ] Script and rehearse agent prompts; rehearse with `/fast`. Present in default permission
+  mode: auto mode approves Aspire resource commands without a prompt (`rework-aspire-first`
+  task 6.1, 2026-10-15).
 - [ ] Record fallback videos of agent segments.
 - [ ] Tunnel baseline: start the environment and tunnel before the talk; smoke test the public
   URL the morning of.
