@@ -38,8 +38,7 @@ read-only telemetry tools, ADR-0022).
   import) and the demo traffic source.
 
 ### Modified Capabilities
-`local-environment` and `agent-telemetry-access` are defined in the unarchived change
-`add-demo-foundation` and modified by `rework-aspire-first`; this change is archived after both.
+`local-environment` and `agent-telemetry-access` in `openspec/specs/` (synced 2026-10-15).
 - `local-environment`: page requests are labelled with their page type in metrics and traces;
   static asset requests leave no traces or logs.
 - `agent-telemetry-access`: "Agent reads production-stage telemetry" scenario "Agent checks a

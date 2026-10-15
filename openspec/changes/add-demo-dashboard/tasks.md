@@ -20,7 +20,7 @@ run in parallel; the contract between them is the tag `acme.page_type` / label
 
 ## 4. Smoke check (worker-backend, shared file assigned by the Architect; `tests/smoke/smoke.cs`; depends on sections 1 and 2)
 
-- [ ] 4.1 Add the design.md D6 checks to the apphost target (dashboards provisioned, page-type label on metric and span, `/assets` excluded) and update the header comment; verify `dotnet run tests/smoke/smoke.cs` on a freshly started AppHost reports PASS for every check, and `dotnet run tests/smoke/smoke.cs -- standalone` still passes
+- [ ] 4.1 Add the design.md D6 checks to the apphost target (dashboards provisioned, page-type label on metric, span and form post, `/assets` excluded) and update the header comment; verify `dotnet run tests/smoke/smoke.cs` on a freshly started AppHost reports PASS for every check, and `dotnet run tests/smoke/smoke.cs -- standalone` still passes
 
 ## 5. Documentation (Architect for `docs/`, `PLANNING.md`; README via a brief; depends on sections 1-4)
 

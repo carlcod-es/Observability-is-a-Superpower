@@ -1,6 +1,6 @@
 ## Context
 
-Current state (branch `add-demo-dashboard` from `main` at `040d980`):
+Current state (branch `add-demo-dashboard` from `main` at `d422997`):
 - `src/SuperPower.AppHost/AppHost.cs`: `lgtm` (`grafana/otel-lgtm:0.36.0`, Grafana host port
   3000, `WithExplicitStart()`), `collector` with separate `*/lgtm` pipelines (no replay),
   `grafana-mcp` (read-only, `prometheus,loki,tempo,datasource` tools) waits for `lgtm`
@@ -110,8 +110,9 @@ After `lgtm` start and the Home request: Grafana `/api/search` lists uids `demo-
 proxy `http_server_request_duration_seconds_count{job="site",acme_page_type="home"}` returns a
 series ("page-type label on metric"; wait up to 30 s for export); Tempo search
 `{resource.service.name="site" && span.acme.page_type="home"}` finds the Home trace ("page-type
-label on span"); the Home load also fetches `/assets/rubber-duck.svg` and Tempo has no span
-with `url.path` `/assets/rubber-duck.svg` ("assets excluded").
+label on span"); the service-enquiry post's span carries `acme.page_type=service` ("page-type
+label on form post"); smoke GETs `/assets/rubber-duck.svg` explicitly, then Tempo has no span
+with that `url.path` ("assets excluded").
 
 ### D7: Documentation
 README "Start Grafana": dashboards under Dashboards > Demo (Demo site, ASP.NET Core),
@@ -145,8 +146,7 @@ exemplar click to a trace, agent per-page metric question; results in `verificat
 ## Migration Plan
 
 Branch `add-demo-dashboard` from `main`. Merge after section 6 and supervisor approval; PO
-commits. Archive after `add-demo-foundation` and `rework-aspire-first` (its deltas modify their
-specs).
+commits. Archive after merge; deltas target `openspec/specs/`.
 
 ## Open Questions
 
