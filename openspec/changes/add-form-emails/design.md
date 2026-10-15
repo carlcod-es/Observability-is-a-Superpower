@@ -23,7 +23,7 @@ in telemetry, Aspire MCP local / Grafana MCP production stage (ADR-0022).
 
 **Non-Goals:**
 - Demo branch content. Presenter changes for `demo/act-*` branches are described only in the
-  git-ignored presenter notes and applied by the PO (tasks.md section 6).
+  presenter notes (`docs/presenter/`) and applied by the PO (tasks.md section 6).
 - Mail queueing, retries, HTML mail, submitter emails.
 
 ## Decisions
@@ -73,10 +73,11 @@ accepted. Alternatives: extend `traffic.cs` (lost: its spec forbids form posts; 
 makes the steady source riskier); k6/bombardier (lost: new tool for attendees).
 
 ### D7. Presenter notes out of agent reach
-`docs/presenter/` (moved from `.presenter/`, PO 2026-10-15) in `.gitignore`; `.claude/settings.json`
-`permissions.deny`: `Read(./docs/presenter/**)` and `Read(/docs/presenter/**)` (start directory and
-project root). File-tool deny does not stop a shell `cat`; the primary safeguard is
-that the stage runs from a separate clone (presenter notes). No ADR: no technology choice.
+`docs/presenter/` (moved from `.presenter/`, committed and public, PO 2026-10-15);
+`.claude/settings.json` `permissions.deny`: `Read(./docs/presenter/**)` and
+`Read(/docs/presenter/**)` (start directory and project root). File-tool deny does not stop a
+shell `cat` or `grep -r`; the primary safeguard is that the stage runs from a separate clone with
+`docs/presenter/` deleted after cloning (presenter notes). No ADR: no technology choice.
 
 ### Bar and test strategy
 Bar: demo (prototype quality, must work reliably on stage tomorrow). Tests: xUnit for

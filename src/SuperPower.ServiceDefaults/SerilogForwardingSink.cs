@@ -76,10 +76,24 @@ internal sealed class SerilogForwardingSink(IServiceProvider services) : ILogEve
             foreach (var (name, value) in e.Properties)
             {
                 if (name == "SourceContext") continue;
-                list.Add(new(name, Convert(value)));
+                Add(list, name, value);
             }
             list.Add(new("{OriginalFormat}", e.MessageTemplate.Text));
             return list;
+        }
+
+        // ADR-0028: destructured objects become dotted attributes (Model.Email) so redaction can see field names.
+        private static void Add(List<KeyValuePair<string, object?>> list, string name, LogEventPropertyValue value)
+        {
+            if (value is StructureValue sv)
+            {
+                foreach (var p in sv.Properties)
+                    Add(list, $"{name}.{p.Name}", p.Value);
+            }
+            else
+            {
+                list.Add(new(name, Convert(value)));
+            }
         }
 
         private static object? Convert(LogEventPropertyValue v) => v switch

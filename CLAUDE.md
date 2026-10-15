@@ -67,7 +67,7 @@ runnable by attendees.
   production observability platform. Azure dropped.
 
 ## Demo site
-- Acme Agency (fictional marketing agency): Home, About us, Contact us, Events list, event
+- Rubber Duck Agency (fictional marketing agency; code names keep `Acme`): Home, About us, Contact us, Events list, event
   pages, Services list, service pages. Spec `agency-site`.
 - Events: one document type; free; title, description, start date and time; no format,
   capacity or places. Past events show "This event has ended" and no form.
@@ -103,6 +103,13 @@ runnable by attendees.
   outcome, log `Form {Form} stored as {Reference}`.
 - Never recorded: Name, Message, Notes, Company, Website, email address. Fine: form, event or
   service, outcome.
+- Log what happened (form, outcome, reference), never the submitted model or field values; the
+  log processor is a safety net, not permission (ADR-0028).
+- `PersonalDataLogProcessor` (ServiceDefaults) masks every log entry before export: fields named
+  Name/Email/Message/Notes/Company/Website -> `[REDACTED]`, email addresses ->
+  `[REDACTED:<id>]` (HMAC, key `Telemetry:RedactionKey` from AppHost parameter
+  `telemetry-redaction-key`). One marked line in `Extensions.cs` disables it for a demo. No
+  Serilog console sink: logs leave the site only through OpenTelemetry.
 
 ## Scope
 - Protect PII from the observability platform only. The database is out of scope;

@@ -23,7 +23,7 @@ demonstrated.
   production stage sees form load beyond what attendees produce.
 - **BREAKING (environment)**: the mail-path fault hop and its Slow / Break / Heal commands are
   removed. Mail goes straight from the site to the mail catcher.
-- Presenter notes live in a git-ignored folder the agent's committed settings deny reading.
+- Presenter notes live in `docs/presenter/` (committed); the agent's committed settings deny reading.
 
 Out of scope: real mail delivery, submitter confirmations, retries or queueing of mail, the
 tunnel itself and database reset (`add-production-environment`, `docs/demo-setup.md`), slide

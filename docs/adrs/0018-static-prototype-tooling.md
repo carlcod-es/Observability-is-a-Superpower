@@ -4,7 +4,7 @@
 Accepted (2026-10-14); typography point superseded by ADR-0019 (2026-10-14); "deletable wholesale" consequence amended by ADR-0020 (2026-10-14); prototype removed, ADR-0021 (2026-10-14)
 
 ## Context
-Change `add-site-prototype` delivers a standalone static prototype of the Acme Agency site (four
+Change `add-site-prototype` delivers a standalone static prototype of the agency site (four
 layouts, ~10 pages) whose markup and CSS later seed the Umbraco templates. Spec `site-prototype`
 forbids third-party front-end frameworks, external fonts and tracking scripts at runtime, and
 pages must work without client-side scripting. User preference: Node.js for tooling; the repo is

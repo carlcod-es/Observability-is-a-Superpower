@@ -5,6 +5,8 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ServiceDiscovery;
 using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Text;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -52,10 +54,16 @@ public static class Extensions
         // and forwards events to the OpenTelemetry logger provider registered below.
         builder.Services.AddSingleton<Serilog.Core.ILogEventSink>(sp => new SerilogForwardingSink(sp));
 
+        var redactionKeyText = builder.Configuration["Telemetry:RedactionKey"];
+        var redactionKey = string.IsNullOrEmpty(redactionKeyText)
+            ? RandomNumberGenerator.GetBytes(32)
+            : Encoding.UTF8.GetBytes(redactionKeyText);
+
         builder.Logging.AddOpenTelemetry(logging =>
         {
             logging.IncludeFormattedMessage = true;
             logging.IncludeScopes = true;
+            logging.AddProcessor(new PersonalDataLogProcessor(redactionKey)); // ADR-0028: log redaction - comment out to show raw values in a demo
         });
 
         builder.Services.AddOpenTelemetry()

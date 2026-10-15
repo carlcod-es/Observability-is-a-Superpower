@@ -4,8 +4,10 @@ Demo for the talk "Observability is a Superpower - Giving Developers and AI Agen
 Vision". Local Umbraco site with .NET Aspire, OpenTelemetry and read-only agent access to
 telemetry over MCP.
 
-How the repo, local environment, data and telemetry are set up: `docs/project-setup.md`.
-Decisions and their reasons: `docs/adrs/`.
+- How the repo, local environment, data and telemetry are set up: `docs/project-setup.md`.
+- Fresh environment before a demo (database reset, smoke check, tunnel): `docs/demo-setup.md`.
+- The talk's act-by-act runthrough: `docs/presenter/`.
+- Decisions and their reasons: `docs/adrs/`.
 
 ## Prerequisites
 
@@ -54,21 +56,24 @@ docker pull grafana/mcp-grafana:2.0.2
 7. Go live: [start Grafana](#start-grafana), then the [demo traffic](#demo-traffic) and the
    [submission burst](#submission-burst). Open Dashboards > Demo > Demo site
    (http://localhost:3000/d/demo-site); the "Form submissions by outcome" panel follows the burst.
-8. Ask Claude Code a metrics question through Grafana (reconnect `grafana` via `/mcp` once `grafana-mcp` is running; see
-   [Connecting Claude Code](#connecting-claude-code)), for example "how long do requests to the
+8. Ask Claude Code a metrics question through Grafana (reconnect `grafana` via `/mcp` once
+   `grafana-mcp` is running; see [Connecting Claude Code](#connecting-claude-code)), for example "how long do requests to the
    Home page take, from metrics?".
 9. Optional: look at the stored submissions ([Connect to the database](#connect-to-the-database));
    run the [tests](#tests).
 
 ## Run the full environment
 
+Rebuild if you need to
+
 ```sh
+dotnet clean SuperPower.slnx
+dotnet build SuperPower.slnx -c Release
 aspire run --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
 ```
 
-The explicit `--apphost` selects this AppHost. The command prints a
-login link for the Aspire dashboard. It starts SQL Server, smtp4dev, the
-OpenTelemetry Collector and the site. The site waits for its dependencies; first start installs
+The explicit `--apphost` selects this AppHost. The command prints a login link for the Aspire
+dashboard. It starts SQL Server, smtp4dev, the OpenTelemetry Collector and the site. The site waits for its dependencies; first start installs
 Umbraco and imports the content (a minute or two). `lgtm` shows in the dashboard as not started
 and `grafana-mcp` as waiting for it (see "Start Grafana").
 
@@ -136,8 +141,8 @@ dotnet run --project src/SuperPower.Web
 ```
 
 Uses `src/SuperPower.Web/umbraco/Data/Umbraco.sqlite.db`, created and filled on first start. No
-mail (no notification email) and no telemetry export (no OTLP endpoint is set); use it for content and view work. The
-SQLite and SQL Server databases are independent of each other.
+notification email and no telemetry export (no OTLP endpoint is set); use it for content and
+view work. The SQLite and SQL Server databases are independent of each other.
 
 ## Reset the databases
 
@@ -160,7 +165,8 @@ Content, document types and media live in `src/SuperPower.Web/uSync/` and
 The full environment's SQL Server, with any SQL client:
 
 - Password and port: Aspire generates the password on first run; both are in the AppHost user
-  secrets, keys `Parameters:sql-password` and `Resources:sql:tcp:port`:
+  secrets, keys `Parameters:sql-password` and `Resources:sql:tcp:port` (next to
+  `Parameters:telemetry-redaction-key`, the generated log-redaction key, ADR-0028):
   ```sh
   dotnet user-secrets list --project src/SuperPower.AppHost
   ```
@@ -179,6 +185,10 @@ instead (see [Run the site on its own](#run-the-site-on-its-own-sqlite)).
 Umbraco logs through Serilog, and only Serilog's levels decide what reaches the dashboard and
 Grafana: change `Serilog:MinimumLevel` in `src/SuperPower.Web/appsettings*.json`.
 `Logging:LogLevel` has no effect.
+
+The site writes no log entries to its console (Serilog console sink removed, ADR-0028): read
+them in the dashboard's structured logs or Grafana, where personal data is masked. Run alone,
+the raw entries are in `src/SuperPower.Web/umbraco/Logs/`.
 
 ## Connecting Claude Code
 
@@ -209,8 +219,7 @@ Notes:
 ## Stable ports and URLs
 
 Fixed ports are pinned in `launchSettings.json` files or the AppHost code; everything else
-(smtp4dev inbox, SQL Server) gets a dynamic port per run - reach those via the
-Aspire dashboard.
+(smtp4dev inbox, SQL Server) gets a dynamic port per run; reach those via the Aspire dashboard.
 
 | What | URL | Pinned in |
 |---|---|---|
@@ -287,7 +296,7 @@ range. Requests carry `User-Agent: SuperPower-LoadTest/1.0 (run <run-id>)`.
 The public URL above is served by a `cloudflared` tunnel from the presenter's machine to the
 local site. Put the tunnel token in `.cloudflared-token` at the repo root (gitignored; token
 from the Cloudflare Zero Trust tunnel page). Start the tunnel manually before the talk, after
-the site is running - same command on every OS:
+the site is running (same command on every OS; full order in `docs/demo-setup.md`):
 
 ```sh
 cloudflared tunnel run --token-file .cloudflared-token

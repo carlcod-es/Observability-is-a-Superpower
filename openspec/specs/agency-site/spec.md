@@ -10,7 +10,7 @@ Decisions: ADR-0003 (content seeding), ADR-0014 (event content model); in `docs/
 ## Requirements
 
 ### Requirement: Agency pages
-The site SHALL present a fictional marketing agency named Acme Agency with these public pages:
+The site SHALL present a fictional marketing agency named Rubber Duck Agency with these public pages:
 Home, About us, Contact us, Events (list), one page per event, Services (list) and one page per
 service. The site navigation SHALL link to Home, About us, Events, Services and Contact us from
 every page.

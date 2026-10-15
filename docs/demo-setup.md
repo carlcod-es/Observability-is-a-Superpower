@@ -1,7 +1,7 @@
 # Demo setup
 
 Steps to bring the environment to a fresh state before a demo. Commands run from the repo root.
-Background for each step is in `README.md`.
+Background for each step is in `README.md`; the talk itself is in `docs/presenter/`.
 
 ## 1. Before you start
 - Docker Desktop is running.

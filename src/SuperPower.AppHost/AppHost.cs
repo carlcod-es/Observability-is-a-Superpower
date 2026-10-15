@@ -52,6 +52,10 @@ builder.AddContainer("grafana-mcp", "grafana/mcp-grafana", "2.0.2")
     .WithHttpEndpoint(port: 8091, targetPort: 8000, name: "mcp")
     .WaitFor(lgtm);
 
+// Pseudonymisation key for log redaction (ADR-0028); generated once, persisted in AppHost user secrets.
+var redactionKey = builder.AddParameter("telemetry-redaction-key",
+    new GenerateParameterDefault { MinLength = 32, Special = false }, secret: true, persist: true);
+
 builder.AddProject<Projects.SuperPower_Web>("site")
     .WithReference(db, connectionName: "umbracoDbDSN")
     .WithEnvironment("ConnectionStrings__umbracoDbDSN_ProviderName", "Microsoft.Data.SqlClient")
@@ -60,6 +64,7 @@ builder.AddProject<Projects.SuperPower_Web>("site")
     .WithEnvironment("Umbraco__CMS__Global__Smtp__SecureSocketOptions", "None")
     .WithEnvironment("Umbraco__CMS__Global__Smtp__From", "noreply@acme-agency.example")
     .WithEnvironment("Acme__Forms__OwnerEmail", "owner@acme-agency.example")
+    .WithEnvironment("Telemetry__RedactionKey", redactionKey)
     .WaitFor(db)
     .WaitFor(smtp4dev)
     .WaitFor(collector)

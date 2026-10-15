@@ -34,7 +34,7 @@ references this file, so the on-stage agent may read it.
 
 ## Product requirements confirmed in explore (2026-10-06, revised 2026-10-08, 2026-10-13)
 - Keep it simple (PO 2026-10-13, CLAUDE.md "Principle"): basic demo, no edge cases.
-- Site: fictional marketing agency, Acme Agency (replaces the pottery studio). Pages: Home,
+- Site: fictional marketing agency, Rubber Duck Agency (replaces the pottery studio). Pages: Home,
   About us, Contact us, Events list, event pages, Services list, service pages.
 - Services (e.g. Umbraco upgrade, SEO audit, AdWords audit): Service enquiry form.
 - Events (e.g. "How to get the most out of your CMS"): free; title, description, start date and
@@ -74,6 +74,8 @@ references this file, so the on-stage agent may read it.
 1. `add-demo-foundation`: agency site, events and services, three forms.
 2. `add-demo-dashboard`: demo Grafana dashboard, provisioning, demo traffic (PO 2026-10-14).
 3. `add-form-emails`: all emails.
+3a. `add-log-redaction` (PO 2026-10-15, ADR-0028): layer 1 logging rule + in-app log
+   redaction processor; Serilog console sink removed. Proposed, not applied.
 4. `add-production-environment`: Cloudflare tunnel and database reset only (Azure dropped, PO
    2026-10-15).
 `add-event-bookings` dropped 2026-10-13 (change directory removed). `add-talk-slides` dropped

@@ -22,7 +22,14 @@ tests/
   smoke/                     end-to-end smoke check, `dotnet run tests/smoke/smoke.cs` (ADR-0012)
   traffic/                   demo traffic source `traffic.cs` (GET only) and submission burst
                              `burst.cs` (ADR-0012)
-docs/adrs/                   architecture decision records
+  load/                      load test `load-test.mjs` (Node), results in `load/results/`
+spikes/                      throwaway investigations, removed before the talk
+docs/
+  adrs/                      architecture decision records
+  feature-requests/          feature requests (FR-NNNN)
+  research/                  background research with sources
+  presenter/                 presenter runthrough for the talk
+  demo-setup.md              fresh environment before a demo
 openspec/                    planning: specs (openspec/specs) and changes (openspec/changes)
 .mcp.json                    MCP servers for Claude Code: aspire, grafana (ADR-0022)
 .claude/settings.json        pre-approved read tools on both servers; denies reading `docs/presenter/`
@@ -39,6 +46,7 @@ packages 13.6.x, Community Toolkit collector hosting 13.4.0; ADR-0001).
 | Database | SQL Server container | SQLite file |
 | Mail | smtp4dev (owner notifications) | not configured: no email sent |
 | Telemetry | OTLP -> Collector -> Aspire dashboard + Grafana LGTM (once started) | none exported (no OTLP endpoint set) |
+| Console | no log entries (structured logs only) | no log entries; read `umbraco/Logs/` |
 | Use | demo, telemetry, agent | quick content or view work |
 
 The AppHost overrides the site's settings with environment variables, so the same site code
@@ -88,15 +96,14 @@ Ctrl+C; optional argument: site URL (default `https://localhost:44368`). Start i
 `tests/traffic/burst.cs` posts valid forms concurrently, round-robin over the three forms, with
 made-up names and `@example.com` addresses: `dotnet run tests/traffic/burst.cs [-- <site-url>]
 [--count 50] [--parallel 10]`. Prints `ok=<n> failed=<n>` and the references; exit 1 on any
-failure. Each post stores a row and sends a notification email (design D6 of `add-form-emails`).
+failure. Each post stores a row and sends a notification email (`add-form-emails` design.md D6).
 
 ### Mail path
 The site sends SMTP to `localhost:2525`, smtp4dev's SMTP port (no TLS, not proxied by Aspire;
 ADR-0025). Each stored submission sends one owner notification to `Acme:Forms:OwnerEmail` (AppHost:
 `owner@acme-agency.example`), subject `New <form> submission ACME-nnnn`, plain-text body with the
 form, page, reference, UTC time and field values (ADR-0027). Personal data stays in the local
-inbox. Without an owner address or SMTP host (standalone) no email is sent. Agent resource
-commands (start, stop, restart) prompt every call (ADR-0022).
+inbox. Without an owner address or SMTP host (standalone) no email is sent.
 
 ## Data: what persists and where
 
@@ -115,7 +122,7 @@ media on first start (`ImportOnFirstBoot`, ADR-0003).
 
 ## Telemetry
 
-Configured once in ServiceDefaults; identical locally and in production.
+Configured once in ServiceDefaults; the site code does not depend on the exporter.
 
 - **Traces**: ASP.NET Core, HttpClient and SqlClient instrumentation, plus the site's
   `Acme.Forms` ActivitySource: `acme.forms.submit` per form post (`acme.form`,
@@ -132,14 +139,29 @@ Configured once in ServiceDefaults; identical locally and in production.
 - **Logs**: Umbraco logs through Serilog. A sink in ServiceDefaults forwards Serilog events to
   the OpenTelemetry logger, so logs keep named properties and link to their trace (ADR-0007).
   The forms code logs `Form {Form} stored as {Reference}` per stored submission.
+  Destructured objects (`{@Model}`) become dotted attributes (`Model.Email`).
   Log levels are set in the site's Serilog configuration only; `Logging:LogLevel` has no effect.
+  No Serilog console sink: log entries leave the site only through OpenTelemetry (raw values
+  stay in Umbraco's local files under `umbraco/Logs/`).
+- **Log redaction** (ADR-0028): `PersonalDataLogProcessor`, the first processor on the
+  OpenTelemetry logger, rewrites every entry before any exporter sees it. Attributes whose last
+  name segment is Name, Email, Message, Notes, Company or Website become `[REDACTED]` (also
+  in the message); every email address becomes `[REDACTED:<id>]`, id = first 12 hex characters
+  of HMAC-SHA256 over the lower-cased address. Same address, same id, as long as the key stays.
+  Key: `Telemetry:RedactionKey`, from the AppHost's generated secret parameter
+  `telemetry-redaction-key`; standalone runs use a random key per process. To show raw values in
+  a demo, comment out the line marked `ADR-0028` in `ConfigureOpenTelemetry`
+  (`src/SuperPower.ServiceDefaults/Extensions.cs`). Not covered: traces, metrics, exception
+  messages, scopes, values inside sequences or dictionaries (email pattern still applies).
 - **Filtered out**: `/health`, `/alive`, `/umbraco/backoffice`, `/css`, `/js`, `/media`,
   `/assets`, `/favicon.ico` leave neither spans nor request logs (`TelemetryPaths.cs`, ADR-0008);
   the request metric still counts them under `acme_page_type="none"`.
 - **Exporter switch**: `APPLICATIONINSIGHTS_CONNECTION_STRING` set -> Azure Monitor; else
   `OTEL_EXPORTER_OTLP_ENDPOINT` set (by Aspire) -> OTLP; else nothing.
 - **Personal data**: form field values (name, email, message, notes, company, website) are
-  never recorded; form, page, outcome and reference are.
+  never recorded; form, page, outcome and reference are. Rule for code: log what happened
+  (form, outcome, reference), never the submitted model or field values; the log processor is a
+  safety net, not permission.
 
 The Collector (`collector/config.yaml`) has two pipeline sets per signal, each with its own batch
 processor: `*/aspire` to the Aspire dashboard (always) and `*/lgtm` to Grafana LGTM. The LGTM
@@ -183,7 +205,7 @@ booking, a service shows Service enquiry. A past event shows "This event has end
 form.
 
 Form submissions go to one site-owned table, `acmeFormSubmission` (form key, page key, UTC
-timestamp, field values as JSON), created by the site's migration plan on start. Works on
+timestamp, reference number, field values as JSON), created by the site's migration plan on start. Works on
 SQLite and SQL Server.
 
 ## Tests
@@ -194,8 +216,8 @@ SQLite and SQL Server.
 - `dotnet run tests/smoke/smoke.cs` (full environment, run right after starting the AppHost) or
   `... -- standalone` (SQLite): pages, form submissions and stored rows, Home trace with database
   spans and linked logs, reference on the success page matching the stored row, and (full
-  environment) a notification email with that reference in smtp4dev (ADR-0012). The full-environment run starts `lgtm` itself
-  and checks that Grafana has no telemetry from a request made before the start, both dashboards
+  environment) a notification email with that reference in smtp4dev (ADR-0012). The full-environment
+  run starts `lgtm` itself and checks that Grafana has no telemetry from a request made before the start, both dashboards
   are provisioned, `acme.page_type` is on the Home metric, span and the service-enquiry post, and
   `/assets` leaves no span. No Umbraco or Aspire integration harness.
 

@@ -143,3 +143,13 @@ context, nothing personal. Agent access: read-only Grafana MCP, Aspire commands 
 ## Rehearsal log (task 6.2)
 | Date | Act | Duration | Notes |
 |---|---|---|---|
+
+## Talking point: console logs disabled (add-log-redaction, ADR-0028)
+Added by the Architect 2026-10-15; place it where it fits.
+- The site no longer writes Serilog to the console (removed from `appsettings.Development.json`).
+- Why: the redaction processor only cleans the OpenTelemetry log path. Console output is a
+  second path the Aspire dashboard (console logs) and the agent (Aspire MCP
+  `list_console_logs`) can read, and it would show personal data unmasked.
+- Point to make: every output path is a place PII can leak. Close the paths you don't need,
+  clean the one you keep. Umbraco's own log files (`umbraco/Logs/`) still hold raw values:
+  local disk, same category as the database.

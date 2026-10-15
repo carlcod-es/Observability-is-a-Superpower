@@ -4,8 +4,8 @@
 Accepted (2026-10-14); prototype font path amended by ADR-0020 (2026-10-14); prototype removed (ADR-0021), site outcome below stands
 
 ## Context
-The PO rebranded the prototype to Rubber Duck Consulting (prototype-only; the Umbraco demo site
-remains Acme Agency) and chose Baloo 2 (headings) + Nunito (body), both SIL Open Font License.
+The PO rebranded the prototype to Rubber Duck Consulting (the Umbraco demo site
+later became Rubber Duck Agency) and chose Baloo 2 (headings) + Nunito (body), both SIL Open Font License.
 ADR-0018 specified a system font stack; the PO overrides that for the prototype. Spec
 `site-prototype` "Minimal page dependencies" exists so page-request telemetry contains only the
 site's own work: fonts must therefore be served from the site's own files, never a CDN. The repo

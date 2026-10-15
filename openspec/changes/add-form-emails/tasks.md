@@ -31,5 +31,5 @@ between sections 2 and 1 (ADR-0027).
 
 ## 6. Presenter preparation (PO; depends on sections 1-5)
 
-- [ ] 6.1 Create the demo branches and stage clone as described in `docs/presenter/runthrough.md`; verify each branch starts and the stage clone has no `docs/presenter/` folder
+- [ ] 6.1 Create the demo branches and stage clone as described in `docs/presenter/runthrough.md`; verify each branch starts and the stage clone has no `docs/presenter/` folder (delete it after cloning: it is committed)
 - [ ] 6.2 Rehearse the runthrough end to end on the stage machine; verify each act's expected observation in `docs/presenter/runthrough.md` is seen, timings recorded there

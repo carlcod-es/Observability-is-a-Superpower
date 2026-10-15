@@ -23,7 +23,7 @@ call.
 ## ADDED Requirements
 
 ### Requirement: Presenter notes out of the agent's reach
-The committed agent settings SHALL deny the agent reading the git-ignored presenter notes
+The committed agent settings SHALL deny the agent reading the presenter notes
 folder `docs/presenter/`.
 
 #### Scenario: Agent tries to read presenter notes
