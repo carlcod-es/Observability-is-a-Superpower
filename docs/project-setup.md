@@ -13,12 +13,14 @@ global.json                  test runner: Microsoft.Testing.Platform
 src/
   SuperPower.AppHost/        Aspire AppHost: every local resource (see "Local environment")
     collector/config.yaml    OpenTelemetry Collector pipelines
+    grafana/                 dashboard provider + dashboards/ JSON, mounted into `lgtm` (ADR-0023)
   SuperPower.ServiceDefaults/ OpenTelemetry, health checks, exporter switch, Serilog forwarding
   SuperPower.Web/            Umbraco 17 site (Rubber Duck Agency; code names keep `Acme`)
 banners/                     banner SVG generator `generate.mjs` (Node) and its output
 tests/
   SuperPower.Web.Tests/      xUnit v3 unit tests (ADR-0012)
   smoke/                     end-to-end smoke check, `dotnet run tests/smoke/smoke.cs` (ADR-0012)
+  traffic/                   demo traffic source, `dotnet run tests/traffic/traffic.cs` (ADR-0012)
 docs/adrs/                   architecture decision records
 openspec/                    planning: specs (openspec/specs) and changes (openspec/changes)
 .mcp.json                    MCP servers for Claude Code: aspire, grafana (ADR-0022)
@@ -62,7 +64,7 @@ Claude Code reads the Aspire dashboard through the `aspire` MCP (stdio) and Graf
 | `sql` / database `umbraco` | Azure SQL run as SQL Server container | dynamic | persistent container + data volume | ADR-0009 |
 | `smtp4dev` | `rnwood/smtp4dev:3.15.0` | dynamic (Inbox link in dashboard) | none (in-memory inbox) | ADR-0010 |
 | `toxiproxy` | `ghcr.io/shopify/toxiproxy:2.12.0` | 2525 (SMTP proxy), dynamic API | none; proxy created healed on start | ADR-0010 |
-| `lgtm` | `grafana/otel-lgtm:0.36.0`, explicit start | 3000 (Grafana, admin/admin) | none: telemetry history lost on restart | ADR-0017, ADR-0022 |
+| `lgtm` | `grafana/otel-lgtm:0.36.0`, explicit start; read-only mounts `grafana/acme-dashboards.yaml`, `grafana/dashboards/` | 3000 (Grafana, admin/admin) | none: telemetry history lost on restart; dashboards reloaded from the repo on every start | ADR-0017, ADR-0022, ADR-0023 |
 | `collector` | OpenTelemetry Collector contrib 0.162.0 | dynamic | none | ADR-0017 |
 | `grafana-mcp` | `grafana/mcp-grafana:2.0.2`, waits for `lgtm` | 8091 (`/mcp`) | none | ADR-0017, ADR-0022 |
 | `site` | `SuperPower.Web` project | 44368 (https), 21258 (http) | - | ADR-0002 |
@@ -72,6 +74,16 @@ the AppHost: Start on `lgtm` in the dashboard (or `aspire resource lgtm start --
 src/SuperPower.AppHost/SuperPower.AppHost.csproj`) starts it without restarting anything else,
 and `grafana-mcp`, waiting for `lgtm`, follows (go-live; ADR-0022). All fixed ports are listed
 in the root `README.md`.
+
+### Dashboards and demo traffic
+
+On every `lgtm` start Grafana provisions the JSON files in
+`src/SuperPower.AppHost/grafana/dashboards/` into folder "Demo": `demo-site.json` (Demo site:
+request rate and p95 per page type with trace exemplars, 5xx share, error logs) and
+`aspnetcore-19924.json` (community ASP.NET Core dashboard, MIT, source in the README there). UI
+edits cannot be saved; change the JSON and restart `lgtm` (ADR-0023).
+`tests/traffic/traffic.cs` requests the site's pages (GET only, about one per second) until
+Ctrl+C; optional argument: site URL (default `https://localhost:44368`). Start it after go-live.
 
 ### Mail path and fault injection
 The site sends SMTP to `localhost:2525`, Toxiproxy's `smtp` proxy, which forwards to smtp4dev.
@@ -103,12 +115,16 @@ Configured once in ServiceDefaults; identical locally and in production.
   `Acme.Forms` ActivitySource. SQL spans are kept only under a recorded parent, which drops
   Umbraco's background database noise (ADR-0008).
 - **Metrics**: ASP.NET Core, HttpClient, .NET runtime, plus the site's `Acme.Forms` Meter.
+- **Page type**: `PageTypeTelemetryMiddleware` tags the request span and
+  `http.server.request.duration` with `acme.page_type` (Prometheus `acme_page_type`): the
+  rendered content type alias (`home`, `page`, `contact`, `events`, `event`, `services`,
+  `service`) or `none` (ADR-0024).
 - **Logs**: Umbraco logs through Serilog. A sink in ServiceDefaults forwards Serilog events to
   the OpenTelemetry logger, so logs keep named properties and link to their trace (ADR-0007).
   Log levels are set in the site's Serilog configuration only; `Logging:LogLevel` has no effect.
 - **Filtered out**: `/health`, `/alive`, `/umbraco/backoffice`, `/css`, `/js`, `/media`,
-  `/favicon.ico` leave neither spans nor request logs (`TelemetryPaths.cs`). `/assets` (header
-  logo) is still traced; excluded by `add-demo-dashboard` (ADR-0008).
+  `/assets`, `/favicon.ico` leave neither spans nor request logs (`TelemetryPaths.cs`, ADR-0008);
+  the request metric still counts them under `acme_page_type="none"`.
 - **Exporter switch**: `APPLICATIONINSIGHTS_CONNECTION_STRING` set -> Azure Monitor; else
   `OTEL_EXPORTER_OTLP_ENDPOINT` set (by Aspire) -> OTLP; else nothing.
 - **Personal data**: form field values (name, email, message, notes, company, website) are
@@ -162,12 +178,13 @@ SQLite and SQL Server.
 ## Tests
 
 - `dotnet test` at the root runs `tests/SuperPower.Web.Tests`: form validation, field-to-JSON
-  mapping, past/upcoming event rules with a fake `TimeProvider`.
+  mapping, past/upcoming event rules with a fake `TimeProvider`, page-type tag values.
 - `dotnet run tests/smoke/smoke.cs` (full environment, run right after starting the AppHost) or
   `... -- standalone` (SQLite): pages, form submissions and stored rows, Home trace with database
   spans and linked logs, Slow/Break/Heal (ADR-0012). The full-environment run starts `lgtm` itself
-  and checks that Grafana has no telemetry from a request made before the start. No Umbraco or
-  Aspire integration harness.
+  and checks that Grafana has no telemetry from a request made before the start, both dashboards
+  are provisioned, `acme.page_type` is on the Home metric, span and the service-enquiry post, and
+  `/assets` leaves no span. No Umbraco or Aspire integration harness.
 
 ## Planning and branches
 

@@ -63,11 +63,14 @@ toxiproxy
 
 // Telemetry: apps -> collector -> Aspire dashboard + Grafana LGTM (ADR-0017, ADR-0022).
 // LGTM is started on demand (explicit start) and receives only post-start telemetry; grafana-mcp waits for it.
+// Demo dashboards are file-provisioned via read-only bind mounts (ADR-0023).
 // WithAppForwarding re-points the projects' OTLP endpoint at the collector.
 var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "0.36.0")
     .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "grafana")
     .WithHttpEndpoint(targetPort: 4318, name: "otlp-http")
     .WithHttpHealthCheck("/api/health", endpointName: "grafana")
+    .WithBindMount("./grafana/acme-dashboards.yaml", "/otel-lgtm/grafana/conf/provisioning/dashboards/acme-dashboards.yaml", isReadOnly: true)
+    .WithBindMount("./grafana/dashboards", "/otel-lgtm/acme-dashboards", isReadOnly: true)
     .WithExplicitStart();
 
 var collector = builder.AddOpenTelemetryCollector("collector", c => c.CollectorTag = "0.162.0")

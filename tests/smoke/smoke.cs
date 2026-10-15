@@ -12,6 +12,9 @@
 //   (404 but logged; a real page such as About us warms the content cache and hides the Home DB spans), starts `lgtm` via the
 //   aspire CLI, waits for Grafana health and grafana-mcp (port 8091), then runs the checks, including "no pre-start
 //   telemetry in Grafana". If `lgtm` is already running the pre-check is reported "not applicable".
+//   add-demo-dashboard (design D6): dashboards provisioned (/api/search: demo-site, 19924), acme.page_type on the Home metric (Prometheus),
+//   Home span and service-enquiry post span (Tempo), and /assets/rubber-duck.svg excluded from tracing.
+//   These checks read Grafana, so `lgtm` must be running (the telemetry section starts it).
 // standalone: SQLite file src/SuperPower.Web/umbraco/Data/Umbraco.sqlite.db, opened read-only. Pages and forms only.
 // Not scripted (PO 2026-10-14): Event booking post to a past event; check it manually (verification.md).
 // Passing both targets also proves the raw FieldsJson is identical on SQL Server and SQLite.
@@ -243,6 +246,7 @@ catch (Exception e) { Report(false, "invalid submission", e.Message); }
 if (!standalone)
 {
     await TelemetryCheck();
+    await DashboardCheck();
     await MailCheck();
 }
 
@@ -312,6 +316,82 @@ async Task TelemetryCheck()
         }
     }
     catch (Exception e) { Report(false, "telemetry", e.Message); }
+}
+
+// ---- 4b. Dashboards and page-type label (add-demo-dashboard, design D6)
+async Task DashboardCheck()
+{
+    try
+    {
+        using var g = new HttpClient { BaseAddress = new Uri(Grafana), Timeout = TimeSpan.FromSeconds(20) };
+        g.DefaultRequestHeaders.Authorization = new("Basic", Convert.ToBase64String("admin:admin"u8.ToArray()));
+        var from = new DateTimeOffset(homeSince.AddMinutes(-1)).ToUnixTimeSeconds();
+        // Tempo TraceQL search: (trace id, selected span attributes) per matching span.
+        async Task<List<(string Trace, Dictionary<string, string> Attrs)>> Tempo(string q, bool strict = false)
+        {
+            var url = "/api/datasources/proxy/uid/tempo/api/search?limit=50&start=" + from + "&end=" + DateTimeOffset.UtcNow.AddMinutes(1).ToUnixTimeSeconds() + "&q=" + Uri.EscapeDataString(q);
+            var resp = await g.GetAsync(url);
+            var list = new List<(string, Dictionary<string, string>)>();
+            if (!resp.IsSuccessStatusCode) return strict ? throw new Exception($"Tempo search {(int)resp.StatusCode}") : list; // non-strict: Tempo can answer 404/5xx while ingesting; callers retry
+            var root = JsonDocument.Parse(await resp.Content.ReadAsStringAsync()).RootElement;
+            if (!root.TryGetProperty("traces", out var traces)) return list;
+            foreach (var t in traces.EnumerateArray())
+                foreach (var set in t.TryGetProperty("spanSets", out var ss) ? ss.EnumerateArray().ToList() : t.TryGetProperty("spanSet", out var one) ? [one] : new List<JsonElement>())
+                    foreach (var sp in set.GetProperty("spans").EnumerateArray())
+                        list.Add((t.GetProperty("traceID").GetString()!, sp.TryGetProperty("attributes", out var at)
+                            ? at.EnumerateArray().ToDictionary(a => a.GetProperty("key").GetString()!, a => a.GetProperty("value").EnumerateObject().First().Value.ToString()) : []));
+            return list;
+        }
+        async Task<List<(string Trace, Dictionary<string, string> Attrs)>> TempoWait(string q, Func<List<(string Trace, Dictionary<string, string> Attrs)>, bool> done)
+        {
+            var r = new List<(string, Dictionary<string, string>)>();
+            for (var i = 0; i < 15; i++)
+            {
+                r = await Tempo(q);
+                if (done(r)) break;
+                await Task.Delay(2000);
+            }
+            return r;
+        }
+
+        // Explicit asset request: must never become a span. Checked last, after a sentinel request made right after it
+        // has shown up in Tempo (spans export in order, so the asset span would be there too); else the check could pass vacuously.
+        var assetStatus = (int)(await NewClient().GetAsync("/assets/rubber-duck.svg")).StatusCode;
+        var sentinelPath = "/smoke-asset-" + Guid.NewGuid().ToString("N") + "/";
+        await NewClient().GetAsync(sentinelPath);
+
+        var search = JsonDocument.Parse(await g.GetStringAsync("/api/search")).RootElement.EnumerateArray().Select(d => d.GetProperty("uid").GetString()).ToList();
+        var missing = new[] { "demo-site", "KdDACDp4z" }.Where(u => !search.Contains(u)).ToList();
+        Report(missing.Count == 0, "dashboards provisioned", missing.Count == 0 ? "demo-site and 19924 (KdDACDp4z) listed" : $"missing {string.Join(", ", missing)}; found {string.Join(", ", search)}");
+
+        var metric = "";
+        for (var i = 0; i < 15 && metric == ""; i++)
+        {
+            var q = Uri.EscapeDataString("""http_server_request_duration_seconds_count{job="site",acme_page_type="home"}""");
+            var resp = await g.GetAsync("/api/datasources/proxy/uid/prometheus/api/v1/query?query=" + q);
+            if (resp.IsSuccessStatusCode)
+            {
+                var res = JsonDocument.Parse(await resp.Content.ReadAsStringAsync()).RootElement.GetProperty("data").GetProperty("result");
+                if (res.GetArrayLength() > 0) { metric = res[0].GetProperty("value")[1].GetString()!; break; }
+            }
+            await Task.Delay(2000);
+        }
+        Report(metric != "", "page-type label on metric", metric != "" ? $"acme_page_type=home count {metric}" : "no series after 30 s");
+
+        var select = " | select(span.acme.page_type, span.url.path)";
+        var home = await TempoWait("""{resource.service.name="site" && span.acme.page_type="home"}""" + select, r => r.Count > 0);
+        Report(home.Count > 0, "page-type label on span", home.Count > 0 ? $"{home.Count} span(s) with acme.page_type=home, e.g. trace {home[0].Trace}" : "no Home span with acme.page_type=home");
+
+        var posts = await TempoWait($$"""{resource.service.name="site" && kind=server && span.http.request.method="POST" && span.url.path=~"{{service.TrimEnd('/')}}/?"}""" + select, r => r.Any(s => s.Attrs.GetValueOrDefault("span.acme.page_type") == "service" || s.Attrs.GetValueOrDefault("acme.page_type") == "service"));
+        var types = posts.Select(s => s.Attrs.GetValueOrDefault("span.acme.page_type") ?? s.Attrs.GetValueOrDefault("acme.page_type") ?? "(missing)").ToList();
+        Report(types.Contains("service"), "page-type label on form post", $"POST server spans: {(types.Count == 0 ? "none found" : string.Join(", ", types.GroupBy(t => t).Select(t => $"{t.Key} x{t.Count()}")))}");
+
+        var sentinel = await TempoWait($$"""{resource.service.name="site" && span.url.path="{{sentinelPath}}"}""" + select, r => r.Count > 0);
+        if (sentinel.Count == 0) { Report(false, "assets excluded", "pipeline not proven live (sentinel request span not in Tempo after 30 s)"); return; }
+        var assets = await Tempo("""{resource.service.name="site" && span.url.path=~"/assets/.*"}""" + select, strict: true);
+        Report(assets.Count == 0 && assetStatus == 200, "assets excluded", $"GET /assets/rubber-duck.svg {assetStatus}; {assets.Count} span(s) with an /assets url.path");
+    }
+    catch (Exception e) { Report(false, "dashboard checks", e.Message); }
 }
 
 // ---- 5. Slow / Break / Heal on the SMTP path (localhost:2525 -> Toxiproxy -> smtp4dev)

@@ -1,3 +1,4 @@
+using SuperPower.Web.Telemetry;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ app.MapDefaultEndpoints();
 
 await app.BootUmbracoAsync();
 
+app.UseMiddleware<PageTypeTelemetryMiddleware>();
 
 app.UseUmbraco()
     .WithMiddleware(u =>

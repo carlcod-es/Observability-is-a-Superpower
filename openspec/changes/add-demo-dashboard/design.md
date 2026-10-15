@@ -120,6 +120,17 @@ traffic source start/stop. `docs/project-setup.md`: AppHost `lgtm` mounts, `test
 `acme.page_type`. FR-0001 and FR-0003 Status -> this change. `agent-telemetry-access` README
 note "Aspire MCP has no metrics tool" unchanged.
 
+### D8: README run-through and database login (PO 2026-10-15)
+Generated `sa` password unchanged: Aspire creates it on first run and keeps it in AppHost user
+secrets (`Parameters:sql-password`); port dynamic (`Resources:sql:tcp:port`, Aspire dashboard).
+README "Connect to the database": server `localhost,<port>`, user `sa`, password via
+`dotnet user-secrets list --project src/SuperPower.AppHost`, `TrustServerCertificate=True`.
+README "Run the demo": numbered run-through linking the existing sections (start, browse and
+submit a form, local telemetry, Grafana go-live, traffic, Claude Code); no
+planted problems or fixes (PLANNING.md rule). Smoke check reads the password from user secrets
+as before. Alternative dropped by the PO: fixed password in AppHost `appsettings.json` (FR-0005;
+needed a volume reset, no gain for the talk).
+
 ## Bar and test strategy
 
 Bar: **prototype** (as `add-demo-foundation`). Automated: `dotnet build SuperPower.slnx`,

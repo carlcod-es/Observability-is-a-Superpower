@@ -31,3 +31,20 @@ site's own image assets) SHALL leave no traces or logs (ADR-0008).
 #### Scenario: Logo request
 - **WHEN** a page is loaded and the browser fetches the header logo
 - **THEN** the local dashboard shows a trace for the page request and none for the logo
+
+### Requirement: Documented database login
+The README SHALL say how to connect a SQL client to the local SQL Server: user `sa`, where to
+find the generated password and the database port.
+
+#### Scenario: Connect with a SQL client
+- **WHEN** someone has started the environment from a fresh clone
+- **THEN** they can connect a SQL client by following the README, with no other source
+
+### Requirement: Demo run-through
+The README SHALL give the demo as a short ordered run-through that links the detailed
+sections, and SHALL NOT describe planted problems or their fixes.
+
+#### Scenario: Attendee follows the run-through
+- **WHEN** an attendee follows the run-through on a fresh clone
+- **THEN** they reach each talk step (site, form post, local telemetry, Grafana go-live, demo
+  traffic, agent questions) without other instructions

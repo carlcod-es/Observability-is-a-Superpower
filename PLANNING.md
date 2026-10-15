@@ -19,13 +19,11 @@ references this file, so the on-stage agent may read it.
   `findings.md` section 6: one custom JSON-first demo dashboard (request rate, 5xx rate, p95 with
   trace exemplars, form meters, Loki error logs), drill-down through the bundled Logs/Traces
   Drilldown apps, JSON in the repo. Open: its task 4.4 (provisioning, not attempted), now FR-0001.
-- [ ] `add-demo-dashboard` proposed 2026-10-15 (branch `add-demo-dashboard` from `main`; ADR-0023, ADR-0024; FR-0001, FR-0003); next `/opsx:apply add-demo-dashboard`. Original note: `/opsx:propose add-demo-dashboard` (PO 2026-10-14: own change, after
-  `add-demo-foundation`, before `add-form-emails`). Inputs: `spike-grafana-dashboard`
-  `findings.md` section 6; FR-0001 (provisioning mount, fallback import on start); also provision
-  community dashboard 19924; demo traffic from a .NET 10 file-based app in `tests/` (ADR-0012)
-  that browses pages and posts no forms; ADR for the dashboard. FR-0003 (per-page-type label
-  on request metrics) is built in the same change, together with the dashboard (PO 2026-10-15). Form-meter panels go in
-  `add-form-emails`.
+- [ ] `add-demo-dashboard` (branch `add-demo-dashboard`; ADR-0023, ADR-0024; FR-0001, FR-0003): apply
+  started 2026-10-15. Built: dashboards provisioned from the repo into `lgtm` (folder Demo: Demo site,
+  ASP.NET Core 19924), page-type label `acme.page_type`, `/assets` excluded, `tests/traffic/traffic.cs`.
+  Smoke checks and README done. Open: task 3.1 PO submission count, PO acceptance on Windows
+  (section 6). Form-meter panels go in `add-form-emails`.
 - [x] Spike closure (PO 2026-10-13): keep both spikes open for reference until pre-talk cleanup
   (Todos).
 
@@ -112,9 +110,8 @@ Decided in ADRs; verified by `add-demo-foundation` tasks:
 - [ ] LGTM stack, Collector and Grafana MCP on Windows (ADR-0017; spike ran on macOS): task 9.3.
   `spike-grafana-dashboard` ran the spike stack on Windows 2026-10-14 without Windows-specific
   issues; Aspire CLI must match the AppHost SDK (13.4.6 CLI vs 13.6.1 SDK kills the AppHost).
-- [ ] Grafana dashboard provisioning in `grafana/otel-lgtm` via bind mount
-  (`/otel-lgtm/grafana/conf/provisioning/dashboards/`): unverified, `spike-grafana-dashboard`
-  task 4.4 not attempted. Tracked as FR-0001
+- [x] Grafana dashboard provisioning in `grafana/otel-lgtm` via bind mount (`/otel-lgtm/grafana/conf/provisioning/dashboards/`): works on macOS 2026-10-15
+  (`add-demo-dashboard` task 1.1); Windows in its task 6.1. FR-0001
   (`docs/feature-requests/0001-grafana-dashboard-provisioning.md`).
 For `add-production-environment`, tunnel baseline:
 - [ ] Cloudflare tunnel to the local site: public URL for the QR code, only the site exposed

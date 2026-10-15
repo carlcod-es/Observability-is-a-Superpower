@@ -35,6 +35,25 @@ docker pull grafana/mcp-grafana:2.0.2
 
 (Podman: replace `docker` with `podman`.)
 
+## Run the demo
+
+1. Check the [Prerequisites](#prerequisites) and do the [pre-pull](#pre-pull-the-container-images).
+2. [Run the full environment](#run-the-full-environment); open the Aspire dashboard
+   (https://localhost:17210) and the site (https://localhost:44368).
+3. Browse the site: Home, an event, a service.
+4. Submit a form: Contact, a service enquiry or an upcoming event booking. Use made-up data.
+5. In the Aspire dashboard find the page request and form post traces, their structured logs and
+   the request-duration metric (Metrics > `site` > `http.server.request.duration`). Form field values never appear in telemetry.
+6. Optional: [connect Claude Code](#connecting-claude-code) and ask, for example, "show the latest
+   trace for the Home page and its logs".
+7. Go live: [start Grafana](#start-grafana), then the [demo traffic](#demo-traffic). Open
+   Dashboards > Demo > Demo site (http://localhost:3000/d/demo-site).
+8. Ask Claude Code a metrics question through Grafana (reconnect `grafana` via `/mcp` once `grafana-mcp` is running; see
+   [Connecting Claude Code](#connecting-claude-code)), for example "how long do requests to the
+   Home page take, from metrics?".
+9. Optional: look at the stored submissions ([Connect to the database](#connect-to-the-database));
+   run the [tests](#tests).
+
 ## Run the full environment
 
 ```sh
@@ -73,6 +92,23 @@ restarted.
 - Grafana holds only telemetry produced after `lgtm` started; earlier traces and logs are dropped,
   not replayed, and metric counters are cumulative, so their first values include earlier totals.
   Load a few pages before querying. Grafana data is lost when the AppHost stops.
+- Dashboards are provisioned on every `lgtm` start, under Dashboards > Demo (Demo site:
+  http://localhost:3000/d/demo-site):
+  - "Demo site": request rate and p95 duration per page type, 5xx share, error logs. Click a p95
+    exemplar point to open its trace.
+  - "ASP.NET Core": community dashboard 19924; pick job `site`.
+  - UI edits are not saved: change the JSON in `src/SuperPower.AppHost/grafana/dashboards/` and
+    restart `lgtm`. Panels fill once the site has traffic.
+
+### Demo traffic
+
+```sh
+dotnet run tests/traffic/traffic.cs                       # optional: -- <site-url>
+```
+
+Default site URL `https://localhost:44368`. GET requests only, about one page per second; never
+posts a form. Prints `requests=<n> failures=<n>` each minute. Stop with Ctrl+C. Start it after
+go-live (after `lgtm` is started); earlier it only clutters the local traces.
 
 ## Run the site on its own (SQLite)
 
@@ -99,6 +135,24 @@ Content, document types and media live in `src/SuperPower.Web/uSync/` and
 - SQLite: stop the site and delete `src/SuperPower.Web/umbraco/Data/Umbraco.sqlite.db*`.
 - Either way, also delete `src/SuperPower.Web/umbraco/Data/TEMP/` (cache shared by both runs;
   stale copies log "Last synced Id ... not found", harmless).
+
+## Connect to the database
+
+The full environment's SQL Server, with any SQL client:
+
+- Server: `localhost,<port>`; the port is dynamic: the `sql` resource in the Aspire dashboard
+  (also `Resources:sql:tcp:port` in the AppHost user secrets).
+- Database: `umbraco`. User: `sa`.
+- Password: Aspire generates it on first run and keeps it in the AppHost user secrets, key
+  `Parameters:sql-password`:
+  ```sh
+  dotnet user-secrets list --project src/SuperPower.AppHost
+  ```
+- `TrustServerCertificate=True` (client option "Trust server certificate").
+- Table `acmeFormSubmission` holds the form submissions.
+
+Local demo data only; the agent has no database access. The standalone run uses a SQLite file
+instead (see [Run the site on its own](#run-the-site-on-its-own-sqlite)).
 
 ## Log levels
 
@@ -161,7 +215,8 @@ dotnet test
 Unit tests for form validation, stored field values and the event date rules.
 
 End-to-end smoke check (pages, form submissions, stored rows, Home trace with database spans
-and linked logs, Slow/Break/Heal):
+and linked logs, Slow/Break/Heal, provisioned dashboards, page-type label `acme.page_type`,
+`/assets` exclusion):
 
 ```sh
 dotnet run tests/smoke/smoke.cs               # full environment, SQL Server

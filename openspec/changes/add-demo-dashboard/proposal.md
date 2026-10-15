@@ -24,6 +24,9 @@ Home page" from metrics (FR-0003). The talk is on 16 Oct 2026, so this has to be
   form, started and stopped by the presenter.
 - The agent's metric check is tightened back to a single page's request duration (FR-0003
   notes).
+- The README gains a numbered run-through of the demo for attendees and says how to connect a
+  SQL client to the local database (generated `sa` password from user secrets, port from the
+  Aspire dashboard). PO 2026-10-15: no fixed password (FR-0005 rejected).
 - Images under the site's static assets folder leave no traces or logs, like the other static
   files (found 2026-10-15: the header logo added that folder).
 
@@ -51,4 +54,5 @@ read-only telemetry tools, ADR-0022).
   smoke check (dashboard present, label present), README and project-setup doc.
 - New ADRs for the dashboard (contents, JSON in the repo, provisioning) and the page-type
   label.
-- Closes FR-0001 and FR-0003.
+- README "Run the demo" and "Connect to the database".
+- Closes FR-0001 and FR-0003; FR-0005 rejected.

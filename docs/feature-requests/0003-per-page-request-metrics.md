@@ -1,8 +1,8 @@
 # FR-0003: Request metrics per page type
 
 ## Status
-Planned in change `add-demo-dashboard` (2026-10-15; ADR-0024). Source: `rework-aspire-first` task 6.3 (`verification.md` finding F1). To be
-built in change `add-demo-dashboard`, together with the dashboard (PO 2026-10-15); not on its own.
+Built in change `add-demo-dashboard` (2026-10-15; ADR-0024). Source: `rework-aspire-first` task 6.3 (`verification.md` finding F1).
+Built together with the dashboard (PO 2026-10-15).
 
 ## Request
 The site's HTTP request metrics (`http.server.request.duration`) carry the Umbraco page type, so
