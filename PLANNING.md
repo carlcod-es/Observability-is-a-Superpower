@@ -175,6 +175,8 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
     dropped); `.WithExternalHttpEndpoints()` on smtp4dev.
 - [ ] FR-0004 (2026-10-15): review nits from `add-demo-foundation` (31 items, code, views, tests,
   README, content); after the talk unless the PO pulls items forward.
+- [ ] FR-0006 (2026-10-16): second instrumented resource in traces (e.g. analytics service fed
+  by a message queue); after the talk.
 - [ ] After the talk (PO): add the slides to the repo for attendees.
 - [ ] Before the talk: remove demo-plan entries from Claude memory, or run the demo
   from a different clone path (memory is keyed to the folder path and loads on stage).
