@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "aspire": {
+      "type": "stdio",
+      "command": "aspire",
+      "args": ["agent", "mcp"]
+    },
+    "grafana": {
+      "type": "http",
+      "url": "http://localhost:8091/mcp"
+    }
+  }
+}

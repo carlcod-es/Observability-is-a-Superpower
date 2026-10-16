@@ -1,0 +1,58 @@
+# WithAppForwarding() sets ASPIRE_ENDPOINT / ASPIRE_API_KEY / ASPIRE_INSECURE on the collector;
+# LGTM_OTLP_URL is set by the AppHost. Every signal goes to the Aspire dashboard and to LGTM.
+# LGTM is started on demand (ADR-0022) and receives only post-start telemetry: separate */lgtm
+# pipelines with retry and queue disabled drop batches while LGTM is down, never replay them,
+# and never affect the */aspire pipelines.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch/aspire:
+  batch/lgtm:
+
+exporters:
+  otlp/aspire:
+    endpoint: ${env:ASPIRE_ENDPOINT}
+    headers:
+      x-otlp-api-key: ${env:ASPIRE_API_KEY}
+    tls:
+      insecure: ${env:ASPIRE_INSECURE}
+      insecure_skip_verify: true
+  otlphttp/lgtm:
+    endpoint: ${env:LGTM_OTLP_URL}
+    retry_on_failure:
+      enabled: false
+    sending_queue:
+      enabled: false
+
+service:
+  pipelines:
+    traces/aspire:
+      receivers: [otlp]
+      processors: [batch/aspire]
+      exporters: [otlp/aspire]
+    traces/lgtm:
+      receivers: [otlp]
+      processors: [batch/lgtm]
+      exporters: [otlphttp/lgtm]
+    metrics/aspire:
+      receivers: [otlp]
+      processors: [batch/aspire]
+      exporters: [otlp/aspire]
+    metrics/lgtm:
+      receivers: [otlp]
+      processors: [batch/lgtm]
+      exporters: [otlphttp/lgtm]
+    logs/aspire:
+      receivers: [otlp]
+      processors: [batch/aspire]
+      exporters: [otlp/aspire]
+    logs/lgtm:
+      receivers: [otlp]
+      processors: [batch/lgtm]
+      exporters: [otlphttp/lgtm]

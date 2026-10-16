@@ -1,0 +1,7 @@
+@inherits UmbracoViewPage<IEnumerable<ICompPage>>
+<ul class="card-list">
+    @foreach (var item in Model)
+    {
+        <li>@await Html.PartialAsync("Partials/Card", item)</li>
+    }
+</ul>

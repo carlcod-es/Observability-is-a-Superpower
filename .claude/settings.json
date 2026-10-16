@@ -1,0 +1,25 @@
+{
+  "enableAllProjectMcpServers": true,
+  "permissions": {
+    "allow": [
+      "mcp__aspire__list_resources",
+      "mcp__aspire__list_console_logs",
+      "mcp__aspire__list_structured_logs",
+      "mcp__aspire__list_traces",
+      "mcp__aspire__list_trace_structured_logs",
+      "mcp__aspire__select_apphost",
+      "mcp__aspire__list_apphosts",
+      "mcp__aspire__list_integrations",
+      "mcp__aspire__doctor",
+      "mcp__aspire__refresh_tools",
+      "mcp__aspire__list_docs",
+      "mcp__aspire__search_docs",
+      "mcp__aspire__get_doc",
+      "mcp__grafana"
+    ],
+    "deny": [
+      "Read(./docs/presenter/**)",
+      "Read(/docs/presenter/**)"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+bin/
+obj/
+TestResults/
+.vs/
+*.user
+.idea/
+
+# Umbraco-generated JSON schemas in test projects (the site's copies stay committed)
+tests/**/appsettings-schema*.json
+tests/**/umbraco-package-schema.json
+
+# Cloudflare tunnel credential (presenter-local, never committed)
+.cloudflared-token
+
+# ModelsBuilder out-of-date marker (SourceCodeManual; generated models stay committed)
+src/SuperPower.Web/Models/ood.flag
+
+# Claude Code worktrees
+.claude/worktrees/
+
+# Local scratch notes (never committed)
+.temp/
+

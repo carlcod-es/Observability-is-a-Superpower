@@ -1,0 +1,93 @@
+﻿@inherits UmbracoViewPage
+@{
+    Layout = null;
+    var cp = Model as ICompPage;
+    var title = string.IsNullOrWhiteSpace(cp?.PageTitle) ? Model.Name : cp!.PageTitle;
+    var root = Model.Root();
+    var nav = new List<IPublishedContent> { root };
+    nav.AddRange(root.Children.Where(c => (c as ICompSeo)?.HideFromNavigation != true));
+    var trail = Model.AncestorsOrSelf().Reverse().ToList();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@title | Rubber Duck Agency</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true">
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container site-header__inner">
+            <a class="site-header__brand" href="/"><img class="site-header__logo" src="~/assets/rubber-duck.svg" alt="" width="38" height="28">Rubber Duck Agency</a>
+            <button class="site-nav__toggle" type="button" aria-controls="site-nav" aria-label="Menu" hidden>
+                <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <nav class="site-nav" id="site-nav" aria-label="Main">
+                <ul class="site-nav__list">
+                    @foreach (var item in nav)
+                    {
+                        var isRoot = item.Id == root.Id;
+                        var label = isRoot ? "Home" : item.Name;
+                        if (item.Id == Model.Id)
+                        {
+                            <li><a href="@item.Url()" aria-current="page">@label</a></li>
+                        }
+                        else if (!isRoot && trail.Any(t => t.Id == item.Id))
+                        {
+                            <li><a href="@item.Url()" aria-current="true">@label</a></li>
+                        }
+                        else
+                        {
+                            <li><a href="@item.Url()">@label</a></li>
+                        }
+                    }
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="banner">
+        <div class="container">
+            <h1 class="banner__heading">@title</h1>
+            @if (!string.IsNullOrWhiteSpace(cp?.Summary))
+            {
+                <p class="banner__text">@cp.Summary</p>
+            }
+            @if (cp?.MainBanner is { } banner && !string.IsNullOrWhiteSpace(banner.Url()))
+            {
+                @await Html.PartialAsync("Partials/Media", banner, new ViewDataDictionary(ViewData) { ["class"] = "banner__image", ["alt"] = "" })
+            }
+        </div>
+    </section>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <div class="container">
+            <ol class="breadcrumb__list">
+                @foreach (var crumb in trail)
+                {
+                    if (crumb.Id == Model.Id)
+                    {
+                        <li aria-current="page">@(crumb.Id == root.Id ? "Home" : title)</li>
+                    }
+                    else
+                    {
+                        <li><a href="@crumb.Url()">@(crumb.Id == root.Id ? "Home" : crumb.Name)</a></li>
+                    }
+                }
+            </ol>
+        </div>
+    </nav>
+
+    <main class="container main">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; Rubber Duck Agency. A fictional marketing agency.</p>
+        </div>
+    </footer>
+</body>
+</html>

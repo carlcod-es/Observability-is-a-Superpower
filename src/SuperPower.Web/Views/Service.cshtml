@@ -1,0 +1,9 @@
+﻿@inherits UmbracoViewPage<Service>
+@{
+    Layout = "master.cshtml";
+}
+@await Html.PartialAsync("Partials/MainContent", Model)
+<section>
+    <h2>Enquire about this service</h2>
+    @await Html.PartialAsync("Partials/Forms/ServiceEnquiryForm", new ServiceEnquiryForm())
+</section>
