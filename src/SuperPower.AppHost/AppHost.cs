@@ -1,6 +1,8 @@
 using Aspire.Hosting.ApplicationModel;
 using Microsoft.Extensions.DependencyInjection;
 
+// Container and volume names are prefixed oisp- so they are easy to find and reset.
+
 // Host port for smtp4dev SMTP; the site connects here directly.
 const int SmtpPort = 2525;
 
@@ -8,12 +10,14 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var db = builder.AddAzureSqlServer("sql")
     .RunAsContainer(c => c
-        .WithDataVolume()
+        .WithContainerName("oisp-sql")
+        .WithDataVolume("oisp-sql-data")
         .WithLifetime(ContainerLifetime.Persistent))
     .AddDatabase("umbraco");
 
 // Mail catcher: web UI on 80 (dashboard link), SMTP published on host 2525 -> container 25, not proxied by Aspire.
 var smtp4dev = builder.AddContainer("smtp4dev", "rnwood/smtp4dev", "3.15.0")
+    .WithContainerName("oisp-smtp4dev")
     .WithHttpEndpoint(targetPort: 80, name: "http")
     .WithEndpoint(port: SmtpPort, targetPort: 25, name: "smtp", scheme: "tcp", isProxied: false)
     .WithEnvironment("ServerOptions__Port", "25")
@@ -28,6 +32,7 @@ var smtp4dev = builder.AddContainer("smtp4dev", "rnwood/smtp4dev", "3.15.0")
 // Demo dashboards are file-provisioned via read-only bind mounts (ADR-0023).
 // WithAppForwarding re-points the projects' OTLP endpoint at the collector.
 var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "0.36.0")
+    .WithContainerName("oisp-lgtm")
     .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "grafana")
     .WithHttpEndpoint(targetPort: 4318, name: "otlp-http")
     .WithHttpHealthCheck("/api/health", endpointName: "grafana")
@@ -36,6 +41,7 @@ var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "0.36.0")
     .WithExplicitStart();
 
 var collector = builder.AddOpenTelemetryCollector("collector", c => c.CollectorTag = "0.162.0")
+    .WithContainerName("oisp-collector")
     .WithConfig("./collector/config.yaml")
     .WithAppForwarding()
     .WithEnvironment("LGTM_OTLP_URL", lgtm.GetEndpoint("otlp-http"));
@@ -43,6 +49,7 @@ var collector = builder.AddOpenTelemetryCollector("collector", c => c.CollectorT
 // Read-only Grafana MCP for the agent. Host validation defaults to loopback variants of --address,
 // so allow the published host port.
 builder.AddContainer("grafana-mcp", "grafana/mcp-grafana", "2.0.2")
+    .WithContainerName("oisp-grafana-mcp")
     .WithArgs("-t", "streamable-http", "--address", "0.0.0.0:8000", "--disable-write",
         "--enabled-tools", "prometheus,loki,tempo,datasource",
         "--allowed-hosts", "localhost:8091,127.0.0.1:8091")

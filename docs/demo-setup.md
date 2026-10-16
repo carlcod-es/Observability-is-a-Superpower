@@ -12,10 +12,8 @@ Background for each step is in `README.md`; the talk itself is in `docs/presente
 Stop the AppHost, then remove the SQL Server container, its volume and the Umbraco temp cache:
 
 ```sh
-docker ps -a --filter name=sql-          # find the sql container
-docker rm -f <container>
-docker volume ls --filter name=sql-data  # superpower.apphost-<hash>-sql-data
-docker volume rm <volume>
+docker rm -f oisp-sql
+docker volume rm oisp-sql-data
 ```
 
 Delete `src/SuperPower.Web/umbraco/Data/TEMP/`.
