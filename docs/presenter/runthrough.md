@@ -102,12 +102,12 @@ Keep the Act 2 low-traffic fallback line either way.
 
 ### Building the demo branch
 
-Prerequisites: everything wanted on stage committed on `main` in the dev repo (the clone takes committed
-`main` only), including `claude-stage.md`.
-Stop the dev AppHost first (same fixed ports).
+
 
 ```sh
-git clone --depth 1 file://$HOME/Work/Talks/Observability-is-a-Superpower ~/Work/Talks/stage
+cd ~/Work/Talks
+rm -rf stage
+git clone --depth 1 git@github.com:carlcod-es/Observability-is-a-Superpower.git ~/Work/Talks/stage
 cd ~/Work/Talks/stage
 git switch -c demo
 git rm -r -q docs openspec spikes PLANNING.md README.md .claude/agents .claude/commands .claude/skills
@@ -161,8 +161,10 @@ aspire start --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
 3. Start the AppHost; wait for first boot. Home loads, resources Running, `lgtm` NotStarted.
 4. No rehearsal submissions left: reset per `docs/demo-setup.md`; recreating the clone is not enough (all clones share `oisp-sql-data`).
 5. Claude Code in the stage clone, default permission mode, `/fast` on. The agent never starts the AppHost
-   (`claude-stage.md`); deny any `aspire run` / `start` / `stop` prompt. `/mcp`: aspire connected,
-   grafana fails until go-live.
+   (`claude-stage.md`); deny any `aspire run` / `start` / `stop` prompt. `/mcp`: aspire connected;
+   select grafana -> Disable (saved per user per folder in `~/.claude.json`, so once per stage clone; it
+   persists across restarts). Check: `claude mcp list` shows grafana `Disabled for this project`, no
+   connection error at startup.
 6. Tabs: site, Aspire (Structured logs, Traces), smtp4dev. VSCodium on the stage clone.
 7. Tunnel check on the phone, then stop it ("Cloudflare tunnel"). Fallback videos ready.
 
@@ -183,7 +185,8 @@ re-enable the processor), asks to restart `site` (approve), re-submit a form, lo
 Fallback: apply Planted problems 1 by hand, restart `site`.
 
 ### 3. Go-live (4 min)
-1. Aspire: start `lgtm`. Claude: `/mcp` -> reconnect grafana.
+1. Aspire: start `lgtm` (starts `grafana-mcp` too); wait for Running. Claude: `/mcp` -> grafana -> Enable
+   (no restart).
 2. Start the tunnel ("Cloudflare tunnel"); QR code slide. "Made-up details welcome, deleted after the talk."
 3. Start `traffic.cs`.
 4. Grafana: Dashboards > Demo > Demo site.
@@ -220,7 +223,7 @@ Agent access: read-only Grafana MCP, Aspire commands prompt, no database.
 Console logs removed (ADR-0028): every output path can leak PII; close the ones you don't need.
 
 ### After the talk
-1. Stop the tunnel and `traffic.cs`.
+1. Stop the tunnel and `traffic.cs`. Optional: `/mcp` -> grafana -> Disable, ready for the next run.
 2. Stop the AppHost. Delete the stage clone, its SQL Server container and volume (
 
 ``` 
