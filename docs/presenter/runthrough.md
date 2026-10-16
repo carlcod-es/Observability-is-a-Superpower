@@ -131,8 +131,7 @@ git commit -a -q -m "demo: strip docs, planning and agent workflow"
 cp ~/Work/Talks/Observability-is-a-Superpower/.cloudflared-token .
 ```
 
-Optional comment strip: edit `AcmeFormsController.cs`, `Extensions.cs`, `FormSubmissionRepository.cs`, then
-`git commit -a -q -m "demo: strip comments"`.
+*Important!* - Edit all pages with the comments "// demo code" and set up
 
 Check:
 - `ls` shows no `docs/`, `openspec/`, `spikes/`, `PLANNING.md`, `README.md`, `claude-stage.md`; `CLAUDE.md` starts
