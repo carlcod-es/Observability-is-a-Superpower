@@ -109,7 +109,7 @@ inbox. Without an owner address or SMTP host (standalone) no email is sent.
 
 | Data | Location | Survives restart | Reset |
 |---|---|---|---|
-| SQL Server database | Docker volume `superpower.apphost-<hash>-sql-data` (inside Docker's VM; hash from the AppHost path) | yes; the container itself is persistent too | stop AppHost, remove the `sql` container, `docker volume rm <volume>` |
+| SQL Server database | Docker volume `oisp-sql-data` (inside Docker's VM; same name for every clone) | yes; the container `oisp-sql` is persistent too | stop AppHost, `docker rm -f oisp-sql`, `docker volume rm oisp-sql-data` |
 | SQLite database | `src/SuperPower.Web/umbraco/Data/Umbraco.sqlite.db` (gitignored) | yes | delete `Umbraco.sqlite.db*` |
 | Umbraco cache/indexes | `src/SuperPower.Web/umbraco/Data/TEMP/` (shared by both modes) | yes | delete with either database reset |
 | Telemetry (LGTM) | inside the `lgtm` container; only from its start on | no | restart the AppHost |

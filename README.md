@@ -151,10 +151,8 @@ Content, document types and media live in `src/SuperPower.Web/uSync/` and
 
 - SQL Server: stop the AppHost, then remove the container and its volume:
   ```sh
-  docker ps -a --filter name=sql-          # find the sql container
-  docker rm -f <container>
-  docker volume ls --filter name=sql-data  # superpower.apphost-<hash>-sql-data
-  docker volume rm <volume>
+  docker rm -f oisp-sql
+  docker volume rm oisp-sql-data
   ```
 - SQLite: stop the site and delete `src/SuperPower.Web/umbraco/Data/Umbraco.sqlite.db*`.
 - Either way, also delete `src/SuperPower.Web/umbraco/Data/TEMP/` (cache shared by both runs;

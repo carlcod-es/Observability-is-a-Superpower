@@ -1,7 +1,7 @@
 # Presenter runthrough (private; contains demo answers)
 
-Fri 16 Oct 2026, 13:30-14:15 BST. Tracked on `main` in `docs/presenter/`; the agent's settings deny `Read` there, but Grep or Bash can still reach it,
-so the `demo` branch deletes it (see "Demo branch"). Never copy into CLAUDE.md, PLANNING.md, openspec/
+Fri 16 Oct 2026, 13:30-14:15 BST. Tracked on `main` in `docs/presenter/`; the stage clone's `demo` branch
+deletes it (see "Demo branch"), so the stage agent never sees it. Never copy into CLAUDE.md, PLANNING.md, openspec/
 or other docs/. All commands run from the stage clone root.
 
 ## Scripts
@@ -34,7 +34,7 @@ export SQL_PORT="$(dotnet user-secrets list --project src/SuperPower.AppHost | s
 Connect (interactive; `GO` runs a batch, `exit` quits):
 
 ```sh
-docker exec -it -e SQLCMDPASSWORD="$SQL_PASSWORD" $(docker ps -q --filter name=sql-) \
+docker exec -it -e SQLCMDPASSWORD="$SQL_PASSWORD" oisp-sql \
   /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -d umbraco -W
 ```
 
@@ -149,17 +149,19 @@ origin service are set in Cloudflare Zero Trust (Networks > Tunnels), not in the
 First rebuild the project
 
 ```
+aspire stop
 dotnet clean SuperPower.slnx
 dotnet build SuperPower.slnx -c Release
-aspire run --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
+aspire start --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
 ```
 
 ### Morning
 1. Stop the dev AppHost (fixed ports 2525, 3000, 8091).
 2. Stage clone on `demo`: "Building the demo branch", including its checks.
 3. Start the AppHost; wait for first boot. Home loads, resources Running, `lgtm` NotStarted.
-4. No rehearsal submissions left: reset per `docs/demo-setup.md` (dev repo) or recreate the clone.
-5. Claude Code in the stage clone, default permission mode, `/fast` on. `/mcp`: aspire connected,
+4. No rehearsal submissions left: reset per `docs/demo-setup.md`; recreating the clone is not enough (all clones share `oisp-sql-data`).
+5. Claude Code in the stage clone, default permission mode, `/fast` on. The agent never starts the AppHost
+   (`claude-stage.md`); deny any `aspire run` / `start` / `stop` prompt. `/mcp`: aspire connected,
    grafana fails until go-live.
 6. Tabs: site, Aspire (Structured logs, Traces), smtp4dev. VSCodium on the stage clone.
 7. Tunnel check on the phone, then stop it ("Cloudflare tunnel"). Fallback videos ready.
@@ -219,5 +221,9 @@ Console logs removed (ADR-0028): every output path can leak PII; close the ones 
 
 ### After the talk
 1. Stop the tunnel and `traffic.cs`.
-2. Stop the AppHost. Delete the stage clone, its SQL Server container and volume (`docker ps -a`,
-   `docker volume ls`, names contain `sql`).
+2. Stop the AppHost. Delete the stage clone, its SQL Server container and volume (
+
+``` 
+docker rm -f oisp-sql 
+docker volume rm oisp-sql-data
+```
