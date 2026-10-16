@@ -31,7 +31,7 @@ call.
 - **THEN** it can list the resources with their state and read the site's console output
 
 #### Scenario: Agent tries a resource command
-- **WHEN** the agent tries to run a resource command (for example a mail-path fault)
+- **WHEN** the agent tries to run a resource command (for example restarting the site)
 - **THEN** an approval prompt is shown before anything runs
 
 ### Requirement: Committed agent configuration
@@ -60,6 +60,14 @@ production-stage tools SHALL be read-only.
 #### Scenario: Production-stage tool surface
 - **WHEN** the production-stage tool list is inspected
 - **THEN** it contains only read tools for traces, logs and metrics
+
+### Requirement: Presenter notes out of the agent's reach
+The committed agent settings SHALL deny the agent reading the presenter notes
+folder `docs/presenter/`.
+
+#### Scenario: Agent tries to read presenter notes
+- **WHEN** the agent tries to read a file under `docs/presenter/` with its file tools
+- **THEN** the read is denied
 
 ### Requirement: No database access for the agent
 The committed agent configuration SHALL NOT give the agent any database connection or

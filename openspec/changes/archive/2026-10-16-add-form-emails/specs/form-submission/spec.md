@@ -40,16 +40,16 @@ to the submitter.
 Each form post SHALL produce telemetry the dashboard and the agent can use: a span for the
 submission, carrying the form, the outcome (`stored`, `invalid` or `failed`) and, when
 stored, the reference; a span for sending the notification; a count of submissions by form
-and outcome; and one information log entry per stored submission naming the form and the
-reference. A post that fails after validation (storing or sending) SHALL be recorded with
+and outcome; and one information log entry per stored submission naming the form, the page
+and the reference. A post that fails after validation (storing or sending) SHALL be recorded with
 outcome `failed` and its error. Telemetry SHALL NOT contain Name, Email, Message, Notes,
 Company or Website values.
 
 #### Scenario: Stored submission in telemetry
 - **WHEN** a valid Contact form is submitted
 - **THEN** the local dashboard shows the post's trace with a submission span (form Contact,
-  outcome stored, its reference) and a notification span, and a log entry with form and
-  reference
+  outcome stored, its reference) and a notification span, and a log entry with form, page
+  and reference
 
 #### Scenario: No personal data
 - **WHEN** a form is submitted with a distinctive name and email address
@@ -60,13 +60,17 @@ Company or Website values.
 
 ### Requirement: Confirmation after submit
 After a valid submission the visitor SHALL see the message "Thank you, we'll be in touch. Your
-reference is <reference>." with the submission's reference, and refreshing the page SHALL NOT
-submit the form again.
+reference is <reference>." with the submission's reference in place of the form, and
+refreshing the page SHALL NOT submit the form again.
 
 #### Scenario: Reference shown
 - **WHEN** a visitor submits a valid form
 - **THEN** the page shows "Thank you, we'll be in touch. Your reference is ACME-…" with the
   reference stored for that submission
+
+#### Scenario: Form hidden after submit
+- **WHEN** a visitor submits a valid form
+- **THEN** the page shows the success message and not the form
 
 #### Scenario: Refresh after submit
 - **WHEN** a visitor refreshes the page after a successful submission

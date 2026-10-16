@@ -25,10 +25,9 @@ references this file, so the on-stage agent may read it.
   Built: dashboards provisioned from the repo into `lgtm` (folder Demo: Demo site, ASP.NET Core 19924), page-type label `acme.page_type`, `/assets` excluded, `tests/traffic/traffic.cs`.
   Smoke checks and README done. Smoke `aspire` launch fails on Windows (.NET-tool shim), accepted by the PO;
   follow-up in its `review-followups.md`. Form panel added in `add-form-emails`.
-- [ ] `add-form-emails` (PO 2026-10-15, simplified acts; ADR-0025/0026/0027): reference `ACME-nnnn`,
-  owner notification, form spans/counter/log, dashboard form panel, `tests/traffic/burst.cs`,
-  Toxiproxy removed, `docs/presenter/` denied to the agent. Applying on `main`; progress in its
-  `tasks.md` / `verification.md`. Section 6 (demo branches, rehearsal) is the PO's.
+- [x] `add-form-emails` (ADR-0025/0026/0027) and `add-log-redaction` (ADR-0028) archived 2026-10-16
+  to `openspec/changes/archive/2026-10-16-*`; specs synced (new `log-privacy`; `form-submission`
+  gains "Form hidden after submit"). Open PO tasks carried to Todos below.
 - [x] Spike closure (PO 2026-10-13): keep both spikes open for reference until pre-talk cleanup
   (Todos).
 
@@ -75,7 +74,7 @@ references this file, so the on-stage agent may read it.
 2. `add-demo-dashboard`: demo Grafana dashboard, provisioning, demo traffic (PO 2026-10-14).
 3. `add-form-emails`: all emails.
 3a. `add-log-redaction` (PO 2026-10-15, ADR-0028): layer 1 logging rule + in-app log
-   redaction processor; Serilog console sink removed. Proposed, not applied.
+   redaction processor; Serilog console sink removed. Archived 2026-10-16.
 3b. `improve-local-performance` (PO 2026-10-15, ADR-0029 proposed): stage run in Release,
    views compiled at build, CMS debug off, M1 machine checklist; before/after telemetry.
    Proposed, not applied.
@@ -146,6 +145,20 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
   toolkit package, used by `add-demo-foundation` task 2.5), root build. All three spike changes
   archived 2026-10-15 to `openspec/changes/archive/2026-10-15-spike-*` with these tasks open.
   Keep `spikes/` off `demo/act-N-*` branches and out of the published repo.
+- [ ] Carried from `add-form-emails` (archived 2026-10-16), PO:
+  - Task 6.1: demo branches and stage clone per `docs/presenter/runthrough.md`; each branch starts;
+    stage clone has no `docs/presenter/`. Every `demo/act-*` branch must contain
+    `AddSubmissionReferenceStep`. Decide whether ADR-0025, ADR-0026/0027 Consequences and the
+    `local-environment` spec stay readable on demo branches / stage clone.
+  - Task 6.2: end-to-end rehearsal on the stage machine; timings in `docs/presenter/runthrough.md`.
+  - Fresh SQL Server migration at the pre-talk DB reset, then AppHost smoke (expect exactly one
+    FAIL, "no pre-start telemetry in Grafana").
+- [ ] Carried from `add-log-redaction` (archived 2026-10-16) task 4.2, PO: place the "console logs
+  disabled" talking point in `docs/presenter/runthrough.md`; decide which demo branches comment
+  out the ADR-0028 line in `Extensions.cs`; check during the rehearsal.
+- [ ] After the talk: smoke pre-start FAIL fix (`timeout: 2s` on collector exporter
+  `otlphttp/lgtm`, or an unproxied lgtm OTLP endpoint); remaining minors and nits in the archived
+  `review-followups.md` of both changes.
 - [ ] Plan and create `demo/act-N-*` fallback branches. Keep `docs/research/` and any OpenSpec
   artifacts that describe later-act fixes off earlier demo branches.
 - [ ] Demo-specific CLAUDE.md for stage: agent instructions to diagnose and verify via telemetry.

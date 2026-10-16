@@ -3,12 +3,11 @@
 ## Purpose
 
 Starts the whole demo locally with one command and brings logs, traces and metrics from the
-site and its dependencies into one observability dashboard, with controls to degrade the mail
-path on demand.
+site and its dependencies into one observability dashboard.
 
 Decisions: ADR-0001 (platform and versions), ADR-0007 (logs), ADR-0008 (traces, metrics,
-exporters), ADR-0009 (local database), ADR-0010 (mail path and fault injection), ADR-0017
-(collector, Grafana LGTM and Grafana MCP); in `docs/adrs/`.
+exporters), ADR-0009 (local database), ADR-0010 (mail path; fault injection removed by
+ADR-0025), ADR-0017 (collector, Grafana LGTM and Grafana MCP); in `docs/adrs/`.
 
 Decisions: ADR-0022 (production-stage platform started on demand, no replay); ADR-0017
 (collector, Grafana LGTM, Grafana MCP); in `docs/adrs/`.
@@ -16,13 +15,15 @@ Decisions: ADR-0022 (production-stage platform started on demand, no replay); AD
 Decisions: ADR-0024 (page-type label on request telemetry); ADR-0008 (excluded static paths); in
 `docs/adrs/`.
 
+Decisions: ADR-0025 (mail fault injection removed); in `docs/adrs/`.
+
 ## Requirements
 
 ### Requirement: One-command start
-The presenter SHALL start the site, its server database, the mail catcher, the mail-path
-fault hop and the telemetry collector with one command, and the dashboard SHALL show each as
-a resource with its state. The production-stage telemetry platform SHALL show as a resource
-that is not started, and its agent server as a resource waiting for it (ADR-0022).
+The presenter SHALL start the site, its server database, the mail catcher and the telemetry
+collector with one command, and the dashboard SHALL show each as a resource with its state.
+The production-stage telemetry platform SHALL show as a resource that is not started, and its
+agent server as a resource waiting for it (ADR-0022).
 
 #### Scenario: Start the environment
 - **WHEN** the presenter runs the start command on a machine with the prerequisites
@@ -56,19 +57,6 @@ the dashboard; no mail SHALL leave the machine.
 #### Scenario: Mail stays local
 - **WHEN** the site sends an email in the local environment
 - **THEN** it appears in the mail catcher's inbox and is not delivered externally
-
-### Requirement: Mail-path fault controls
-Mail from the site SHALL pass through a fault hop. The dashboard SHALL offer three commands
-on that hop: Slow (adds latency to every mail exchange), Break (mail connections fail) and
-Heal (removes all faults). The hop SHALL start healed.
-
-#### Scenario: Slow mail
-- **WHEN** the presenter runs Slow and the site sends an email
-- **THEN** sending takes measurably longer and the email still arrives
-
-#### Scenario: Break and heal
-- **WHEN** the presenter runs Break, then Heal
-- **THEN** mail sent while broken fails, and mail sent after Heal arrives
 
 ### Requirement: File-based database mode
 The site SHALL run on its own, without the environment host or a container runtime, using a

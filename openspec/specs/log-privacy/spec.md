@@ -1,10 +1,14 @@
+# log-privacy Specification
+
 ## Purpose
 
 Keeps personal form data out of the site's log entries on every observability platform, even
 when a log line in the code includes it, while still letting entries about the same email
 address be linked (ADR-0028).
 
-## ADDED Requirements
+Decisions: ADR-0028 (log redaction); in `docs/adrs/`.
+
+## Requirements
 
 ### Requirement: Personal field values masked in logs
 Before a log entry leaves the site, the value of any entry property named Name, Email,
@@ -23,8 +27,8 @@ without such properties SHALL be unchanged.
 
 #### Scenario: Ordinary entry unchanged
 - **WHEN** a valid form is stored
-- **THEN** the entry "Form <form> stored as <reference>" appears with form and reference as
-  before
+- **THEN** the entry "Form <form> for <page> stored as <reference>" appears with form, page
+  and reference as before
 
 ### Requirement: Email addresses pseudonymised in logs
 Before a log entry leaves the site, every email address in the entry's property values and
@@ -49,7 +53,7 @@ bypass the masking.
 
 #### Scenario: Console view
 - **WHEN** a valid form is stored on the local environment
-- **THEN** the site's structured logs show "Form <form> stored as <reference>" and the site's
+- **THEN** the site's structured logs show "Form <form> for <page> stored as <reference>" and the site's
   console output in the local dashboard does not
 
 ### Requirement: Safety net can be switched off for a demo
