@@ -15,14 +15,14 @@ public sealed class FormSubmissionRepository(IScopeAccessor scopeAccessor) : IFo
         // Demo Code : Act 2
         // Write lock removed: concurrent submissions can read the same MAX and insert a duplicate reference.
         // Fix: take the lock before reading MAX; it is held until the caller completes the scope.
-        // Scope.WriteLock(AcmeLocks.Submissions);
+        Scope.WriteLock(AcmeLocks.Submissions);
         var database = Scope.Database;
         var max = await database.ExecuteScalarAsync<int?>(
             database.SqlContext.Sql().SelectMax<FormSubmissionDto>(x => x.ReferenceNumber).From<FormSubmissionDto>());
 
         // Demo Code : Act 2
         // Fallback if traffic is too low to hit the race: uncomment to fail submissions made on an even second.
-        // if (DateTime.UtcNow.Second % 2 == 0) throw new InvalidOperationException($"Duplicate submission reference {(max ?? 0) + 1}.");
+        if (DateTime.UtcNow.Second % 2 == 0) throw new InvalidOperationException($"Duplicate submission reference {(max ?? 0) + 1}.");
 
         var dto = new FormSubmissionDto
         {

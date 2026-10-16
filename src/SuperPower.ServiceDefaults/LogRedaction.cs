@@ -53,14 +53,17 @@ internal static partial class LogRedaction
             }
         }
 
-        // 2. Collected values in the message, longest first.
+        // 2. Collected values in the message, longest first, whole words only
+        //    (a short value such as "te" must not hit "Submitted" or "Website").
         if (message is not null)
         {
             foreach (var (value, replacement) in collected.OrderByDescending(c => c.Key.Length))
             {
-                if (message.Contains(value, StringComparison.Ordinal))
+                var pattern = $@"(?<![\p{{L}}\p{{N}}_]){Regex.Escape(value)}(?![\p{{L}}\p{{N}}_])";
+                var replaced = Regex.Replace(message, pattern, _ => replacement);
+                if (replaced != message)
                 {
-                    message = message.Replace(value, replacement, StringComparison.Ordinal);
+                    message = replaced;
                     changed = true;
                 }
             }

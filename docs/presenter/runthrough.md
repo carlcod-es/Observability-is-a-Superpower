@@ -146,6 +146,14 @@ origin service are set in Cloudflare Zero Trust (Networks > Tunnels), not in the
 
 ## Steps
 
+First rebuild the project
+
+```
+dotnet clean SuperPower.slnx
+dotnet build SuperPower.slnx -c Release
+aspire run --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
+```
+
 ### Morning
 1. Stop the dev AppHost (fixed ports 2525, 3000, 8091).
 2. Stage clone on `demo`: "Building the demo branch", including its checks.

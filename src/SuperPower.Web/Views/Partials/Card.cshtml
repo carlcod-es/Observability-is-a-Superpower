@@ -4,7 +4,9 @@
     var url = Model.Url();
 }
 <article class="card">
-    @await Html.PartialAsync("Partials/Media", Model.MainBanner, new ViewDataDictionary(ViewData) { ["class"] = "card__image", ["alt"] = "" })
+    <a class="card__image-link" href="@url" tabindex="-1" aria-hidden="true">
+        @await Html.PartialAsync("Partials/Media", Model.MainBanner, new ViewDataDictionary(ViewData) { ["class"] = "card__image", ["alt"] = "" })
+    </a>
     <div class="card__body">
         <h3 class="card__title"><a href="@url">@title</a></h3>
         @if (Model is Event ev && ev.StartDate is { } start)

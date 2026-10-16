@@ -91,6 +91,8 @@ public sealed class AcmeFormsController(
         }
 
         // Demo code : Act 1
+        // DON'T COMMENT OUT - leave this in to show form redaction
+        // This is here to show how the data gets in there
         // Log all form submissions, which will store personal information in the logs
         logger.LogInformation("Form Submitted {@Model}", model);
 

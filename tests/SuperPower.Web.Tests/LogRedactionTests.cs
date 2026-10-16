@@ -64,6 +64,14 @@ public class LogRedactionTests
     }
 
     [Fact]
+    public void Collected_value_inside_a_word_is_left_alone()
+    {
+        var (_, message) = LogRedaction.Redact(
+            Attrs(("Company", "te")), "Form Submitted { Company: \"te\", Website: \"x\" }", Key);
+        Assert.Equal("Form Submitted { Company: \"[REDACTED]\", Website: \"x\" }", message);
+    }
+
+    [Fact]
     public void Quoted_value_is_replaced_in_escaped_message_form()
     {
         var (_, message) = LogRedaction.Redact(
