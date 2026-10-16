@@ -4,8 +4,8 @@
 
     // Demo Code : Act 2 - slow page
     // Contact us takes 3 seconds longer than other pages to render.
-    // Only enable this if there isn't enough traffic to trigger the SQL error when audience fill in the form
-    // await Task.Delay(TimeSpan.FromSeconds(3));
+    // Initial state - uncomment
+    await Task.Delay(TimeSpan.FromSeconds(3));
 }
 @await Html.PartialAsync("Partials/MainContent", Model)
 @await Html.PartialAsync("Partials/Forms/ContactForm", new ContactForm())
