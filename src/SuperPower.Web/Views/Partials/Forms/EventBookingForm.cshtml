@@ -4,28 +4,30 @@
     var reference = TempData[AcmeFormsController.ReferenceTempDataKey]?.ToString();
     <p class="form-success" role="status">@AcmeFormsController.SuccessMessage Your reference is @reference.</p>
 }
-
-@using (Html.BeginUmbracoForm<AcmeFormsController>(nameof(AcmeFormsController.SubmitEventBooking), new { }, new { novalidate = "novalidate" }, FormMethod.Post))
+else
 {
-    <div asp-validation-summary="ModelOnly" class="form-errors"></div>
-    <div class="form-field">
-        <label asp-for="Name">@Html.DisplayNameFor(m => m.Name)<span class="required-marker" aria-hidden="true"> *</span><span class="visually-hidden"> (required)</span></label>
-        <input asp-for="Name" />
-        <span asp-validation-for="Name" class="field-error"></span>
-    </div>
-    <div class="form-field">
-        <label asp-for="Email">@Html.DisplayNameFor(m => m.Email)<span class="required-marker" aria-hidden="true"> *</span><span class="visually-hidden"> (required)</span></label>
-        <input asp-for="Email" />
-        <span asp-validation-for="Email" class="field-error"></span>
-    </div>
-    <div class="form-field">
-        <label asp-for="Notes">@Html.DisplayNameFor(m => m.Notes)</label>
-        <textarea asp-for="Notes"></textarea>
-        <span asp-validation-for="Notes" class="field-error"></span>
-    </div>
-    <div class="form-field form-check">
-        <input asp-for="JoinMailingList" />
-        <label asp-for="JoinMailingList">@Html.DisplayNameFor(m => m.JoinMailingList)</label>
-    </div>
-    <button type="submit">Send</button>
+    using (Html.BeginUmbracoForm<AcmeFormsController>(nameof(AcmeFormsController.SubmitEventBooking), new { }, new { novalidate = "novalidate" }, FormMethod.Post))
+    {
+        <div asp-validation-summary="ModelOnly" class="form-errors"></div>
+        <div class="form-field">
+            <label asp-for="Name">@Html.DisplayNameFor(m => m.Name)<span class="required-marker" aria-hidden="true"> *</span><span class="visually-hidden"> (required)</span></label>
+            <input asp-for="Name" />
+            <span asp-validation-for="Name" class="field-error"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="Email">@Html.DisplayNameFor(m => m.Email)<span class="required-marker" aria-hidden="true"> *</span><span class="visually-hidden"> (required)</span></label>
+            <input asp-for="Email" />
+            <span asp-validation-for="Email" class="field-error"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="Notes">@Html.DisplayNameFor(m => m.Notes)</label>
+            <textarea asp-for="Notes"></textarea>
+            <span asp-validation-for="Notes" class="field-error"></span>
+        </div>
+        <div class="form-field form-check">
+            <input asp-for="JoinMailingList" />
+            <label asp-for="JoinMailingList">@Html.DisplayNameFor(m => m.JoinMailingList)</label>
+        </div>
+        <button type="submit">Send</button>
+    }
 }

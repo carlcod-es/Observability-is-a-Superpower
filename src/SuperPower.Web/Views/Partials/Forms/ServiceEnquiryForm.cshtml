@@ -4,33 +4,35 @@
     var reference = TempData[AcmeFormsController.ReferenceTempDataKey]?.ToString();
     <p class="form-success" role="status">@AcmeFormsController.SuccessMessage Your reference is @reference.</p>
 }
-
-@using (Html.BeginUmbracoForm<AcmeFormsController>(nameof(AcmeFormsController.SubmitServiceEnquiry), new { }, new { novalidate = "novalidate" }, FormMethod.Post))
+else
 {
-    <div class="form-field">
-        <label asp-for="Name">@Html.DisplayNameFor(m => m.Name)<span class="required-marker" aria-hidden="true"> *</span><span class="visually-hidden"> (required)</span></label>
-        <input asp-for="Name" />
-        <span asp-validation-for="Name" class="field-error"></span>
-    </div>
-    <div class="form-field">
-        <label asp-for="Email">@Html.DisplayNameFor(m => m.Email)<span class="required-marker" aria-hidden="true"> *</span><span class="visually-hidden"> (required)</span></label>
-        <input asp-for="Email" />
-        <span asp-validation-for="Email" class="field-error"></span>
-    </div>
-    <div class="form-field">
-        <label asp-for="Company">@Html.DisplayNameFor(m => m.Company)</label>
-        <input asp-for="Company" />
-        <span asp-validation-for="Company" class="field-error"></span>
-    </div>
-    <div class="form-field">
-        <label asp-for="Website">@Html.DisplayNameFor(m => m.Website)</label>
-        <input asp-for="Website" />
-        <span asp-validation-for="Website" class="field-error"></span>
-    </div>
-    <div class="form-field">
-        <label asp-for="Message">@Html.DisplayNameFor(m => m.Message)<span class="required-marker" aria-hidden="true"> *</span><span class="visually-hidden"> (required)</span></label>
-        <textarea asp-for="Message"></textarea>
-        <span asp-validation-for="Message" class="field-error"></span>
-    </div>
-    <button type="submit">Send</button>
+    using (Html.BeginUmbracoForm<AcmeFormsController>(nameof(AcmeFormsController.SubmitServiceEnquiry), new { }, new { novalidate = "novalidate" }, FormMethod.Post))
+    {
+        <div class="form-field">
+            <label asp-for="Name">@Html.DisplayNameFor(m => m.Name)<span class="required-marker" aria-hidden="true"> *</span><span class="visually-hidden"> (required)</span></label>
+            <input asp-for="Name" />
+            <span asp-validation-for="Name" class="field-error"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="Email">@Html.DisplayNameFor(m => m.Email)<span class="required-marker" aria-hidden="true"> *</span><span class="visually-hidden"> (required)</span></label>
+            <input asp-for="Email" />
+            <span asp-validation-for="Email" class="field-error"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="Company">@Html.DisplayNameFor(m => m.Company)</label>
+            <input asp-for="Company" />
+            <span asp-validation-for="Company" class="field-error"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="Website">@Html.DisplayNameFor(m => m.Website)</label>
+            <input asp-for="Website" />
+            <span asp-validation-for="Website" class="field-error"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="Message">@Html.DisplayNameFor(m => m.Message)<span class="required-marker" aria-hidden="true"> *</span><span class="visually-hidden"> (required)</span></label>
+            <textarea asp-for="Message"></textarea>
+            <span asp-validation-for="Message" class="field-error"></span>
+        </div>
+        <button type="submit">Send</button>
+    }
 }
