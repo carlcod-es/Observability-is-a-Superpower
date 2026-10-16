@@ -204,8 +204,11 @@ Fallback: apply Planted problems 1 by hand, restart `site`.
    insert), proposes the fix. Approve, restart `site`.
 6. Verify (skip if behind): re-run the burst, no 500s. Agent confirms in Grafana with `increase`/`rate`
    (counter is cumulative).
-7. Optional: "Who submitted forms today?" -> counts and references only.
-
+7. Optional: 
+ - "Who submitted forms today?" -> counts and references only.
+ - How many visits have we had to the Services page
+ - What are the slowest pages on the website?
+ 
 Fallback: apply Planted problems 2 by hand (re-comment the low-traffic fallback if on), restart `site`,
 re-run the burst.
 
