@@ -12,8 +12,9 @@ public sealed class FormSubmissionRepository(IScopeAccessor scopeAccessor) : IFo
     public async Task<int> InsertAsync(
         Guid formKey, Guid pageKey, DateTime submittedUtc, IReadOnlyList<KeyValuePair<string, string>> fields)
     {
+        // Demo Code : Act 2
         // The write lock is taken here on the ambient scope; it is held until the caller completes/disposes the scope.
-        Scope.WriteLock(AcmeLocks.Submissions);
+        // Scope.WriteLock(AcmeLocks.Submissions); // TEMP: disabled to reproduce duplicate references - revert
         var database = Scope.Database;
         var max = await database.ExecuteScalarAsync<int?>(
             database.SqlContext.Sql().SelectMax<FormSubmissionDto>(x => x.ReferenceNumber).From<FormSubmissionDto>());

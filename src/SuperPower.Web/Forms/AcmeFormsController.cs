@@ -90,8 +90,9 @@ public sealed class AcmeFormsController(
             return CurrentUmbracoPage();
         }
 
-        // Demo code
-        // logger.LogInformation("Form Submitted {@Model}", model);
+        // Demo code : Act 1
+        // Log all form submissions, which will store personal information in the logs
+        logger.LogInformation("Form Submitted {@Model}", model);
 
         try
         {
