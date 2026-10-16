@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SuperPower.AiDemo.AppHost/SuperPower.AiDemo.AppHost.csproj" />
+    <Project Path="src/SuperPower.AiDemo.ServiceDefaults/SuperPower.AiDemo.ServiceDefaults.csproj" />
+    <Project Path="src/SuperPower.AiDemo.Web/SuperPower.AiDemo.Web.csproj" />
+  </Folder>
+</Solution>

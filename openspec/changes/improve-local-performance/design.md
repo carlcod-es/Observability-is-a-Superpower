@@ -62,8 +62,8 @@ machine would slow every request.
 - [Measurement noise on a laptop (thermals, background apps)] → Run each measure three times
   and take the median. A gain inside the noise counts as no gain and the item is dropped
   (ADR-0029).
-- [Late change the day before the talk] → Settings only, each reversible in one line. Merged into
-  `main` only after PO approval.
+- [Late change the day before the talk] → Settings only, each reversible in one line. Demo
+  branches `demo/act-N-*` are rebased or merged only after PO approval.
 
 ## Migration Plan
 

@@ -1,8 +1,7 @@
 # Presenter runthrough (private; contains demo answers)
 
-Fri 16 Oct 2026, 13:30-14:15 BST. Tracked on `main` in `docs/presenter/`; the agent's settings deny `Read` there, but Grep or Bash can still reach it,
-so the `demo` branch deletes it (see "Demo branch"). Never copy into CLAUDE.md, PLANNING.md, openspec/
-or other docs/. All commands run from the stage clone root.
+Fri 16 Oct 2026, 13:30-14:15 BST. Git-ignored; the agent's settings deny reading it. Never copy into
+CLAUDE.md, PLANNING.md, openspec/, docs/ or a demo branch. All commands run from the stage clone root.
 
 ## Scripts
 
@@ -13,12 +12,12 @@ or other docs/. All commands run from the stage clone root.
 | Go-live | `cloudflared tunnel run --token-file .cloudflared-token` | Ctrl+C to stop |
 | Go-live | `dotnet run tests/traffic/traffic.cs` | Steady GET traffic, ~1 req/s; Ctrl+C to stop |
 | Optional | `node tests/load/load-test.mjs --users 10 --duration 60` | GET-only page load, default `--base https://observability.carlcod.es`; results in `tests/load/results/` |
-| Act 2 | `dotnet run tests/load/burst.cs -- 5 8` | Rounds, posts per round. Concurrent Contact / service / event posts. Not `tests/traffic/burst.cs` (different output) |
+| Act 2 | `dotnet run /Users/carl/Work/Talks/Observability-is-a-Superpower/tests/load/burst.cs -- 5 8` | Rounds, posts per round. Concurrent Contact / service / event posts. Dev clone path: untracked, not in the stage clone |
 
 Burst output: one line per post (`302 ACME-nnnn` or `500`), then
 `<n> posts, <n> with reference, <n> without; duplicates: ...`. Bug present: about half return 500.
 Fixed: every post returns 302. No failures: raise posts per round (`-- 5 16`).
-Every successful post is stored and sends an owner email to smtp4dev; a failed post sends none.
+Every successful post is stored and sends an owner email to smtp4dev.
 
 ## Database
 
@@ -58,103 +57,30 @@ WHERE SubmittedUtc > DATEADD(minute, -10, SYSUTCDATETIME()) GROUP BY FormKey;
 SELECT name, is_unique FROM sys.indexes WHERE object_id = OBJECT_ID('acmeFormSubmission');
 ```
 
-## Planted problems (on `main`, marked `// Demo Code : Act N`)
+## Planted problems (`demo/act-1-start`)
 
-1. **Act 1, PII in logs.** `AcmeFormsController` logs `Form Submitted {@Model}` (every field, including Name
-   and Email), and the `PersonalDataLogProcessor` line in `ServiceDefaults/Extensions.cs` is commented out.
-   Fix: delete the `{@Model}` log line (the `stored as {Reference}` log stays); uncomment the processor line
-   as the safety net.
-2. **Act 2, duplicate reference.** `FormSubmissionRepository.InsertAsync` has `Scope.WriteLock` commented out.
-   Concurrent posts read the same max; the second insert hits `IX_acmeFormSubmission_ReferenceNumber`
-   (SqlException 2601) -> 500. The email is sent after the insert, so a failed post sends no email.
-   Fix: uncomment the `WriteLock` line. Any fix is fine if the burst then shows no 500s.
-   Low-traffic fallback: in `FormSubmissionRepository.InsertAsync`, uncomment the second `// Demo Code : Act 2`
-   line (`DateTime.UtcNow.Second % 2 == 0` -> `InvalidOperationException "Duplicate submission reference N"`),
-   restart `site`. About half of posts fail, every 500 is an even second. Logs show `InvalidOperationException`,
-   not SqlException 2601, and no duplicate emails. Re-comment it to fix.
+1. **Act 1, PII in logs.** `AcmeFormsController` logs `Form {Form} submitted by {Name} <{Email}> as {Reference}`.
+   Fix: log form + reference only.
+2. **Act 2, duplicate reference.** `FormSubmissionRepository` has no `WriteLock`, and the controller sends
+   the email before inserting. Concurrent posts read the same max: both email the same `ACME-nnnn`,
+   the second insert hits `IX_acmeFormSubmission_ReferenceNumber` (SqlException 2601) -> 500.
+   Fix: write lock (as on `main`) and email after insert. Any fix is fine if the burst then shows no 500s.
 
-   Also a slowdown on the contact page (Contact.cshtml)
-
-One `demo` branch for stage (see "Demo branch"), no per-act branches. Fallback for an act = apply its fix by hand in the stage clone, restart `site`. Code changes
-never need a database reset.
-
-## Demo branch
-
-`demo` = `main` minus everything that tells the stage agent the planted problems or their fixes. Built in the
-stage clone only, never pushed, never merged into `main`. Rebuild (new clone) after any `main` change.
-
-Delete:
-- `docs/` (ADRs incl. ADR-0026 write lock and ADR-0028 redaction, `research/`, `feature-requests/`,
-  `presenter/`, `project-setup.md`, `demo-setup.md`; the dev repo keeps them)
-- `openspec/` (specs and archived changes describe the lock and the redaction)
-- `spikes/`
-- `PLANNING.md`
-- `README.md` (describes the redaction key, ADR-0028)
-- `.claude/agents/`, `.claude/commands/`, `.claude/skills/` (planning workflow; makes the agent role-play)
-
-Keep: `.claude/settings.json`, `.mcp.json`, `src/`, `tests/`, `banners/`, build files.
-
-Replace: `CLAUDE.md` with `claude-stage.md` (committed on `main` under that name so it is not loaded there;
-site summary, diagnose and verify from telemetry; no redaction processor, `Demo Code` or fix details).
-
-Decide: strip the explanatory lines under each `// Demo Code : Act N` (Act 2 says "Fix: take the lock").
-Keep the Act 2 low-traffic fallback line either way.
-
-### Building the demo branch
-
-Prerequisites: everything wanted on stage committed on `main` in the dev repo (the clone takes committed
-`main` only), including `claude-stage.md`.
-Stop the dev AppHost first (same fixed ports).
-
-```sh
-git clone --depth 1 file://$HOME/Work/Talks/Observability-is-a-Superpower ~/Work/Talks/stage
-cd ~/Work/Talks/stage
-git switch -c demo
-git rm -r -q docs openspec spikes PLANNING.md README.md .claude/agents .claude/commands .claude/skills
-git rm -q CLAUDE.md && git mv claude-stage.md CLAUDE.md
-git commit -a -q -m "demo: strip docs, planning and agent workflow"
-cp ~/Work/Talks/Observability-is-a-Superpower/.cloudflared-token .
-```
-
-Optional comment strip: edit `AcmeFormsController.cs`, `Extensions.cs`, `FormSubmissionRepository.cs`, then
-`git commit -a -q -m "demo: strip comments"`.
-
-Check:
-- `ls` shows no `docs/`, `openspec/`, `spikes/`, `PLANNING.md`, `README.md`, `claude-stage.md`; `CLAUDE.md` starts
-  "# Rubber Duck Agency site"; `ls .claude` shows only `settings.json`.
-- `git branch` shows `* demo`; `git remote -v` points at the dev repo. Never `git push`.
-- `grep -rn "Demo Code" src` shows the three planted spots (and their fix lines unless stripped).
-- `dotnet build SuperPower.slnx` succeeds.
-
-## Cloudflare tunnel
-
-Public URL https://observability.carlcod.es/ -> the local site. Remotely managed tunnel: the hostname and
-origin service are set in Cloudflare Zero Trust (Networks > Tunnels), not in the repo.
-
-- Needs: `cloudflared` installed (`brew install cloudflared`), `.cloudflared-token` in the stage clone root
-  (copied in "Building the demo branch"; token from the Zero Trust tunnel page). The token is a credential:
-  never on screen, never committed; rotate in Zero Trust if it leaks.
-- Start only after the AppHost is up and Home loads locally. In its own terminal, from the stage clone root:
-  `cloudflared tunnel run --token-file .cloudflared-token`
-- Up when the log shows "Registered tunnel connection" (normally 4). Check the public URL on the phone (mobile
-  data, not venue Wi-Fi): Home loads, then a form page.
-- Ctrl+C stops it; the public URL then returns a Cloudflare error page. Restart with the same command.
-- Morning: start, check on phone, stop. Go-live: start again. After the talk: stop.
-- Not working: `cloudflared` log errors -> network or token; 502 on the public URL -> site not running or
-  origin service in Zero Trust points at the wrong local URL (`http://localhost:21258` or
-  `https://localhost:44368`).
+Branches: `demo/act-2-start` = Act 1 fixed (fallback); `main` = both fixed. Same schema on all
+branches; switching never needs a database reset.
 
 ## Steps
 
 ### Morning
 1. Stop the dev AppHost (fixed ports 2525, 3000, 8091).
-2. Stage clone on `demo`: "Building the demo branch", including its checks.
+2. Stage clone: `git clone --depth 1 --no-single-branch file://$HOME/Work/Talks/Observability-is-a-Superpower ~/Work/Talks/stage`,
+   `git switch demo/act-1-start`, copy `.cloudflared-token` in.
 3. Start the AppHost; wait for first boot. Home loads, resources Running, `lgtm` NotStarted.
-4. No rehearsal submissions left: reset per `docs/demo-setup.md` (dev repo) or recreate the clone.
+4. No rehearsal submissions left: reset per `docs/demo-setup.md` or recreate the clone.
 5. Claude Code in the stage clone, default permission mode, `/fast` on. `/mcp`: aspire connected,
    grafana fails until go-live.
 6. Tabs: site, Aspire (Structured logs, Traces), smtp4dev. VSCodium on the stage clone.
-7. Tunnel check on the phone, then stop it ("Cloudflare tunnel"). Fallback videos ready.
+7. Tunnel check on the phone, then stop it. Fallback videos ready.
 
 ### 1. Local X-ray (5 min)
 1. Submit a Service enquiry -> "Thank you, we'll be in touch. Your reference is ACME-nnnn."
@@ -168,38 +94,35 @@ Prompt:
 > whether form submissions leave any personal data in our logs or traces. If they do, fix it at
 > the source and prove the fix from the telemetry.
 
-Expected: finds `Name` / `Email` on the `Form Submitted` log entry, edits `AcmeFormsController` (may also
-re-enable the processor), asks to restart `site` (approve), re-submit a form, logs clean.
-Fallback: apply Planted problems 1 by hand, restart `site`.
+Expected: finds `Name` / `Email` on the log entry, edits `AcmeFormsController`, asks to restart
+`site` (approve), re-submit a form, logs clean.
+Fallback: `git switch demo/act-2-start`, restart `site`.
 
 ### 3. Go-live (4 min)
 1. Aspire: start `lgtm`. Claude: `/mcp` -> reconnect grafana.
-2. Start the tunnel ("Cloudflare tunnel"); QR code slide. "Made-up details welcome, deleted after the talk."
+2. Start the tunnel; QR code slide. "Made-up details welcome, deleted after the talk."
 3. Start `traffic.cs`.
 4. Grafana: Dashboards > Demo > Demo site.
 5. Point: Grafana holds only telemetry from go-live on.
 
 ### 4. Act 2: load breaks submissions (13 min; shorten here)
 1. Attendees submit for a minute; form panel shows `stored`.
-2. Run the burst; about half the posts return 500. No 500s: enable the low-traffic fallback (Planted
-   problems 2), restart `site`, re-run the burst. Before the Act 2 prompt, say the failure is planted
-   (the agent will read the line).
-3. Dashboard: Error rate (5xx) spike, Form submissions by outcome `failed`, Error logs panel SqlException
-   (`InvalidOperationException` with the fallback).
-4. Optional: database queries above (latest submissions, unique index).
-5. Prompt:
+2. Run the burst; about half the posts return 500.
+3. Dashboard: 5xx spike, form panel `failed`, Error logs panel SqlException.
+4. smtp4dev: two emails with the same `ACME-nnnn`. "One of these customers got an error page."
+5. Optional: database queries above (latest submissions, unique index).
+6. Prompt:
    > Since we went live, some visitors get an error when they submit a form. Use our production
    > observability in Grafana to find out what is failing and why, fix it, and tell me how we
    > will know it is fixed.
 
-   Expected: Loki duplicate key error, Tempo failing POSTs, explains the race (no lock around read max +
-   insert), proposes the fix. Approve, restart `site`.
-6. Verify (skip if behind): re-run the burst, no 500s. Agent confirms in Grafana with `increase`/`rate`
+   Expected: Loki duplicate key error, Tempo failing POSTs, explains the race and the email order,
+   proposes the fix. Approve, restart `site`.
+7. Verify (skip if behind): re-run the burst, no 500s. Agent confirms in Grafana with `increase`/`rate`
    (counter is cumulative).
-7. Optional: "Who submitted forms today?" -> counts and references only.
+8. Optional: "Who submitted forms today?" -> counts and references only.
 
-Fallback: apply Planted problems 2 by hand (re-comment the low-traffic fallback if on), restart `site`,
-re-run the burst.
+Fallback: `git switch main`, restart `site`, re-run the burst.
 
 ### 5. Close (7 min)
 Useful telemetry: outcome counter, spans with the reference, errors with context, nothing personal.

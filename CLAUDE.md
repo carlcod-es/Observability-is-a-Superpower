@@ -124,9 +124,7 @@ runnable by attendees.
   `/opsx:propose` or `/opsx:update`, then Status names that change.
 - `PLANNING.md` (temporary): open decisions, unknowns and todos. Check it before
   starting work; update it when items are resolved or discovered.
-- No per-act branches (PO 2026-10-16): `main` holds the planted problems, marked `// Demo Code : Act N` with the
-  fix commented beside them; recovery is applying that fix by hand. One `demo` branch for stage strips
-  docs, planning and agent workflow files (list in the presenter runthrough); never merged into `main`.
+- Demo recovery points are git branches `demo/act-N-*`; `main` is the final state.
 
 ## Apply-phase team
 The main session is the Architect: it plans blocks, briefs agents, ticks tasks and reports

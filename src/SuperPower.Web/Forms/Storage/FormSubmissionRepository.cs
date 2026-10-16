@@ -20,10 +20,6 @@ public sealed class FormSubmissionRepository(IScopeAccessor scopeAccessor) : IFo
         var max = await database.ExecuteScalarAsync<int?>(
             database.SqlContext.Sql().SelectMax<FormSubmissionDto>(x => x.ReferenceNumber).From<FormSubmissionDto>());
 
-        // Demo Code : Act 2
-        // Fallback if traffic is too low to hit the race: uncomment to fail submissions made on an even second.
-        // if (DateTime.UtcNow.Second % 2 == 0) throw new InvalidOperationException($"Duplicate submission reference {(max ?? 0) + 1}.");
-
         var dto = new FormSubmissionDto
         {
             ReferenceNumber = (max ?? 0) + 1,

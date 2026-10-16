@@ -1,0 +1,14 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.6.0">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <UserSecretsId>b30e7ce8-5fd5-4eb7-b26d-ecc0885d4708</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Azure.Sql" />
+    <ProjectReference Include="..\SuperPower.AiDemo.Web\SuperPower.AiDemo.Web.csproj" />
+  </ItemGroup>
+
+</Project>

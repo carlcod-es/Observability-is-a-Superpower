@@ -78,6 +78,10 @@ references this file, so the on-stage agent may read it.
 3b. `improve-local-performance` (PO 2026-10-15, ADR-0029 proposed): stage run in Release,
    views compiled at build, CMS debug off, M1 machine checklist; before/after telemetry.
    Proposed, not applied.
+3c. `add-ai-demo` (PO 2026-10-16, ADR-0030, ADR-0031; branch `feature/add-ai-demo`): optional
+   segment after act 2; standalone `demo-ai/` Umbraco + Clean + Umbraco.AI (Anthropic, backoffice
+   prompts), Aspire dashboard only, prompt-content capture switch flipped live. Never runs with the
+   main demo; all setup done before the talk; presenter notes in `demo-ai/`. Proposed, not applied.
 4. `add-production-environment`: Cloudflare tunnel and database reset only (Azure dropped, PO
    2026-10-15).
 `add-event-bookings` dropped 2026-10-13 (change directory removed). `add-talk-slides` dropped
@@ -144,28 +148,29 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
   copy any dashboard JSON the demo adopts out first), remove `Microsoft.Data.SqlClient` from `Directory.Packages.props` (keep the
   toolkit package, used by `add-demo-foundation` task 2.5), root build. All three spike changes
   archived 2026-10-15 to `openspec/changes/archive/2026-10-15-spike-*` with these tasks open.
-  Keep `spikes/` out of the stage clone and the published repo.
+  Keep `spikes/` off `demo/act-N-*` branches and out of the published repo.
 - [ ] Carried from `add-form-emails` (archived 2026-10-16), PO:
-  - Task 6.1: stage clone of `main` per `docs/presenter/runthrough.md` (no demo branches, PO 2026-10-16);
-    stage clone has no `docs/presenter/`. Decide whether ADR-0025, ADR-0026/0027 Consequences and the
-    `local-environment` spec stay readable in the stage clone.
+  - Task 6.1: demo branches and stage clone per `docs/presenter/runthrough.md`; each branch starts;
+    stage clone has no `docs/presenter/`. Every `demo/act-*` branch must contain
+    `AddSubmissionReferenceStep`. Decide whether ADR-0025, ADR-0026/0027 Consequences and the
+    `local-environment` spec stay readable on demo branches / stage clone.
   - Task 6.2: end-to-end rehearsal on the stage machine; timings in `docs/presenter/runthrough.md`.
   - Fresh SQL Server migration at the pre-talk DB reset, then AppHost smoke (expect exactly one
     FAIL, "no pre-start telemetry in Grafana").
 - [ ] Carried from `add-log-redaction` (archived 2026-10-16) task 4.2, PO: place the "console logs
-  disabled" talking point in `docs/presenter/runthrough.md`; the ADR-0028 line in `Extensions.cs` is
-  commented out on `main` (`// Demo Code : Act 1`); check during the rehearsal.
+  disabled" talking point in `docs/presenter/runthrough.md`; decide which demo branches comment
+  out the ADR-0028 line in `Extensions.cs`; check during the rehearsal.
 - [ ] After the talk: smoke pre-start FAIL fix (`timeout: 2s` on collector exporter
   `otlphttp/lgtm`, or an unproxied lgtm OTLP endpoint); remaining minors and nits in the archived
   `review-followups.md` of both changes.
-- [x] Demo fallback branches: dropped (PO 2026-10-16). Planted problems live on `main` as
-  `// Demo Code : Act N` comments; fallback is applying the fix by hand. Stage uses one `demo`
-  branch with docs, OpenSpec, planning and agent workflow files deleted (presenter runthrough "Demo branch").
-  Built in the stage clone only (runthrough "Building the demo branch"); never pushed or merged.
-  Stage CLAUDE.md drafted as `claude-stage.md` (renamed to `CLAUDE.md` on `demo`); PO to review.
-- [x] Demo-specific CLAUDE.md for stage: `claude-stage.md`, renamed to `CLAUDE.md` on `demo`, which also
-  drops `.claude/agents/`, `.claude/commands/` and `.claude/skills/` (2026-10-16). Open, PO: whether the
-  published repo keeps them and the OpenSpec planning.
+- [ ] Plan and create `demo/act-N-*` fallback branches. Keep `docs/research/` and any OpenSpec
+  artifacts that describe later-act fixes off earlier demo branches.
+- [ ] Demo-specific CLAUDE.md for stage: agent instructions to diagnose and verify via telemetry.
+  Decide whether the Roles and "Apply-phase team" sections and `.claude/agents/` stay on
+  `demo/act-N-*` branches and in the published repo. Analyst recommendation (PO to confirm):
+  leave them, and `.claude/commands/opsx/`, off demo branches and `main`; on stage they make
+  the agent role-play and route fixes through sub-agents. PO decides separately whether
+  attendees see the OpenSpec planning.
 - [ ] Script and rehearse agent prompts; rehearse with `/fast`. Present in default permission
   mode: auto mode approves Aspire resource commands without a prompt (`rework-aspire-first`
   task 6.1, 2026-10-15).

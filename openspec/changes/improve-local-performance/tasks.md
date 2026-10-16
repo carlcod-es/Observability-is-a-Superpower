@@ -26,4 +26,4 @@ with 2-4. Each step is measured as in design.md "Measurement" (M1-M5), recorded 
 
 - [ ] 5.1 (PO) Docker Desktop: Rosetta emulation and VirtioFS on; memory sized from `docker stats` with `lgtm` running, leaving macOS without swap; quit heavy apps; mains power; restart Docker and the AppHost before the talk (ADR-0029 decision 5); verify `docker info` shows the memory, the SQL container starts, and Activity Monitor shows no swap growth during a `burst.cs` run
 - [ ] 5.2 (PO) Runthrough: switch to the stage start command; no warm-up step (PO 2026-10-15); verify a full rehearsal on the stage command, with the first Home load on stage showing database spans
-- [ ] 5.3 (PO) Approve the merge into `main` (no demo branches, PO 2026-10-16); verify `main` builds and starts with the stage command
+- [ ] 5.3 (PO) Approve the merge into `main` and the `demo/act-N-*` branches; verify each act branch builds and starts with the stage command

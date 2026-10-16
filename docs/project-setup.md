@@ -229,5 +229,5 @@ SQLite and SQL Server.
   Change order: `add-demo-foundation`, `add-demo-dashboard`, `add-form-emails`,
   `add-production-environment`.
 - ADRs in `docs/adrs/`; `PLANNING.md` holds open decisions and todos (temporary).
-- Branches: `main` only. Planted demo problems are marked `// Demo Code : Act N` in the code, with the fix beside them.
+- Branches: `main` is the final state; `demo/act-N-*` are demo recovery points.
 - `spikes/` holds throwaway investigations; removed before the talk.

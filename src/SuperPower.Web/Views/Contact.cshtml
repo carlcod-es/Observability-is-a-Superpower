@@ -1,10 +1,6 @@
 ﻿@inherits UmbracoViewPage<Contact>
 @{
     Layout = "master.cshtml";
-
-    // Demo Code : slow page
-    // Contact us takes 3 seconds longer than other pages to render.
-    await Task.Delay(TimeSpan.FromSeconds(3));
 }
 @await Html.PartialAsync("Partials/MainContent", Model)
 @await Html.PartialAsync("Partials/Forms/ContactForm", new ContactForm())

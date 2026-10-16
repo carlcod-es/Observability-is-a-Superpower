@@ -291,6 +291,12 @@ range. Requests carry `User-Agent: SuperPower-LoadTest/1.0 (run <run-id>)`.
 - Timings vary by about ±30% per page between identical short runs. Compare the TOTAL row and
   p95 from runs of 60 s or more.
 
+## AI demo
+
+Optional standalone segment after act 2: Umbraco.AI prompt calls to Anthropic shown as traces
+and metrics in the Aspire dashboard. Separate site and AppHost under `demo-ai/`; runs instead
+of the main demo, never at the same time. Setup, key and run steps: `demo-ai/README.md`.
+
 ## Cloudflare tunnel (presenter, before the demo)
 
 The public URL above is served by a `cloudflared` tunnel from the presenter's machine to the
