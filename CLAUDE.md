@@ -180,3 +180,7 @@ technology or dependencies; scope growth; anything destructive.
 
 After supervisor approval: summary to the PO (built, deviations, deferred, risks). Commit
 only once the PO approves.
+
+## Todo :
+
+ - Extend the aspire demo to include either a redis cache or an API which is separarelt hosted for the demo
