@@ -16,7 +16,7 @@ public sealed class FormSubmissionRepository(IScopeAccessor scopeAccessor) : IFo
         // Write lock removed: concurrent submissions can read the same MAX and insert a duplicate reference.
         // Fix: take the lock before reading MAX; it is held until the caller completes the scope.
         // Initail Demo State - Comment out
-        Scope.WriteLock(AcmeLocks.Submissions);
+        // Scope.WriteLock(AcmeLocks.Submissions);
 
         var database = Scope.Database;
         var max = await database.ExecuteScalarAsync<int?>(

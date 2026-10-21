@@ -183,4 +183,4 @@ only once the PO approves.
 
 ## Todo :
 
- - Extend the aspire demo to include either a redis cache or an API which is separarelt hosted for the demo
+ - I'd li

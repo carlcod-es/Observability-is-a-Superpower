@@ -1,7 +1,9 @@
 # FR-0006: Second instrumented resource in the trace
 
 ## Status
-Open (2026-10-16), after the talk (PO). Source: PO 2026-10-16, on the Home trace in the Aspire
+Folded into `add-booking-api` (2026-10-21, PO): site -> booking service (`api`) -> Redis over HTTP
+for reads; site -> RabbitMQ -> `api` -> Redis for bookings (ADR-0030, ADR-0031, ADR-0032). Analytics
+service not built: the booking count replaces it. Opened 2026-10-16. Source: PO 2026-10-16, on the Home trace in the Aspire
 dashboard listing only `site`.
 
 ## Request

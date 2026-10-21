@@ -78,6 +78,8 @@ references this file, so the on-stage agent may read it.
 3b. `improve-local-performance` (PO 2026-10-15, ADR-0029 proposed): stage run in Release,
    views compiled at build, CMS debug off, M1 machine checklist; before/after telemetry.
    Proposed, not applied.
+3c. `add-booking-api` (PO 2026-10-21, ADR-0030/0031/0032 proposed): booking count on event pages via a
+   separate API, Redis cache and RabbitMQ queue for bookings; cross-service traces; no planted problems yet. Proposed, not applied.
 4. `add-production-environment`: Cloudflare tunnel and database reset only (Azure dropped, PO
    2026-10-15).
 `add-event-bookings` dropped 2026-10-13 (change directory removed). `add-talk-slides` dropped
@@ -187,8 +189,9 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
     dropped); `.WithExternalHttpEndpoints()` on smtp4dev.
 - [ ] FR-0004 (2026-10-15): review nits from `add-demo-foundation` (31 items, code, views, tests,
   README, content); after the talk unless the PO pulls items forward.
-- [ ] FR-0006 (2026-10-16): second instrumented resource in traces (e.g. analytics service fed
-  by a message queue); after the talk.
+- [ ] FR-0006 (2026-10-16): folded into `add-booking-api` (HTTP read, queue for bookings).
+- [ ] Planted problems in the API/queue/cache layers (PO 2026-10-21): PO picks acts and problems after
+  `add-booking-api`; recorded only in `docs/presenter/runthrough.md`.
 - [ ] After the talk (PO): add the slides to the repo for attendees.
 - [ ] Before the talk: remove demo-plan entries from Claude memory, or run the demo
   from a different clone path (memory is keyed to the folder path and loads on stage).
