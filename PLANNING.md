@@ -195,8 +195,11 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
 - [x] `add-booking-api` PO tasks 6.1 (runthrough reset) done, 6.2 skipped (Mac only); archived 2026-10-22.
 - [ ] Windows unverified for `api` / `cache` / `queue` (spec `local-environment` "Cross-platform"); attendees on
   Windows may hit it. PO 2026-10-22: not before the talk.
-- [ ] Planted problems in the API/queue/cache layers (PO 2026-10-21): PO picks acts and problems after
-  `add-booking-api`; recorded only in `docs/presenter/runthrough.md`.
+- [ ] New act for queue errors (PO 2026-10-22; was `add-booking-api` task 6.3): planned as a new OpenSpec
+  change (not yet created). The change describes only the observable demo capability (marked `// Demo Code : Act N`
+  toggle, diagnosable from telemetry, fixed by hand); problem details and fixes only in
+  `docs/presenter/runthrough.md` (PO moves it to `.temp/` for the Architect to edit). Timings set by the PO live,
+  not planned. Next: `/opsx:explore`, starting with which symptom the audience sees.
 - [ ] After the talk (PO): add the slides to the repo for attendees.
 - [ ] Before the talk: remove demo-plan entries from Claude memory, or run the demo
   from a different clone path (memory is keyed to the folder path and loads on stage).
