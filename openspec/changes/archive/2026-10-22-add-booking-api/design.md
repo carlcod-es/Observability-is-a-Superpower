@@ -155,7 +155,7 @@ date, for upcoming and past events. One small rule in `wwwroot/css/site.css` if 
 ### D11. Load comparison (PO 2026-10-21)
 Question: does the change slow the site for a room of 150-200 people scanning the QR code?
 Measured before any change code and again after section 4, same conditions, so the delta is
-the change's cost. Results in `verification.md`; raw files in `tests/load/results/`.
+the change's cost. Results in `verification.md`; raw files in `tests/load/results/` (gitignored, local only; PO 2026-10-22).
 
 Conditions (both runs identical): presenter Mac on mains power, macOS-performance prep applied
 (`docs/presenter/macos-performance.md`); same build configuration as the stage run at the time;

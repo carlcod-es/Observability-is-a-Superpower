@@ -34,8 +34,8 @@ D1, D3, D6, D7) -> 3 -> 4 -> 7.2 -> 5; 6 (PO) after 4.
 
 ## 6. Presenter (PO; `docs/presenter/`; depends on 4)
 
-- [ ] 6.1 (PO) Runthrough: morning database reset also runs `docker rm -f oisp-cache oisp-queue` and `docker volume rm oisp-cache-data`; Morning step 1 notes the new resources; verify a reset followed by start shows all event pages without count text and an empty `booking-stored` queue
-- [ ] 6.2 (PO) Run the AppHost on Windows; verify `cache`, `queue` and `api` reach Running, an event page trace shows `site` and `api`, and a booking trace shows both
+- [x] 6.1 (PO) Runthrough: morning database reset also runs `docker rm -f oisp-cache oisp-queue` and `docker volume rm oisp-cache-data`; Morning step 1 notes the new resources; verify a reset followed by start shows all event pages without count text and an empty `booking-stored` queue
+- [ ] 6.2 (PO) Skipped, PO 2026-10-22: demo runs on the Mac only; Windows unverified for `api`, `cache`, `queue`. Was: Run the AppHost on Windows; verify `cache`, `queue` and `api` reach Running, an event page trace shows `site` and `api`, and a booking trace shows both
 - [ ] 6.3 (PO) Choose acts and problems for the API/queue/cache layers (later; not in this change's acceptance); verify they are recorded only in the runthrough
 
 ## 7. Load comparison (Architect runs local; PO runs tunnel and watches memory; no file changes except `verification.md` and `tests/load/results/`; 7.1 before section 1, 7.2 depends on 4)

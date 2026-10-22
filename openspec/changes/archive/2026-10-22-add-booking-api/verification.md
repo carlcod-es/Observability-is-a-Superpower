@@ -192,3 +192,8 @@ loop with no think time (580-4800 req/s); 150-200 people in the room produce an 
 and the worst run still served 581 req/s with 0 failed page requests and p95 ≈ 0.5 s. Do not run a
 load test shortly before the talk (the `lgtm` backlog lasts minutes). The burst 500 is on the contact
 form, outside this change.
+
+## 6.1 Runthrough reset (PO, 2026-10-22)
+Runthrough updated (Morning steps 1, 4, 8; telemetry list; After the talk). After reset and start: PO saw
+`booking-stored` Ready 0 / Unacked 0 / Total 0 with 1 consumer in the management UI; Architect: every
+event page linked from `/events/` shows no `event-bookings` text.

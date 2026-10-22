@@ -17,13 +17,16 @@ Decisions: ADR-0024 (page-type label on request telemetry); ADR-0008 (excluded s
 
 Decisions: ADR-0025 (mail fault injection removed); in `docs/adrs/`.
 
+Decisions: ADR-0030 (booking service), ADR-0031 (cache), ADR-0032 (queue); in `docs/adrs/`.
+
 ## Requirements
 
 ### Requirement: One-command start
-The presenter SHALL start the site, its server database, the mail catcher and the telemetry
-collector with one command, and the dashboard SHALL show each as a resource with its state.
-The production-stage telemetry platform SHALL show as a resource that is not started, and its
-agent server as a resource waiting for it (ADR-0022).
+The presenter SHALL start the site, its server database, the mail catcher, the booking service,
+its cache, the queue and the telemetry collector with one command, and the dashboard SHALL show
+each as a resource with its state. The production-stage telemetry platform SHALL show as a
+resource that is not started, and its agent server as a resource waiting for it (ADR-0022,
+ADR-0030, ADR-0031, ADR-0032).
 
 #### Scenario: Start the environment
 - **WHEN** the presenter runs the start command on a machine with the prerequisites
@@ -34,6 +37,11 @@ agent server as a resource waiting for it (ADR-0022).
 #### Scenario: Fresh database on start
 - **WHEN** the environment starts without existing database data
 - **THEN** the site populates itself as defined by the agency-site capability
+
+#### Scenario: Cache kept across restarts
+- **WHEN** the environment is stopped and started again
+- **THEN** booking counts are the same as before the restart, and they reset only when the
+  presenter resets the cache along with the database
 
 ### Requirement: Telemetry in one place
 Structured logs, traces and metrics from the site SHALL appear in the dashboard, correlated by
@@ -151,3 +159,17 @@ sections, and SHALL NOT describe planted problems or their fixes.
 - **WHEN** an attendee follows the run-through on a fresh clone
 - **THEN** they reach each talk step (site, form post, local telemetry, Grafana go-live, demo
   traffic, agent questions) without other instructions
+
+### Requirement: Traces across services
+A request or message that the site passes to another instrumented service SHALL appear as one
+trace with spans from each service, and the dashboard SHALL list each service as a separate
+resource (spec `event-booking-count`, "Booking service telemetry").
+
+#### Scenario: Two resources in one trace
+- **WHEN** a visitor opens an event page with the environment running
+- **THEN** the dashboard's trace view lists the site and the booking service for that trace
+
+#### Scenario: Across the queue
+- **WHEN** a visitor books an event with the environment running
+- **THEN** the dashboard's trace view lists the site and the booking service for the booking's
+  trace
