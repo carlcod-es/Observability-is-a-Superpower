@@ -19,6 +19,9 @@
 //   add-form-emails task 5.1: the success page shows "Your reference is ACME-nnnn" matching the stored ReferenceNumber (both targets);
 //   apphost: smtp4dev holds the owner notification (to owner@acme-agency.example, subject ending in that reference) for each valid submission.
 //   standalone sends no email.
+//   add-booking-api (design D10): apphost: booking count on the first upcoming event page rises by one within 5 s of a booking, Tempo has
+//   `api` spans with acme.event.key and a booking trace with `site` acme.forms.submit and `api` deliver booking-stored (with acme.event.key) (needs `lgtm`); standalone: no event-bookings element,
+//   a booking still returns a reference.
 // Not scripted (PO 2026-10-14): Event booking post to a past event; check it manually (verification.md).
 // Passing both targets also proves the raw FieldsJson is identical on SQL Server and SQLite.
 #:package Microsoft.Data.SqlClient
@@ -256,6 +259,19 @@ if (!standalone)
     await TelemetryCheck();
     await DashboardCheck();
     await NotificationCheck();
+    await BookingCheck();
+}
+else
+{
+    // add-booking-api: without api, cache and queue the page shows no count and booking still works.
+    try
+    {
+        var page = await http.GetStringAsync(upcomingEvent);
+        Report(!page.Contains("event-bookings"), "standalone: no booking count", "event page has no event-bookings element");
+    }
+    catch (Exception e) { Report(false, "standalone: no booking count", e.Message); }
+    await ValidSubmission("standalone: event booking returns reference", upcomingEvent, eventKey, [
+        new("Name", "Smoke Test"), new("Email", "smoke@example.com"), new("Notes", "Smoke test booking"), new("JoinMailingList", "true")], null);
 }
 
 Console.WriteLine(failures == 0 ? "ALL CHECKS PASSED" : $"{failures} CHECK(S) FAILED");
@@ -436,6 +452,55 @@ async Task NotificationCheck()
         catch (Exception e) { Report(false, $"notification email {label}", e.Message); }
     }
     if (submitted.Count == 0) Report(false, "notification email", "no valid submission to check");
+}
+
+// ---- 6. Booking count and api telemetry (add-booking-api, design D10)
+async Task BookingCheck()
+{
+    var since = new DateTimeOffset(DateTime.UtcNow.AddMinutes(-1)).ToUnixTimeSeconds();
+    // Count shown on the event page; absent element = 0.
+    async Task<int> Count()
+    {
+        var m = Regex.Match(await NewClient().GetStringAsync(upcomingEvent), @"event-bookings"">\s*(\d+)");
+        return m.Success ? int.Parse(m.Groups[1].Value) : 0;
+    }
+    try
+    {
+        var before = await Count();
+        var (status, _, _, _) = await Post(upcomingEvent, [new("Name", "Smoke Test"), new("Email", "smoke@example.com"), new("Notes", "Smoke test booking"), new("JoinMailingList", "true")]);
+        var now = before;
+        for (var i = 0; i < 10 && now != before + 1; i++)
+        {
+            await Task.Delay(500);
+            now = await Count();
+        }
+        Report(status == 302 && now == before + 1, "booking count rises", $"post {status}, count {before} -> {now}");
+    }
+    catch (Exception e) { Report(false, "booking count rises", e.Message); }
+
+    try
+    {
+        using var g = new HttpClient { BaseAddress = new Uri(Grafana), Timeout = TimeSpan.FromSeconds(20) };
+        g.DefaultRequestHeaders.Authorization = new("Basic", Convert.ToBase64String("admin:admin"u8.ToArray()));
+        // Tempo TraceQL search; polls for exporter delay. Returns the number of matching traces and the first trace id.
+        async Task<(int Traces, string First)> Tempo(string q)
+        {
+            var n = 0; var first = "";
+            for (var i = 0; i < 15 && n == 0; i++)
+            {
+                var resp = await g.GetAsync("/api/datasources/proxy/uid/tempo/api/search?limit=50&start=" + since + "&end=" + DateTimeOffset.UtcNow.AddMinutes(1).ToUnixTimeSeconds() + "&q=" + Uri.EscapeDataString(q));
+                if (resp.IsSuccessStatusCode && JsonDocument.Parse(await resp.Content.ReadAsStringAsync()).RootElement.TryGetProperty("traces", out var t) && t.GetArrayLength() > 0)
+                    (n, first) = (t.GetArrayLength(), t[0].GetProperty("traceID").GetString()!);
+                else await Task.Delay(2000);
+            }
+            return (n, first);
+        }
+        var api = await Tempo("""{resource.service.name="api" && span.acme.event.key != nil}""");
+        Report(api.Traces > 0, "api spans with acme.event.key", api.Traces > 0 ? $"{api.Traces} trace(s), e.g. {api.First}" : "none found in Tempo after 30 s");
+        var both = await Tempo("""{resource.service.name="site" && name="acme.forms.submit"} && {resource.service.name="api" && name="deliver booking-stored" && span.acme.event.key != nil}""");
+        Report(both.Traces > 0, "booking trace spans site and api", both.Traces > 0 ? $"{both.Traces} trace(s), e.g. {both.First}" : "no trace with spans from both services after 30 s");
+    }
+    catch (Exception e) { Report(false, "booking telemetry", e.Message); }
 }
 
 static string Run(string file, params string[] arguments)

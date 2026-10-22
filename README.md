@@ -24,7 +24,7 @@ Linux arm64. The standalone run (SQLite) works everywhere.
 
 ## Pre-pull the container images
 
-The first full run pulls about 4.8 GB of images (Grafana LGTM alone is 2.6 GB). Pull them
+The first full run pulls about 5.2 GB of images (Grafana LGTM alone is 2.6 GB). Pull them
 before you need them:
 
 ```sh
@@ -33,6 +33,8 @@ docker pull grafana/otel-lgtm:0.36.0
 docker pull ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.162.0
 docker pull rnwood/smtp4dev:3.15.0
 docker pull grafana/mcp-grafana:2.0.2
+docker pull redis:8.6
+docker pull rabbitmq:4.3-management
 ```
 
 (Podman: replace `docker` with `podman`.)
@@ -73,13 +75,19 @@ aspire run --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
 ```
 
 The explicit `--apphost` selects this AppHost. The command prints a login link for the Aspire
-dashboard. It starts SQL Server, smtp4dev, the OpenTelemetry Collector and the site. The site waits for its dependencies; first start installs
+dashboard. It starts SQL Server, smtp4dev, the OpenTelemetry Collector, `cache` (Redis), `queue` (RabbitMQ), the booking
+service `api` and the site. The site waits for SQL Server, smtp4dev and the Collector, not for `api`, `cache` or `queue`; first start installs
 Umbraco and imports the content (a minute or two). `lgtm` shows in the dashboard as not started
 and `grafana-mcp` as waiting for it (see "Start Grafana").
 
 - Site: https://localhost:44368 (backoffice `/umbraco`; login in
   `src/SuperPower.Web/appsettings.Development.json`, Unattended user).
 - Aspire dashboard: logs, traces and metrics; the smtp4dev inbox link.
+- `api`: booking service (ADR-0030), no public endpoint. It counts event bookings in `cache`; the event
+  pages show "N people have booked this event" from it.
+- `queue`: the RabbitMQ management UI is the URL on the `queue` resource in the Aspire dashboard. The
+  login is user `guest` and the password is the generated `queue-password` parameter (Aspire dashboard,
+  Parameters/Resources view).
 
 The Aspire dashboard has all telemetry from the start. The SQL Server database persists between
 runs.
@@ -141,8 +149,8 @@ dotnet run --project src/SuperPower.Web
 ```
 
 Uses `src/SuperPower.Web/umbraco/Data/Umbraco.sqlite.db`, created and filled on first start. No
-notification email and no telemetry export (no OTLP endpoint is set); use it for content and
-view work. The SQLite and SQL Server databases are independent of each other.
+notification email, no telemetry export (no OTLP endpoint is set) and no booking count on event
+pages (no `api`, `cache` or `queue`); event bookings still work. Use it for content and view work. The SQLite and SQL Server databases are independent of each other.
 
 ## Reset the databases
 
@@ -153,6 +161,13 @@ Content, document types and media live in `src/SuperPower.Web/uSync/` and
   ```sh
   docker rm -f oisp-sql
   docker volume rm oisp-sql-data
+  ```
+- Booking counts (`cache`) and the queue: with the AppHost stopped, also remove their containers and the
+  cache volume (this zeroes the counts; `-v` also removes the queue's anonymous volume):
+  ```sh
+  docker rm -f oisp-cache
+  docker rm -f -v oisp-queue
+  docker volume rm oisp-cache-data
   ```
 - SQLite: stop the site and delete `src/SuperPower.Web/umbraco/Data/Umbraco.sqlite.db*`.
 - Either way, also delete `src/SuperPower.Web/umbraco/Data/TEMP/` (cache shared by both runs;
@@ -245,7 +260,8 @@ the notification subject and body.
 End-to-end smoke check (pages, form submissions, stored rows, the reference on the success page
 matching the stored row, the notification email in smtp4dev (full environment), Home trace with
 database spans and linked logs, provisioned dashboards, page-type label `acme.page_type`,
-`/assets` exclusion):
+`/assets` exclusion, booking count rising after a booking, `api` spans and the site-to-api booking
+trace in Tempo; standalone: no booking count, booking still returns a reference):
 
 ```sh
 dotnet run tests/smoke/smoke.cs               # full environment, SQL Server

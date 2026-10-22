@@ -14,6 +14,11 @@ builder.CreateUmbracoBuilder()
 
 builder.AddServiceDefaults();
 
+if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("queue")))
+{
+    builder.AddRabbitMQClient("queue", s => s.DisableHealthChecks = true);
+}
+
 WebApplication app = builder.Build();
 
 app.MapDefaultEndpoints();

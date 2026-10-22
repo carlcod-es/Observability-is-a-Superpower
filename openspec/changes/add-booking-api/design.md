@@ -126,9 +126,11 @@ date, for upcoming and past events. One small rule in `wwwroot/css/site.css` if 
 `.event-when` (ADR-0021).
 
 ### D9. Telemetry
-- No new ActivitySource or Meter in the site. Page trace: site request span -> HttpClient span
+- No new ActivitySource or Meter in the site. Site span `acme.forms.publish` on the existing
+  `Acme.Forms` source wraps the publish (tag `acme.event.key`, Error on failure; PO 2026-10-22,
+  task 4.2: a publish failing before RabbitMQ.Client starts its span otherwise left no span). Page trace: site request span -> HttpClient span
   (error on failure or timeout; retries as sibling spans) -> `api` server span -> Redis `GET`.
-  Booking trace: site request -> `acme.forms.submit` -> RabbitMQ publish span -> `api` deliver
+  Booking trace: site request -> `acme.forms.submit` -> `acme.forms.publish` -> RabbitMQ publish span -> `api` deliver
   / process span -> Redis `INCR`.
 - ServiceDefaults gains `AddSource("RabbitMQ.Client.*")` only if the Aspire client does not
   register the sources itself (task 1.2 checks).

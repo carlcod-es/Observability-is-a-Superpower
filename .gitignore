@@ -21,3 +21,4 @@ src/SuperPower.Web/Models/ood.flag
 # Local scratch notes (never committed)
 .temp/
 
+tests/load/results/

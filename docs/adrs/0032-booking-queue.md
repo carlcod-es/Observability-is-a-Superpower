@@ -1,7 +1,12 @@
 # ADR-0032: Booking queue
 
 ## Status
-Proposed (2026-10-21, `add-booking-api`)
+Accepted (2026-10-22, `add-booking-api`). Proposed 2026-10-21. Task 1.2 findings: the `api`
+`deliver booking-stored` span is a child of the publish (also linked), so the consumer fallback
+span was not built; the Aspire client registers the RabbitMQ sources, so ServiceDefaults is
+unchanged. Image `rabbitmq:4.3-management` (package default); the image declares an anonymous
+volume, so the reset uses `docker rm -f -v oisp-queue`. Deviation (PO 2026-10-22): site span
+`acme.forms.publish` around the publish (ADR-0030 Status).
 
 ## Context
 FR-0006 asked for a trace that crosses services through a queue. The PO (2026-10-21) put the

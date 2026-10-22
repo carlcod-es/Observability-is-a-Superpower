@@ -1,5 +1,6 @@
 ﻿@inherits UmbracoViewPage<Event>
 @inject SuperPower.Web.Events.IEventSchedule Schedule
+@inject SuperPower.Web.Events.IBookingCounts Bookings
 @{
     Layout = "master.cshtml";
 }
@@ -7,6 +8,10 @@
     @if (Model.StartDate is { } start)
     {
         <p class="event-when">@await Html.PartialAsync("Partials/EventWhen", start)</p>
+    }
+    @if (SuperPower.Web.Events.BookingCountText.Format(await Bookings.GetAsync(Model.Key)) is { } bookingText)
+    {
+        <p class="event-bookings">@bookingText</p>
     }
     @await Html.PartialAsync("Partials/MainContent", Model)
 </section>

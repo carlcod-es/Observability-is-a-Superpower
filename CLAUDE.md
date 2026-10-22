@@ -54,6 +54,9 @@ runnable by attendees.
 
 ## Stack
 - .NET 10, Umbraco 17 LTS, .NET Aspire (AppHost + ServiceDefaults), OpenTelemetry.
+- Booking service `api` (minimal API, ADR-0030) with Redis `cache` (ADR-0031) and RabbitMQ
+  `queue` (ADR-0032): event pages read the booking count over HTTP; stored event bookings are
+  counted through the queue. The site works without all three (2 s cap, fail-soft).
 - Agent: Claude Code CLI with two MCP servers (ADR-0022, PO 2026-10-15):
   - Local stage: Aspire MCP over the Aspire dashboard; traces, structured logs, resource state
     and console logs, read tools pre-approved; resource commands prompt every call. No metrics
@@ -94,13 +97,16 @@ runnable by attendees.
   Set umbracoDbDSN and umbracoDbDSN_ProviderName.
 - SMTP: Umbraco -> smtp4dev (container, SMTP on localhost:2525). No fault injection
   (Toxiproxy removed, ADR-0025). Agent resource commands need per-call approval (ADR-0022).
+- `api`, `cache` (`oisp-cache`, volume `oisp-cache-data`) and `queue` (`oisp-queue`, management
+  UI, no volume): containers persistent; `api` waits for both, `site` waits for neither and
+  references `api` and `queue`. `api` has no external endpoint. Agents get no cache or queue access.
 - ServiceDefaults: OTLP locally; Azure Monitor exporter when
   APPLICATIONINSIGHTS_CONNECTION_STRING is set. Instrumentation code identical in both.
 
 ## Telemetry
 - The site's forms code emits its own ActivitySource and Meter `Acme.Forms` (ADR-0027): spans
-  `acme.forms.submit` / `acme.forms.notify`, counter `acme.forms.submissions` by form and
-  outcome, log `Form {Form} for {Page} stored as {Reference}` (`Page`: page name, e.g. the event
+  `acme.forms.submit` / `acme.forms.notify` / `acme.forms.publish` (booking queued, ADR-0030),
+  counter `acme.forms.submissions` by form and outcome, log `Form {Form} for {Page} stored as {Reference}` (`Page`: page name, e.g. the event
   or service title).
 - Never recorded: Name, Message, Notes, Company, Website, email address. Fine: form, event or
   service, outcome.
@@ -111,6 +117,8 @@ runnable by attendees.
   `[REDACTED:<id>]` (HMAC, key `Telemetry:RedactionKey` from AppHost parameter
   `telemetry-redaction-key`). One marked line in `Extensions.cs` disables it for a demo. No
   Serilog console sink: logs leave the site only through OpenTelemetry.
+- `api` (ADR-0030): ServiceDefaults telemetry and log masking as the site; server and consumer
+  spans tagged `acme.event.key` (event GUID only), log `Booking recorded for {EventKey}, count {Count}`.
 
 ## Scope
 - Protect PII from the observability platform only. The database is out of scope;

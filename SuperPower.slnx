@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/SuperPower.AppHost/SuperPower.AppHost.csproj" />
+    <Project Path="src/SuperPower.Api/SuperPower.Api.csproj" />
     <Project Path="src/SuperPower.ServiceDefaults/SuperPower.ServiceDefaults.csproj" />
     <Project Path="src/SuperPower.Web/SuperPower.Web.csproj" />
   </Folder>

@@ -26,6 +26,7 @@ public sealed class AcmeFormsController(
     ICoreScopeProvider scopeProvider,
     IFormSubmissionRepository repository,
     IEventSchedule schedule,
+    IBookingEvents bookingEvents,
     TimeProvider timeProvider,
     IEmailSender emailSender,
     IConfiguration configuration,
@@ -109,6 +110,11 @@ public sealed class AcmeFormsController(
             var reference = SubmissionReference.Format(number);
             activity?.SetTag("acme.submission.reference", reference);
             logger.LogInformation("Form {Form} for {Page} stored as {Reference}", form, CurrentPage.Name, reference);
+
+            if (form == "event_booking")
+            {
+                await bookingEvents.PublishStoredAsync(CurrentPage.Key);
+            }
 
             await Notify(form, formName, reference, submittedUtc, model);
 

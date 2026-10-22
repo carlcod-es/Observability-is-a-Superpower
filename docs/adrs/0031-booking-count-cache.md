@@ -1,7 +1,10 @@
 # ADR-0031: Booking count cache
 
 ## Status
-Proposed (2026-10-21, `add-booking-api`)
+Accepted (2026-10-22, `add-booking-api`). Proposed 2026-10-21. No deviations. Image `redis:8.6`
+(package default). Generated password stable across AppHost restarts (`add-booking-api` task 1.5).
+A failed Redis call marks the `api` server span Error; the Redis client span itself carries no
+Error status (instrumentation behaviour, `add-booking-api` task 4.2).
 
 ## Context
 The booking service (ADR-0030) keeps a count per event in its own store, and the cache calls

@@ -78,8 +78,9 @@ references this file, so the on-stage agent may read it.
 3b. `improve-local-performance` (PO 2026-10-15, ADR-0029 proposed): stage run in Release,
    views compiled at build, CMS debug off, M1 machine checklist; before/after telemetry.
    Proposed, not applied.
-3c. `add-booking-api` (PO 2026-10-21, ADR-0030/0031/0032 proposed): booking count on event pages via a
-   separate API, Redis cache and RabbitMQ queue for bookings; cross-service traces; no planted problems yet. Proposed, not applied.
+3c. `add-booking-api` (PO 2026-10-21, ADR-0030/0031/0032 accepted 2026-10-22): booking count on event pages via a
+   separate API, Redis cache and RabbitMQ queue for bookings; cross-service traces; no planted problems yet.
+   Applied 2026-10-22 (sections 1-5); open: load comparison task 7.2 and PO tasks 6.1-6.3.
 4. `add-production-environment`: Cloudflare tunnel and database reset only (Azure dropped, PO
    2026-10-15).
 `add-event-bookings` dropped 2026-10-13 (change directory removed). `add-talk-slides` dropped
@@ -189,7 +190,9 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
     dropped); `.WithExternalHttpEndpoints()` on smtp4dev.
 - [ ] FR-0004 (2026-10-15): review nits from `add-demo-foundation` (31 items, code, views, tests,
   README, content); after the talk unless the PO pulls items forward.
-- [ ] FR-0006 (2026-10-16): folded into `add-booking-api` (HTTP read, queue for bookings).
+- [x] FR-0006 (2026-10-16): delivered by `add-booking-api` (2026-10-22).
+- [ ] `add-booking-api` PO tasks: 6.1 runthrough reset adds `docker rm -f oisp-cache`,
+  `docker rm -f -v oisp-queue`, `docker volume rm oisp-cache-data`; 6.2 Windows run; then archive.
 - [ ] Planted problems in the API/queue/cache layers (PO 2026-10-21): PO picks acts and problems after
   `add-booking-api`; recorded only in `docs/presenter/runthrough.md`.
 - [ ] After the talk (PO): add the slides to the repo for attendees.

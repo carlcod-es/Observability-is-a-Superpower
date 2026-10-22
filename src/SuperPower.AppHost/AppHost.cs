@@ -63,6 +63,25 @@ builder.AddContainer("grafana-mcp", "grafana/mcp-grafana", "2.0.2")
 var redactionKey = builder.AddParameter("telemetry-redaction-key",
     new GenerateParameterDefault { MinLength = 32, Special = false }, secret: true, persist: true);
 
+var cache = builder.AddRedis("cache")
+    .WithContainerName("oisp-cache")
+    .WithDataVolume("oisp-cache-data")
+    .WithLifetime(ContainerLifetime.Persistent);
+
+var queue = builder.AddRabbitMQ("queue")
+    .WithContainerName("oisp-queue")
+    .WithManagementPlugin()
+    .WithLifetime(ContainerLifetime.Persistent);
+
+// Booking service (ADR-0030): no external endpoint, not reachable through the tunnel.
+var api = builder.AddProject<Projects.SuperPower_Api>("api")
+    .WithReference(cache)
+    .WithReference(queue)
+    .WithEnvironment("Telemetry__RedactionKey", redactionKey)
+    .WaitFor(cache)
+    .WaitFor(queue)
+    .WaitFor(collector);
+
 builder.AddProject<Projects.SuperPower_Web>("site")
     .WithReference(db, connectionName: "umbracoDbDSN")
     .WithEnvironment("ConnectionStrings__umbracoDbDSN_ProviderName", "Microsoft.Data.SqlClient")
@@ -72,6 +91,8 @@ builder.AddProject<Projects.SuperPower_Web>("site")
     .WithEnvironment("Umbraco__CMS__Global__Smtp__From", "noreply@acme-agency.example")
     .WithEnvironment("Acme__Forms__OwnerEmail", "owner@acme-agency.example")
     .WithEnvironment("Telemetry__RedactionKey", redactionKey)
+    .WithReference(api)
+    .WithReference(queue) // no WaitFor on api or queue: the site must run without them
     .WaitFor(db)
     .WaitFor(smtp4dev)
     .WaitFor(collector)
