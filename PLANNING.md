@@ -198,7 +198,7 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
 - [ ] New act for queue errors (PO 2026-10-22; was `add-booking-api` task 6.3): planned as a new OpenSpec
   change (not yet created). The change describes only the observable demo capability (marked `// Demo Code : Act N`
   toggle, diagnosable from telemetry, fixed by hand); problem details and fixes only in
-  `docs/presenter/runthrough.md` (PO moves it to `.temp/` for the Architect to edit). Timings set by the PO live,
+  `docs/presenter/runthrough.md` (Architect edits the working copy `.temp/runthrough.md`; PO copies it over to commit). Timings set by the PO live,
   not planned. Next: `/opsx:explore`, starting with which symptom the audience sees.
 - [ ] After the talk (PO): add the slides to the repo for attendees.
 - [ ] Before the talk: remove demo-plan entries from Claude memory, or run the demo
