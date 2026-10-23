@@ -73,8 +73,7 @@ warnings, inaccurate comments, README gaps).
 ### README and docs
 26. `README.md:13,36`: Podman claim unverified; add `ASPIRE_CONTAINER_RUNTIME=podman` and a
     Podman note in the reset steps, or drop Podman.
-27. `README.md` Tests section: say the full-environment smoke run starts `lgtm` itself and needs
-    it not yet started.
+27. Obsolete (`extend-demo` task 3.5: `lgtm` starts with the AppHost; the smoke check no longer starts it).
 28. `README.md:139-140`: "Home makes database calls only on its first load after start" is
     readable by the on-stage agent; keep or soften (PO).
 29. `README.md:128`, `docs/project-setup.md:131`: `select_apphost` / `spikes/` notes; edit with

@@ -51,6 +51,7 @@ references this file, so the on-stage agent may read it.
 - Agent telemetry by stage (PO 2026-10-15, ADR-0022, replaces PO 2026-10-13 "Grafana MCP only"):
   local stage Aspire MCP (traces, logs, resource state, console logs; commands prompt);
   production stage Grafana MCP (read-only logs, traces, metrics), Grafana started at go-live.
+  Superseded by ADR-0033 (2026-10-22/23): Grafana MCP only, registered alone; `lgtm` starts with the AppHost.
 - Never recorded in telemetry: Name, Message, Notes, Company, Website, email address. Fine:
   form, event or service, outcome.
 - Owner dashboard of bookings: stretch goal.
@@ -157,14 +158,13 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
     stage clone has no `docs/presenter/`. Decide whether ADR-0025, ADR-0026/0027 Consequences and the
     `local-environment` spec stay readable in the stage clone.
   - Task 6.2: end-to-end rehearsal on the stage machine; timings in `docs/presenter/runthrough.md`.
-  - Fresh SQL Server migration at the pre-talk DB reset, then AppHost smoke (expect exactly one
-    FAIL, "no pre-start telemetry in Grafana").
+  - Fresh SQL Server migration at the pre-talk DB reset, then AppHost smoke (expect `ALL CHECKS PASSED`;
+    the pre-start check was removed, `extend-demo` task 3.5).
 - [ ] Carried from `add-log-redaction` (archived 2026-10-16) task 4.2, PO: place the "console logs
   disabled" talking point in `docs/presenter/runthrough.md`; the ADR-0028 line in `Extensions.cs` is
   commented out on `main` (`// Demo Code : Act 1`); check during the rehearsal.
-- [ ] After the talk: smoke pre-start FAIL fix (`timeout: 2s` on collector exporter
-  `otlphttp/lgtm`, or an unproxied lgtm OTLP endpoint); remaining minors and nits in the archived
-  `review-followups.md` of both changes.
+- [ ] After the talk: remaining minors and nits in the archived `review-followups.md` of both changes
+  (smoke pre-start FAIL: obsolete, check removed by `extend-demo` task 3.5).
 - [x] Demo fallback branches: dropped (PO 2026-10-16). Planted problems live on `main` as
   `// Demo Code : Act N` comments; fallback is applying the fix by hand. Stage uses one `demo`
   branch with docs, OpenSpec, planning and agent workflow files deleted (presenter runthrough "Demo branch").
@@ -199,7 +199,7 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
 - [ ] Windows unverified for `api` / `cache` / `queue` (spec `local-environment` "Cross-platform"); attendees on
   Windows may hit it. PO 2026-10-22: not before the talk.
 - [x] New act for queue errors: delivered as Act 3 by `extend-demo` (2026-10-23).
-- [ ] `extend-demo` task 5.1 (PO): copy `.temp/runthrough.md` to `docs/presenter/`; rehearse Morning and Act 3
+- [ ] `extend-demo` task 5.1 (PO; deferred 2026-10-24 to the pre-talk rehearsal, fresh stage clone at a new path): copy `.temp/runthrough.md` to `docs/presenter/`; rehearse Morning and Act 3
   with the agent on the Grafana MCP only; confirm `claude mcp list` in the stage clone shows only `grafana`
   (`extend-demo` task 3.4).
 - [ ] Before the talk (PO): decide whether the `demo` branch strips the explanatory lines under each

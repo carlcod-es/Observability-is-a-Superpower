@@ -11,7 +11,7 @@ panels; row 3 is "Form submissions by outcome" at full width. The smoke check as
 started AppHost (first Home load has database spans). Agent setup follows ADR-0022 (Aspire MCP
 before go-live, Grafana MCP after).
 
-Fixed constraints applied: Grafana MCP read-only (ADR-0017), `lgtm` explicit-start (ADR-0022),
+Fixed constraints applied: Grafana MCP read-only (ADR-0017),
 planted problems marked `// Demo Code : Act N` on `main` in the fixed state (CLAUDE.md "Repo
 conventions"). Gaps they imply, decided here: how the agent restarts services without the Aspire
 MCP (it asks; D4), and where the counted side of the panel comes from (D2).
@@ -35,7 +35,6 @@ the `// Demo Code : Act 3` comment and the presenter runthrough. Not described h
 **Non-Goals:**
 - Retrying, recovering or recounting lost bookings; dead-letter queue.
 - An `api` error panel; counts per event on the dashboard.
-- AppHost changes.
 - Windows verification.
 
 ## Decisions
@@ -75,13 +74,12 @@ mention of Aspire resource commands; resource list gains `api`, `cache`, `queue`
 start and the agent on `grafana` only, which is what the repo registers; to add the Aspire MCP,
 `claude mcp add --scope local aspire -- aspire agent mcp` or add the block back into `.mcp.json`;
 `/mcp` then shows it connected. "Connecting Claude Code" says only `grafana` is registered.
-Runthrough: Morning starts `lgtm` after the final restart, checks `claude mcp list` shows only
+Runthrough: after the final restart `lgtm` runs with the AppHost (D8); Morning checks `claude mcp list` shows only
 `grafana`, connected; Go-live is the tunnel and traffic; Act 1 prompt and all check queries use Grafana.
 
 ### D5. Smoke running mode (spec `local-environment`)
-`dotnet run tests/smoke/smoke.cs -- running`: target apphost; skips "home trace (first load)" and
-"no pre-start telemetry in Grafana" (both printed as `N/A ... not applicable: running mode`); the
-pre-start request to `/smoke-pre/` is not made. Everything else unchanged. Header comment documents
+`dotnet run tests/smoke/smoke.cs -- running`: target apphost; skips "home trace (first load)"
+(printed as `N/A ... not applicable: running mode`). Everything else unchanged. Header comment documents
 the mode without naming acts. New apphost check (both modes, needs `lgtm`): after the smoke
 booking, `acme_bookings_counted_total{job="api"}` increases within 60 s (Prometheus query via
 Grafana, as the page-type metric check). Alternatives: detect the planted state (leaks the answer
@@ -94,10 +92,23 @@ brief and the runthrough only. Rebuilding `api` (Aspire Rebuild) applies either 
 
 ### D7. Presenter runthrough (Architect, `.temp/runthrough.md`; PO copies to `docs/presenter/`)
 Planted problems row and entry for Act 3; Morning: start, smoke #1 (fixed state), then set initial
-states, amend commit, reset booking counts, restart, start `lgtm`, Claude Code with `grafana`
+states, amend commit, reset booking counts, restart (`lgtm` starts with it, D8), Claude Code with `grafana`
 connected; Act 3 section after Act 2 (prompt, expected path, check queries, speaking notes on the
 panel, fallback); rule "no event bookings before Act 3"; Act 2 speaking note to park the bookings
 gap; Close: optional smoke #2 (`-- running`). No timings.
+
+### D8. `lgtm` starts with the AppHost (PO 2026-10-23; ADR-0033, specs `local-environment`, `agent-telemetry-access`, `demo-dashboard`)
+`lgtm` loses `.WithExplicitStart()`; `collector` gets `.WaitFor(lgtm)`. `site` and `api` already wait for
+`collector`, so start order is `lgtm` -> `collector` -> `site`/`api` and start-up telemetry reaches both
+the Aspire dashboard and Grafana (the LGTM exporter has no retry). `grafana-mcp` still waits for `lgtm`.
+Smoke check: "no pre-start telemetry in Grafana", the `/smoke-pre/` request and the `lgtm` start code
+are removed; the smoke check waits for Grafana health and port 8091 before its Grafana checks;
+`-- running` prints one N/A line. README: no "Start Grafana" step (section becomes "Grafana": URL,
+dashboards, starts with the AppHost); Claude Code connects `grafana` when opened after start.
+Alternatives: `lgtm` last (site and collector not waiting): start-up telemetry lost in both dashboards
+(`WithAppForwarding` routes all app telemetry through the collector; no console log sink); `lgtm` waiting
+for `site` while `site` waits for `collector`: dependency cycle; rejected (PO 2026-10-23). Cost: `site`
+starts later by `lgtm`'s time to healthy.
 
 ## Risks / Trade-offs
 

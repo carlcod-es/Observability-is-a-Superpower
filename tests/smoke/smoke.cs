@@ -1,23 +1,20 @@
 // End-to-end smoke check (add-demo-foundation task 9.4, ADR-0012). .NET 10 file-based app.
 //
-//   dotnet run tests/smoke/smoke.cs                 target "apphost": AppHost freshly started (aspire run), SQL Server, `lgtm` not started;
+//   dotnet run tests/smoke/smoke.cs                 target "apphost": AppHost freshly started (aspire run), SQL Server; `lgtm` starts with it;
 //                                                   run it before any page is loaded (its first request is the first Home load)
 //   dotnet run tests/smoke/smoke.cs -- running      target "apphost" on an environment that has already served traffic (extend-demo design D5):
-//                                                   skips "home trace (first load)" and "no pre-start telemetry in Grafana" (printed N/A), makes no /smoke-pre/ request;
-//                                                   everything else is unchanged. `lgtm` is started if it is not running.
+//                                                   skips "home trace (first load)" (printed N/A); everything else is unchanged.
 //   dotnet run tests/smoke/smoke.cs -- standalone   target "standalone": `dotnet run --project src/SuperPower.Web`, SQLite
 //
 // Run from inside the repo. Exit code is non-zero if any check FAILs. Submissions are fake and never deleted.
 // apphost: SQL Server login comes from the AppHost user secrets (Parameters:sql-password, Resources:sql:tcp:port);
 //   override with env SMOKE_SQL_CONNECTION. smtp4dev is reached through the `aspire` CLI (web UI URL) and its HTTP API.
 //   Telemetry is read through Grafana (http://localhost:3000, admin/admin), the same path the agent uses.
-//   Grafana (`lgtm`) is on demand (ADR-0022): the check requests the unknown page /smoke-pre/?smoke-pre=<marker>
-//   (404 but logged; a real page such as About us warms the content cache and hides the Home DB spans), starts `lgtm` via the
-//   aspire CLI, waits for Grafana health and grafana-mcp (port 8091), then runs the checks, including "no pre-start
-//   telemetry in Grafana". If `lgtm` is already running the pre-check is reported "not applicable".
+//   Grafana (`lgtm`) starts with the AppHost (ADR-0033): the check waits for Grafana health and grafana-mcp (port 8091),
+//   then runs the checks.
 //   add-demo-dashboard (design D6): dashboards provisioned (/api/search: demo-site, 19924), acme.page_type on the Home metric (Prometheus),
 //   Home span and service-enquiry post span (Tempo), and /assets/rubber-duck.svg excluded from tracing.
-//   These checks read Grafana, so `lgtm` must be running (the telemetry section starts it).
+//   These checks read Grafana, so `lgtm` must be running.
 // standalone: SQLite file src/SuperPower.Web/umbraco/Data/Umbraco.sqlite.db, opened read-only. Pages and forms only.
 //   add-form-emails task 5.1: the success page shows "Your reference is ACME-nnnn" matching the stored ReferenceNumber (both targets);
 //   apphost: smtp4dev holds the owner notification (to owner@acme-agency.example, subject ending in that reference) for each valid submission.
@@ -179,37 +176,22 @@ async Task ValidSubmission(string label, string url, Guid formKey, List<KeyValue
 // (later loads are served from Umbraco's cache without database calls); TelemetryCheck inspects its trace.
 var marker = Guid.NewGuid().ToString("N");
 var homeSince = DateTime.UtcNow.AddSeconds(-5);
-var preMarker = Guid.NewGuid().ToString("N");
-var preStart = false; // true when this run requested a page before lgtm was started
 if (!standalone)
 {
-    try
+    using var probe = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+    var ready = false;
+    for (var i = 0; i < 60 && !ready; i++)
     {
-        var lgtmJson = Run("aspire", "describe", "lgtm", "--apphost", appHostProject, "--non-interactive", "--nologo", "--format", "json");
-        var lgtmState = JsonDocument.Parse(lgtmJson[lgtmJson.IndexOf('{')..]).RootElement.GetProperty("resources")[0].GetProperty("state").GetString();
-        if (lgtmState == "NotStarted")
+        try
         {
-            if (!running) await NewClient().GetAsync("/smoke-pre/?smoke-pre=" + preMarker);
-            Run("aspire", "resource", "lgtm", "start", "--apphost", appHostProject, "--non-interactive", "--nologo");
-            preStart = !running;
-            homeSince = DateTime.UtcNow.AddSeconds(-5);
-            using var probe = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
-            var ready = false;
-            for (var i = 0; i < 60 && !ready; i++)
-            {
-                try
-                {
-                    ready = (await probe.GetAsync(Grafana + "/api/health")).IsSuccessStatusCode;
-                    if (ready) { using var tcp = new TcpClient(); await tcp.ConnectAsync("localhost", 8091); }
-                }
-                catch { ready = false; }
-                if (!ready) await Task.Delay(2000);
-            }
-            Console.WriteLine(ready ? "lgtm started: Grafana healthy, grafana-mcp port 8091 open" : "note: lgtm started but Grafana / grafana-mcp not ready after 120 s");
+            ready = (await probe.GetAsync(Grafana + "/api/health")).IsSuccessStatusCode;
+            if (ready) { using var tcp = new TcpClient(); await tcp.ConnectAsync("localhost", 8091); }
         }
-        else Console.WriteLine($"note: lgtm is {lgtmState}, not started by this run");
+        catch { ready = false; }
+        if (!ready) await Task.Delay(2000);
     }
-    catch (Exception e) { Console.WriteLine($"note: lgtm pre-start failed ({e.Message})"); }
+    Console.WriteLine(ready ? "Grafana healthy, grafana-mcp port 8091 open" : "note: Grafana / grafana-mcp not ready after 120 s");
+    homeSince = DateTime.UtcNow.AddSeconds(-5);
     try { await NewClient().GetAsync("/?smoke=" + marker); }
     catch (Exception e) { Console.WriteLine($"note: first Home request failed ({e.Message})"); }
 }
@@ -324,11 +306,9 @@ async Task TelemetryCheck()
         }
 
         const string homeName = "home trace (first load): database spans + linked logs";
-        const string preName = "no pre-start telemetry in Grafana";
         if (running)
         {
             Console.WriteLine($"N/A  {homeName} - not applicable: running mode");
-            Console.WriteLine($"N/A  {preName} - not applicable: running mode");
             return;
         }
         // The first request of the run (section 0): its log lines carry the trace id.
@@ -339,18 +319,6 @@ async Task TelemetryCheck()
         if (home is { Db: 0 })
             detail = "Home trace has no database spans: run the smoke check right after starting the AppHost (first Home load after start); " + detail;
         Report(home is { Server: >= 1, Db: > 0 }, homeName, detail);
-
-        // Request made before lgtm started must not appear; only meaningful once the pipeline is proven live (home lines found).
-        if (!preStart) Console.WriteLine($"N/A  {preName} - not applicable: lgtm was already running");
-        else if (homeIds.Count == 0) Report(false, preName, "pipeline not proven live (no Home log lines in Loki)");
-        else
-        {
-            var since = new DateTimeOffset(homeSince.AddMinutes(-2)).ToUnixTimeMilliseconds() * 1_000_000;
-            var j = await Get("/api/datasources/proxy/uid/loki/loki/api/v1/query_range?limit=20&start=" + since + "&query="
-                + Uri.EscapeDataString($$"""{service_name="site"} |= "smoke-pre={{preMarker}}" """));
-            var lines = j.GetProperty("data").GetProperty("result").EnumerateArray().Sum(s => s.GetProperty("values").GetArrayLength());
-            Report(lines == 0, preName, lines == 0 ? $"no Loki line with smoke-pre={preMarker}" : $"{lines} Loki line(s) with smoke-pre={preMarker}");
-        }
     }
     catch (Exception e) { Report(false, "telemetry", e.Message); }
 }

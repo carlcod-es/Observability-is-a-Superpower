@@ -55,11 +55,11 @@ docker pull rabbitmq:4.3-management
    appear in telemetry.
 6. Optional: [enable the Aspire MCP](#enable-the-aspire-mcp) and ask Claude Code, for example,
    "show the latest trace for the Home page and its logs".
-7. Go live: [start Grafana](#start-grafana), then the [demo traffic](#demo-traffic) and the
-   [submission burst](#submission-burst). Open Dashboards > Demo > Demo site
+7. Go live: the [demo traffic](#demo-traffic) and the [submission burst](#submission-burst)
+   (Grafana is already running, see [Grafana](#grafana)). Open Dashboards > Demo > Demo site
    (http://localhost:3000/d/demo-site); the "Form submissions by outcome" panel follows the burst.
-8. Ask Claude Code a metrics question through Grafana (reconnect `grafana` via `/mcp` once
-   `grafana-mcp` is running; see [Connecting Claude Code](#connecting-claude-code)), for example "how long do requests to the
+8. Ask Claude Code a metrics question through Grafana (see
+   [Connecting Claude Code](#connecting-claude-code)), for example "how long do requests to the
    Home page take, from metrics?".
 9. Optional: look at the stored submissions ([Connect to the database](#connect-to-the-database));
    run the [tests](#tests).
@@ -75,10 +75,10 @@ aspire run --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
 ```
 
 The explicit `--apphost` selects this AppHost. The command prints a login link for the Aspire
-dashboard. It starts SQL Server, smtp4dev, the OpenTelemetry Collector, `cache` (Redis), `queue` (RabbitMQ), the booking
+dashboard. It starts SQL Server, smtp4dev, Grafana LGTM (`lgtm`), the OpenTelemetry Collector, `grafana-mcp`, `cache` (Redis), `queue` (RabbitMQ), the booking
 service `api` and the site. The site waits for SQL Server, smtp4dev and the Collector, not for `api`, `cache` or `queue`; first start installs
-Umbraco and imports the content (a minute or two). `lgtm` shows in the dashboard as not started
-and `grafana-mcp` as waiting for it (see "Start Grafana").
+Umbraco and imports the content (a minute or two). The Collector waits for `lgtm` and `grafana-mcp`
+waits for it too (see "Grafana").
 
 - Site: https://localhost:44368 (backoffice `/umbraco`; login in
   `src/SuperPower.Web/appsettings.Development.json`, Unattended user).
@@ -92,24 +92,16 @@ and `grafana-mcp` as waiting for it (see "Start Grafana").
 The Aspire dashboard has all telemetry from the start. The SQL Server database persists between
 runs.
 
-## Start Grafana
+## Grafana
 
-Grafana LGTM (the production-stage platform, ADR-0022) is not started with the AppHost. Start
-it from the Aspire dashboard (Start action on the `lgtm` resource) or the CLI:
-
-```sh
-aspire resource lgtm start --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
-```
-
-`grafana-mcp` waits for `lgtm` and starts by itself; Grafana is up in about 15 s with the image
-pulled (see "Pre-pull the container images"; a first start without it is slow). The site is not
-restarted.
+Grafana LGTM (the production-stage platform, ADR-0022) starts with the AppHost. The Collector waits
+for it, so start-up telemetry reaches Grafana (ADR-0033). It is up in about 15 s with the image
+pulled (see "Pre-pull the container images"; a first start without it is slow).
 
 - Grafana: http://localhost:3000 (admin/admin), Explore for Tempo (traces), Loki (logs) and
   Prometheus (metrics).
-- Grafana holds only telemetry produced after `lgtm` started; earlier traces and logs are dropped,
-  not replayed, and metric counters are cumulative, so their first values include earlier totals.
-  Load a few pages before querying. Grafana data is lost when the AppHost stops.
+- Metric counters are cumulative and reset when a service restarts. Load a few pages before
+  querying. Grafana data is lost when the AppHost stops.
 - Dashboards are provisioned on every `lgtm` start, under Dashboards > Demo (Demo site:
   http://localhost:3000/d/demo-site):
   - "Demo site": request rate and p95 duration per page type, 5xx share, error logs, form
@@ -127,8 +119,8 @@ dotnet run tests/traffic/traffic.cs                       # optional: -- <site-u
 ```
 
 Default site URL `https://localhost:44368`. GET requests only, about one page per second; never
-posts a form. Prints `requests=<n> failures=<n>` each minute. Stop with Ctrl+C. Start it after
-go-live (after `lgtm` is started); earlier it only clutters the local traces.
+posts a form. Prints `requests=<n> failures=<n>` each minute. Stop with Ctrl+C. Start it at
+go-live; earlier it only clutters the local traces.
 
 ### Submission burst
 
@@ -216,10 +208,9 @@ pre-approves its tools, plus the Aspire MCP read tools for when that is
 | `aspire` (opt-in, see [Enable the Aspire MCP](#enable-the-aspire-mcp)) | stdio, `aspire agent mcp` (Aspire CLI on PATH) | Resource state, console logs, structured logs and traces from the Aspire dashboard; resource commands |
 
 1. Start the full environment.
-2. Open Claude Code at the repo root (trust the folder if asked). `/mcp` shows `grafana` failed:
-   nothing answers on its port until Grafana is started.
-3. Start Grafana (see "Start Grafana"), wait for `grafana-mcp` to be running, then run `/mcp`
-   and reconnect `grafana`.
+2. Open Claude Code at the repo root (trust the folder if asked).
+3. `/mcp` shows `grafana` connected. (If Claude Code was opened before `grafana-mcp` was Running, reconnect it
+   in `/mcp`.)
 4. Ask for telemetry, for example "show the latest trace for the Home page and its logs".
 
 Notes:
@@ -264,13 +255,12 @@ Fixed ports are pinned in `launchSettings.json` files or the AppHost code; every
 | Site (http) | http://localhost:21258 | `src/SuperPower.Web/Properties/launchSettings.json` |
 | Umbraco backoffice | https://localhost:44368/umbraco (https only; login over http fails with OpenIddict ID2083) | - |
 | Aspire dashboard | https://localhost:17210 | `src/SuperPower.AppHost/Properties/launchSettings.json` |
-| Grafana (reachable after start) | http://localhost:3000 (admin/admin) | AppHost code (ADR-0017) |
-| Grafana MCP (reachable after start) | http://localhost:8091/mcp | AppHost code (ADR-0017) |
+| Grafana | http://localhost:3000 (admin/admin) | AppHost code (ADR-0017) |
+| Grafana MCP | http://localhost:8091/mcp | AppHost code (ADR-0017) |
 | SMTP (site -> smtp4dev) | localhost:2525 | AppHost code (ADR-0025) |
 | Public site (Cloudflare tunnel) | https://observability.carlcod.es/ | Cloudflare; origin is the local site |
 
-Ports 3000, 8091 and 2525 must be free (the AppHost binds them at start, before Grafana is
-started); 3000 often clashes with Node dev servers.
+Ports 3000, 8091 and 2525 must be free (the AppHost binds them at start); 3000 often clashes with Node dev servers.
 
 ## Tests
 
@@ -294,8 +284,7 @@ dotnet run tests/smoke/smoke.cs -- running    # full environment that has alread
 dotnet run tests/smoke/smoke.cs -- standalone # site on its own, SQLite
 ```
 
-`-- running` skips the two first-load checks (Home database spans, no pre-start telemetry) and
-prints them as N/A.
+`-- running` skips the first-load check (Home database spans) and prints it as N/A.
 
 Run the full-environment check right after starting the AppHost, before loading any page: Home
 makes database calls only on its first load after start. The check adds test submissions to the

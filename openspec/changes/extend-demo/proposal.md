@@ -28,6 +28,8 @@ Grafana throughout:
 - The production-stage platform runs from the morning for the whole talk. The Aspire dashboard
   remains the presenter's view for showing logs, traces and metrics; the agent uses only the
   Grafana MCP in every act. Go-live becomes the tunnel and demo traffic only.
+- Grafana starts with the environment (PO 2026-10-23): no separate start step; the telemetry
+  collector waits for it, so start-up telemetry reaches Grafana too.
 - The repo registers only the Grafana MCP (PO 2026-10-23), so a fresh clone matches the talk. The
   README explains how to enable the Aspire MCP. The runthrough's morning steps check that Grafana is
   connected.
@@ -56,14 +58,17 @@ None.
 
 ### Modified Capabilities
 - `demo-dashboard`: "Demo dashboard contents" gains the bookings stored vs counted panel and the
-  row 3 layout.
+  row 3 layout; "Dashboards present on platform start" reworded for the platform starting with the
+  environment.
 - `event-booking-count`: booking processing failures are recorded in telemetry (error on the
   booking's trace, error log in the booking service, event identity only).
 - `agent-telemetry-access`: the agent can diagnose and verify every act from the production-stage
   platform alone, with only the Grafana MCP registered; restarts go through the presenter. The
-  Aspire MCP is opt-in.
+  Aspire MCP is opt-in. "Agent reads production-stage telemetry" is replaced by a start-up
+  version (no "before go-live" period).
 - `local-environment`: README and demo run-through describe running with the production-stage
-  platform from the start; README describes enabling the Aspire MCP.
+  platform from the start; README describes enabling the Aspire MCP. The platform and its agent
+  server start with the environment; "Production-stage platform on demand" is removed.
 
 ## Impact
 
@@ -71,6 +76,7 @@ None.
 - Demo dashboard definition and its spec.
 - Smoke check: new mode for an already-running environment; morning order.
 - `.mcp.json`: `aspire` removed (PO 2026-10-23).
+- AppHost: `lgtm` no longer explicit-start; `collector` waits for it (PO 2026-10-23).
 - README, stage agent instructions (`claude-stage.md`), presenter runthrough working copy.
 - ADR-0022 (Aspire MCP local, Grafana at go-live): the talk no longer follows its stage split;
   the Architect records a superseding or amending ADR at propose.

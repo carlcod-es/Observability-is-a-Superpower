@@ -62,7 +62,7 @@ runnable by attendees.
   resource commands prompt every call; no metrics) is opt-in via the README, its read tools
   pre-approved (ADR-0022). Grafana MCP (read-only) runs over Grafana LGTM, fed by an
   OpenTelemetry Collector alongside the Aspire dashboard (logs, traces, metrics). LGTM and its MCP
-  server are explicit-start resources. Metric counters are cumulative and reset on a service restart.
+  server start with the AppHost; the collector waits for LGTM (ADR-0033). Metric counters are cumulative and reset on a service restart.
 - On stage (ADR-0033, PO 2026-10-22): Grafana runs from the morning for the whole talk; the agent
   uses only the Grafana MCP in every act. The Aspire dashboard is the presenter's view. The agent cannot restart
   services: it asks, the presenter rebuilds the resource from the Aspire dashboard. Go-live is the

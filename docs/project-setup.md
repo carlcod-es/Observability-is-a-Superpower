@@ -31,8 +31,8 @@ docs/
   presenter/                 presenter runthrough for the talk
   demo-setup.md              fresh environment before a demo
 openspec/                    planning: specs (openspec/specs) and changes (openspec/changes)
-.mcp.json                    MCP servers for Claude Code: aspire, grafana (ADR-0022)
-.claude/settings.json        pre-approved read tools on both servers; denies reading `docs/presenter/`
+.mcp.json                    MCP server for Claude Code: grafana; aspire opt-in (ADR-0033)
+.claude/settings.json        pre-approved read tools (grafana; aspire once enabled); denies reading `docs/presenter/`
 ```
 
 Layout decisions: ADR-0002. Versions: .NET 10, Umbraco 17.7.1, Aspire 13.6 (SDK 13.6.0, hosting
@@ -45,7 +45,7 @@ packages 13.6.x, Community Toolkit collector hosting 13.4.0; ADR-0001).
 | Command | `aspire run --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj` | `dotnet run --project src/SuperPower.Web` |
 | Database | SQL Server container | SQLite file |
 | Mail | smtp4dev (owner notifications) | not configured: no email sent |
-| Telemetry | OTLP -> Collector -> Aspire dashboard + Grafana LGTM (once started) | none exported (no OTLP endpoint set) |
+| Telemetry | OTLP -> Collector -> Aspire dashboard + Grafana LGTM | none exported (no OTLP endpoint set) |
 | Console | no log entries (structured logs only) | no log entries; read `umbraco/Logs/` |
 | Use | demo, telemetry, agent | quick content or view work |
 
@@ -65,23 +65,21 @@ start, and nothing syncs them afterwards.
                                                                          grafana-mcp :8091
 ```
 
-Claude Code reads the Aspire dashboard through the `aspire` MCP (stdio) and Grafana through
-`grafana-mcp`. `lgtm` is explicit start; `grafana-mcp` waits for it.
+Claude Code reads Grafana through `grafana-mcp` (and the Aspire dashboard through the opt-in
+`aspire` MCP). `lgtm` starts with the AppHost; `collector` and `grafana-mcp` wait for it (ADR-0033).
 
 | Resource | Image / type | Ports | Persistence | ADR |
 |---|---|---|---|---|
 | `sql` / database `umbraco` | Azure SQL run as SQL Server container | dynamic | persistent container + data volume | ADR-0009 |
 | `smtp4dev` | `rnwood/smtp4dev:3.15.0` | 2525 (SMTP), dynamic web UI (Inbox link in dashboard) | none (in-memory inbox) | ADR-0010, ADR-0025 |
-| `lgtm` | `grafana/otel-lgtm:0.36.0`, explicit start; read-only mounts `grafana/acme-dashboards.yaml`, `grafana/dashboards/` | 3000 (Grafana, admin/admin) | none: telemetry history lost on restart; dashboards reloaded from the repo on every start | ADR-0017, ADR-0022, ADR-0023 |
-| `collector` | OpenTelemetry Collector contrib 0.162.0 | dynamic | none | ADR-0017 |
+| `lgtm` | `grafana/otel-lgtm:0.36.0`, starts with the AppHost; read-only mounts `grafana/acme-dashboards.yaml`, `grafana/dashboards/` | 3000 (Grafana, admin/admin) | none: telemetry history lost on restart; dashboards reloaded from the repo on every start | ADR-0017, ADR-0023, ADR-0033 |
+| `collector` | OpenTelemetry Collector contrib 0.162.0, waits for `lgtm` | dynamic | none | ADR-0017, ADR-0033 |
 | `grafana-mcp` | `grafana/mcp-grafana:2.0.2`, waits for `lgtm` | 8091 (`/mcp`) | none | ADR-0017, ADR-0022 |
 | `site` | `SuperPower.Web` project | 44368 (https), 21258 (http) | - | ADR-0002 |
 
-Start order: the site waits for `sql`, `smtp4dev` and `collector`. `lgtm` does not start with
-the AppHost: Start on `lgtm` in the dashboard (or `aspire resource lgtm start --apphost
-src/SuperPower.AppHost/SuperPower.AppHost.csproj`) starts it without restarting anything else,
-and `grafana-mcp`, waiting for `lgtm`, follows (go-live; ADR-0022). All fixed ports are listed
-in the root `README.md`.
+Start order: `lgtm` -> `collector` and `grafana-mcp` -> `site` (also waits for `sql` and `smtp4dev`)
+and `api` (also waits for `cache` and `queue`), so start-up telemetry reaches Grafana (ADR-0033). All
+fixed ports are listed in the root `README.md`.
 
 ### Dashboards and demo traffic
 
@@ -92,7 +90,7 @@ submissions per minute by form and outcome) and
 `aspnetcore-19924.json` (community ASP.NET Core dashboard, MIT, source in the README there). UI
 edits cannot be saved; change the JSON and restart `lgtm` (ADR-0023).
 `tests/traffic/traffic.cs` requests the site's pages (GET only, about one per second) until
-Ctrl+C; optional argument: site URL (default `https://localhost:44368`). Start it after go-live.
+Ctrl+C; optional argument: site URL (default `https://localhost:44368`). Start it at go-live.
 `tests/traffic/burst.cs` posts valid forms concurrently, round-robin over the three forms, with
 made-up names and `@example.com` addresses: `dotnet run tests/traffic/burst.cs [-- <site-url>]
 [--count 50] [--parallel 10]`. Prints `ok=<n> failed=<n>` and the references; exit 1 on any
@@ -112,7 +110,7 @@ inbox. Without an owner address or SMTP host (standalone) no email is sent.
 | SQL Server database | Docker volume `oisp-sql-data` (inside Docker's VM; same name for every clone) | yes; the container `oisp-sql` is persistent too | stop AppHost, `docker rm -f oisp-sql`, `docker volume rm oisp-sql-data` |
 | SQLite database | `src/SuperPower.Web/umbraco/Data/Umbraco.sqlite.db` (gitignored) | yes | delete `Umbraco.sqlite.db*` |
 | Umbraco cache/indexes | `src/SuperPower.Web/umbraco/Data/TEMP/` (shared by both modes) | yes | delete with either database reset |
-| Telemetry (LGTM) | inside the `lgtm` container; only from its start on | no | restart the AppHost |
+| Telemetry (LGTM) | inside the `lgtm` container; from the AppHost start | no | restart the AppHost |
 | Emails (smtp4dev) | in memory | no | restart the AppHost |
 | Content and media definitions | `src/SuperPower.Web/uSync/v17/` (committed) | source of truth | - |
 | Media files | `src/SuperPower.Web/wwwroot/media/` (committed; banners generated by `banners/generate.mjs`, 1600x500) | source of truth | - |
@@ -166,10 +164,9 @@ Configured once in ServiceDefaults; the site code does not depend on the exporte
 
 The Collector (`collector/config.yaml`) has two pipeline sets per signal, each with its own batch
 processor: `*/aspire` to the Aspire dashboard (always) and `*/lgtm` to Grafana LGTM. The LGTM
-exporter has retry and sending queue off: while `lgtm` is not started its batches are dropped,
-never replayed, so LGTM holds no traces or logs from before its start (metric counters are
-cumulative and include earlier totals); the Aspire path is unaffected (ADR-0022).
-Until then the collector logs an export error per batch.
+exporter has retry and sending queue off: batches are dropped while `lgtm` is unreachable, never
+replayed; the collector waits for `lgtm` at start, so this only matters if `lgtm` is stopped later
+(ADR-0033). The Aspire path is unaffected.
 
 ## Agent access (Claude Code)
 
@@ -182,8 +179,8 @@ Until then the collector logs an export error per batch.
   `spikes/` holds other AppHosts the agent calls `select_apphost` first.
 - `grafana` (`http://localhost:8091/mcp`; production stage): the Grafana MCP with writes
   disabled and only the Prometheus (metrics), Loki (logs), Tempo (traces) and datasource tools,
-  22 read-only tools, all pre-approved (ADR-0017). Reachable only after `lgtm` is started;
-  Claude Code shows it failed until then, `/mcp` reconnects it.
+  22 read-only tools, all pre-approved (ADR-0017). Reachable once `grafana-mcp` is Running;
+  opened earlier, Claude Code shows it failed and `/mcp` reconnects it.
 
 The agent has no database access.
 
@@ -219,7 +216,7 @@ SQLite and SQL Server.
   `... -- standalone` (SQLite): pages, form submissions and stored rows, Home trace with database
   spans and linked logs, reference on the success page matching the stored row, and (full
   environment) a notification email with that reference in smtp4dev (ADR-0012). The full-environment
-  run starts `lgtm` itself and checks that Grafana has no telemetry from a request made before the start, both dashboards
+  run waits for Grafana and `grafana-mcp`, then checks that both dashboards
   are provisioned, `acme.page_type` is on the Home metric, span and the service-enquiry post, and
   `/assets` leaves no span. No Umbraco or Aspire integration harness.
 

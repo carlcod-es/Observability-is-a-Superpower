@@ -1,5 +1,20 @@
 ## MODIFIED Requirements
 
+### Requirement: Dashboards present on platform start
+When the production-stage platform starts, which it does with the environment (ADR-0033), it
+SHALL list the site's demo dashboard and the generic ASP.NET Core dashboard (community dashboard
+19924) with no import or other manual step, on every start, including after an environment
+restart. The dashboard definitions in the repo SHALL be their only source; nothing is edited in
+the platform's UI to make them appear.
+
+#### Scenario: First go-live
+- **WHEN** the environment has been freshly started
+- **THEN** both dashboards are listed in the platform without any import
+
+#### Scenario: After a restart
+- **WHEN** the environment is stopped and started again
+- **THEN** both dashboards are listed again and render with data once the site has traffic
+
 ### Requirement: Demo dashboard contents
 The demo dashboard SHALL show, for the site only unless stated, with a default time window of
 15 minutes and automatic refresh:

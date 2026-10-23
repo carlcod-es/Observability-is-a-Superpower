@@ -25,7 +25,7 @@ aspire run --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
 ```
 
 First start installs Umbraco, runs the site migrations and imports the content (a minute or
-two). Wait until the `site` resource is Running. Do not start `lgtm`; it is started at go-live.
+two). Wait until all resources are Running, including `lgtm` and `grafana-mcp`.
 
 ## 4. Smoke check
 Run immediately after the start, before loading any page:
@@ -34,8 +34,7 @@ Run immediately after the start, before loading any page:
 dotnet run tests/smoke/smoke.cs
 ```
 
-Expected: every check passes except `no pre-start telemetry in Grafana` (known, accepted). Any
-other FAIL is a real problem. The smoke check stores a few test submissions, so the first
+Expected: `ALL CHECKS PASSED`. Any FAIL is a real problem. The smoke check stores a few test submissions, so the first
 reference you see on stage will not be ACME-0001.
 
 ## 5. Start the Cloudflare tunnel

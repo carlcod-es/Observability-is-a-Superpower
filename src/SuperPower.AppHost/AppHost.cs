@@ -28,7 +28,7 @@ var smtp4dev = builder.AddContainer("smtp4dev", "rnwood/smtp4dev", "3.15.0")
     .WithExternalHttpEndpoints();
 
 // Telemetry: apps -> collector -> Aspire dashboard + Grafana LGTM (ADR-0017, ADR-0022).
-// LGTM is started on demand (explicit start) and receives only post-start telemetry; grafana-mcp waits for it.
+// LGTM starts with the AppHost; the collector waits for it so start-up telemetry reaches Grafana (ADR-0033); grafana-mcp waits for it.
 // Demo dashboards are file-provisioned via read-only bind mounts (ADR-0023).
 // WithAppForwarding re-points the projects' OTLP endpoint at the collector.
 var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "0.36.0")
@@ -37,14 +37,14 @@ var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "0.36.0")
     .WithHttpEndpoint(targetPort: 4318, name: "otlp-http")
     .WithHttpHealthCheck("/api/health", endpointName: "grafana")
     .WithBindMount("./grafana/acme-dashboards.yaml", "/otel-lgtm/grafana/conf/provisioning/dashboards/acme-dashboards.yaml", isReadOnly: true)
-    .WithBindMount("./grafana/dashboards", "/otel-lgtm/acme-dashboards", isReadOnly: true)
-    .WithExplicitStart();
+    .WithBindMount("./grafana/dashboards", "/otel-lgtm/acme-dashboards", isReadOnly: true);
 
 var collector = builder.AddOpenTelemetryCollector("collector", c => c.CollectorTag = "0.162.0")
     .WithContainerName("oisp-collector")
     .WithConfig("./collector/config.yaml")
     .WithAppForwarding()
-    .WithEnvironment("LGTM_OTLP_URL", lgtm.GetEndpoint("otlp-http"));
+    .WithEnvironment("LGTM_OTLP_URL", lgtm.GetEndpoint("otlp-http"))
+    .WaitFor(lgtm);
 
 // Read-only Grafana MCP for the agent. Host validation defaults to loopback variants of --address,
 // so allow the published host port.

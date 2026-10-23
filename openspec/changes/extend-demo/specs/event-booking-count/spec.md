@@ -36,3 +36,27 @@ What the toggle does SHALL be described only in the code comment and the present
 - **WHEN** the presenter applies the fix, restarts the booking service and books an event
 - **THEN** the event's count rises by one within 5 seconds; bookings made while the toggle was
   planted stay uncounted
+
+## MODIFIED Requirements
+
+### Requirement: Booking service telemetry
+The booking service SHALL emit traces, logs and metrics to the same destinations as the site:
+the local dashboard and the production-stage platform (ADR-0033). Each request and
+each queued message SHALL carry the trace context from the site, so the site's work, the
+queue hand-over, the service's handling and its cache operations appear in one trace. Spans
+SHALL identify the event by its identity only.
+
+#### Scenario: Event page trace
+- **WHEN** a visitor opens an event page
+- **THEN** the local dashboard shows one trace with the site's page request, the site's call to
+  the booking service, the service's request handling and its cache read, from two resources
+
+#### Scenario: Booking trace
+- **WHEN** a valid event booking is stored
+- **THEN** one trace contains the submission span and the site's queue publish on the site, and
+  the service's message handling and cache update on the booking service
+
+#### Scenario: Production-stage platform
+- **WHEN** the production-stage platform is running and an event page is opened
+- **THEN** the platform holds the trace with spans from both the site and the booking service,
+  and the agent can query the service's logs and request metrics there

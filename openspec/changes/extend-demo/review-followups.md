@@ -56,3 +56,39 @@
 - nit: `README.md:242-246` second enable path (`.mcp.json` block) is optional under the demo bar. Kept: design.md D4.
 - nit: `README.md:210-211` Aspire pre-approval note duplicates line 227; keep one.
 - nit: `README.md:62-63` over-long line (pre-existing); reflow.
+- PO check done 2026-10-23 in a fresh clone at another path: `/mcp` listed only `grafana` (22 tools) (task 3.4);
+  after `claude mcp add --scope local aspire -- aspire agent mcp`, `aspire` connected and the agent listed resources
+  with no approval prompt (task 3.3).
+
+## Supervisor, section 3 re-review after Aspire opt-in (APPROVED)
+- minor (task 4.5, fixed by the Architect): `docs/project-setup.md:34-35` still listed `aspire` in `.mcp.json`.
+- nit: ADR-0022:18 Decision says two servers; Status marks it superseded. Left (ADR convention).
+- nit: `extend-demo` task 4.2 text says `aspire` disabled; superseded by task 4.4. Left (history).
+- nit: main spec `agent-telemetry-access` "Telemetry tools are read-only and pre-approved" says "both sources";
+  still true (allow entries kept). Left.
+- Risk: stage clone for task 5.1 must be a fresh clone at a new path (or `aspire` absent from `claude mcp list`).
+
+## Reviewer, task 3.5 (APPROVED; runtime re-verified by the Architect)
+- Architect 2026-10-23: fresh `aspire start`, all resources Running incl. `lgtm`, `grafana-mcp`; smoke `ALL CHECKS
+  PASSED` (17 PASS, no N/A; "Grafana healthy, grafana-mcp port 8091 open"); `-- running` `ALL CHECKS PASSED`, one N/A
+  (home trace). Reviewer could not run it: the worker's AppHost had stopped when its shell exited.
+- Beyond brief (accepted): README Grafana bullet on dropped pre-start telemetry replaced by cumulative counters reset
+  on service restart.
+- minor: `README.md:78` long unwrapped line; wrap.
+- nit: `README.md:263` long unwrapped line.
+- nit: `README.md:212` kept a one-line `/mcp` reconnect hedge (Claude Code opened before `grafana-mcp` Running). Kept.
+- nit: README "Grafana" intro cites ADR-0022; ADR-0033 is the current decision.
+
+## Supervisor, section 3 re-review after lgtm auto-start (CHANGES REQUESTED -> fixed by the Architect)
+- major (task 4.6, fixed): `docs/demo-setup.md:28,37` still said "do not start `lgtm`" and expected the pre-start
+  FAIL; file added to task 4.6.
+- major (task 4.6, fixed): `.temp/runthrough.md` smoke #2 expected two N/A lines; now one.
+- minor (fixed): design.md D4 runthrough sentence; D5 stray "and"; local-environment delta "Default unchanged" wording.
+- minor (fixed): `event-booking-count` "Booking service telemetry" said "platform once started"; MODIFIED delta added.
+- minor (open, worker-owned): `src/SuperPower.AppHost/collector/config.yaml:3-5` comment says LGTM "started on demand
+  (ADR-0022)"; behaviour (retry and queue off) unchanged. Comment-only fix in a later block.
+- minor (open, at archive): main spec Purpose lines `local-environment` (ADR-0022 "started on demand") and
+  `demo-dashboard` ("started on demand"): reword citing ADR-0033 when archiving.
+- nit (fixed): FR-0004 item 27 marked obsolete. nit (left): task 3.1 text is history.
+- Risk: `site` and `api` start only after `lgtm` is healthy; pre-pull images every morning. Read the bookings panel as
+  increases only (counters reset on `api` restart).

@@ -18,6 +18,21 @@ SHALL say so and SHALL name only the production-stage platform as the agent's te
 - **THEN** it asks the presenter to restart that service and waits, rather than running a
   command
 
+### Requirement: Agent reads production-stage telemetry from start-up
+With the environment running, the agent SHALL be able to query the production-stage platform's
+traces, logs and metrics, including telemetry from the site's start-up (ADR-0033). Metric
+counters are cumulative and reset on a service restart.
+
+#### Scenario: Agent checks a metric
+- **WHEN** the agent is asked how long requests to a page take, after the page was requested
+- **THEN** it can retrieve that page type's request durations from the site's request-duration
+  metric, filtered by page type (FR-0003, ADR-0024)
+
+#### Scenario: First request after start
+- **WHEN** the agent searches the platform for the first page request after the environment
+  started
+- **THEN** it finds that request's trace and log entries
+
 ## MODIFIED Requirements
 
 ### Requirement: Agent reads local telemetry
@@ -65,3 +80,11 @@ source's read tools, and the README SHALL give the single step that enables that
   environment running
 - **THEN** the agent can query the local telemetry and its read tools run without an approval
   prompt
+
+## REMOVED Requirements
+
+### Requirement: Agent reads production-stage telemetry
+**Reason**: The production-stage platform starts with the environment (PO 2026-10-23, ADR-0033), so
+there is no "before the start" period to exclude; replaced by "Agent reads production-stage
+telemetry from start-up".
+**Migration**: see the added requirement "Agent reads production-stage telemetry from start-up".
