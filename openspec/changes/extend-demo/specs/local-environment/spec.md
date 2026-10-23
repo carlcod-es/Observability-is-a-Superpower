@@ -1,15 +1,14 @@
 ## ADDED Requirements
 
-### Requirement: README matches the talk's agent setup
+### Requirement: README explains enabling the local-environment source
 The README SHALL state that the talk runs the production-stage platform from the start and
-gives the agent only the production-stage telemetry source, that the repo registers both
-sources, and how to disable the local-environment source for the repo folder to match the talk
-(ADR-0033).
+gives the agent only the production-stage telemetry source, that the repo registers only that
+source, and how to enable the local-environment source (ADR-0033).
 
-#### Scenario: Attendee matches the talk
-- **WHEN** an attendee follows the README section on the talk's agent setup
-- **THEN** the agent lists only the production-stage source as active and can query it once the
-  platform is running
+#### Scenario: Attendee enables the local source
+- **WHEN** an attendee follows the README section on enabling the local-environment source
+- **THEN** the agent lists both sources as active and can query each once its environment is
+  running
 
 ### Requirement: Smoke check on a running environment
 The smoke check SHALL offer a mode for an environment that has already served traffic. In that

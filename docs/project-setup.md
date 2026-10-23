@@ -173,9 +173,10 @@ Until then the collector logs an export error per batch.
 
 ## Agent access (Claude Code)
 
-`.mcp.json` registers two MCP servers (ADR-0022):
+`.mcp.json` registers only `grafana`; `aspire` is opt-in (README "Enable the Aspire MCP")
+(ADR-0022, ADR-0033):
 
-- `aspire` (stdio, `aspire agent mcp`; local stage): traces, structured logs, a trace's logs,
+- `aspire` (stdio, `aspire agent mcp`; opt-in): traces, structured logs, a trace's logs,
   resource state and console logs from the running AppHost; no metrics. `.claude/settings.json`
   pre-approves its 13 read tools by name; `execute_resource_command` prompts every call. While
   `spikes/` holds other AppHosts the agent calls `select_apphost` first.

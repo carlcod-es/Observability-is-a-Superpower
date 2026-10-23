@@ -35,7 +35,7 @@ the `// Demo Code : Act 3` comment and the presenter runthrough. Not described h
 **Non-Goals:**
 - Retrying, recovering or recounting lost bookings; dead-letter queue.
 - An `api` error panel; counts per event on the dashboard.
-- Removing the Aspire MCP from the repo; AppHost changes.
+- AppHost changes.
 - Windows verification.
 
 ## Decisions
@@ -67,13 +67,16 @@ counted" at `x` 12, `y` 16, `w` 12, `h` 8, Prometheus data source, unit `short`,
 Next free panel `id`. No other panel changes. Alternatives: ADR-0034.
 
 ### D4. Grafana MCP throughout (ADR-0033, spec `agent-telemetry-access`)
-No repo config change. `claude-stage.md` "Telemetry access": Grafana MCP only, from the start;
+`.mcp.json` drops `aspire` (PO 2026-10-23); `.claude/settings.json` keeps the `mcp__aspire__*`
+allow entries, so its read tools are pre-approved once enabled. `claude-stage.md` "Telemetry access": Grafana MCP only, from the start;
 "How to work": after a fix, ask the presenter to rebuild the named resource (Aspire Rebuild; Restart does not recompile) (`site` or `api`); no
-mention of Aspire resource commands; resource list gains `api`, `cache`, `queue`. README gains
-"Match the talk's agent setup": the talk ran Grafana from the start and the agent on `grafana`
-only; `/mcp` -> `aspire` -> Disable (per folder); start `lgtm` before opening Claude Code.
-Runthrough: Morning starts `lgtm` after the final restart, disables `aspire`, checks `claude mcp
-list`; Go-live is the tunnel and traffic; Act 1 prompt and all check queries use Grafana.
+mention of Aspire resource commands; resource list gains `api`, `cache`, `queue`. README
+"Match the talk's agent setup" becomes "Enable the Aspire MCP": the talk ran Grafana from the
+start and the agent on `grafana` only, which is what the repo registers; to add the Aspire MCP,
+`claude mcp add --scope local aspire -- aspire agent mcp` or add the block back into `.mcp.json`;
+`/mcp` then shows it connected. "Connecting Claude Code" says only `grafana` is registered.
+Runthrough: Morning starts `lgtm` after the final restart, checks `claude mcp list` shows only
+`grafana`, connected; Go-live is the tunnel and traffic; Act 1 prompt and all check queries use Grafana.
 
 ### D5. Smoke running mode (spec `local-environment`)
 `dotnet run tests/smoke/smoke.cs -- running`: target apphost; skips "home trace (first load)" and
@@ -91,8 +94,8 @@ brief and the runthrough only. Rebuilding `api` (Aspire Rebuild) applies either 
 
 ### D7. Presenter runthrough (Architect, `.temp/runthrough.md`; PO copies to `docs/presenter/`)
 Planted problems row and entry for Act 3; Morning: start, smoke #1 (fixed state), then set initial
-states, amend commit, reset booking counts, restart, start `lgtm`, Claude Code with `aspire`
-disabled; Act 3 section after Act 2 (prompt, expected path, check queries, speaking notes on the
+states, amend commit, reset booking counts, restart, start `lgtm`, Claude Code with `grafana`
+connected; Act 3 section after Act 2 (prompt, expected path, check queries, speaking notes on the
 panel, fallback); rule "no event bookings before Act 3"; Act 2 speaking note to park the bookings
 gap; Close: optional smoke #2 (`-- running`). No timings.
 
@@ -108,6 +111,8 @@ gap; Close: optional smoke #2 (`-- running`). No timings.
   runthrough's open decision on stripping explanatory lines on `demo` covers Act 3 too.
 - [Grafana MCP not connected when Claude Code opens] -> runthrough check `claude mcp list` after
   `grafana-mcp` is Running; `/mcp` reconnect.
+- [Dev clones and attendees lose the Aspire MCP by default (no `lgtm` needed for it)] -> one
+  `claude mcp add` command in the README; read tools stay pre-approved (PO 2026-10-23).
 
 ## Migration Plan
 

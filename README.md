@@ -53,8 +53,8 @@ docker pull rabbitmq:4.3-management
    the request-duration metric (Metrics > `site` > `http.server.request.duration`). The form post
    trace has an `acme.forms.submit` span with a child `acme.forms.notify`. Form field values never
    appear in telemetry.
-6. Optional: [connect Claude Code](#connecting-claude-code) and ask, for example, "show the latest
-   trace for the Home page and its logs".
+6. Optional: [enable the Aspire MCP](#enable-the-aspire-mcp) and ask Claude Code, for example,
+   "show the latest trace for the Home page and its logs".
 7. Go live: [start Grafana](#start-grafana), then the [demo traffic](#demo-traffic) and the
    [submission burst](#submission-burst). Open Dashboards > Demo > Demo site
    (http://localhost:3000/d/demo-site); the "Form submissions by outcome" panel follows the burst.
@@ -206,42 +206,52 @@ the raw entries are in `src/SuperPower.Web/umbraco/Logs/`.
 
 ## Connecting Claude Code
 
-`.mcp.json` registers two MCP servers; `.claude/settings.json` enables them and pre-approves
-their read tools.
+`.mcp.json` registers only `grafana`, the talk's setup. `.claude/settings.json` enables it and
+pre-approves its tools, plus the Aspire MCP read tools for when that is
+[enabled](#enable-the-aspire-mcp).
 
 | Server | Transport | Gives the agent |
 |---|---|---|
-| `aspire` | stdio, `aspire agent mcp` (Aspire CLI on PATH) | Resource state, console logs, structured logs and traces from the Aspire dashboard; resource commands |
 | `grafana` | http://localhost:8091/mcp (Grafana MCP container, read-only) | Traces, logs and metrics from Grafana |
+| `aspire` (opt-in, see [Enable the Aspire MCP](#enable-the-aspire-mcp)) | stdio, `aspire agent mcp` (Aspire CLI on PATH) | Resource state, console logs, structured logs and traces from the Aspire dashboard; resource commands |
 
-1. Start the full environment. `aspire` works from then on.
-2. Open Claude Code at the repo root (trust the folder if asked). `/mcp` shows `aspire`
-   connected and `grafana` failed: nothing answers on its port until Grafana is started.
+1. Start the full environment.
+2. Open Claude Code at the repo root (trust the folder if asked). `/mcp` shows `grafana` failed:
+   nothing answers on its port until Grafana is started.
 3. Start Grafana (see "Start Grafana"), wait for `grafana-mcp` to be running, then run `/mcp`
    and reconnect `grafana`.
 4. Ask for telemetry, for example "show the latest trace for the Home page and its logs".
 
 Notes:
 
-- Several AppHosts live under the repo (`spikes/`), so the agent must call `select_apphost` first;
-  it is pre-approved.
-- Pre-approved: the Aspire read tools and all `grafana` tools. Aspire `execute_resource_command`
-  is not pre-approved: Claude Code prompts on each call.
-- The Aspire MCP has no metrics tool; metrics come from Grafana.
+- Pre-approved: all `grafana` tools, and the Aspire read tools once `aspire` is enabled.
+- With `aspire` enabled: several AppHosts live under the repo (`spikes/`), so the agent must call
+  `select_apphost` first (pre-approved); `execute_resource_command` is not pre-approved, Claude
+  Code prompts on each call; there is no metrics tool, metrics come from Grafana.
 - The agent has no database tool and no write access to Grafana.
 
-## Match the talk's agent setup
+## Enable the Aspire MCP
 
-The talk ran Grafana (`lgtm`) from the start and gave the agent only `grafana`. The repo registers
-both servers and keeps `aspire` usable. To match the talk:
+The talk ran Grafana (`lgtm`) from the start and gave the agent only `grafana`, which is what the
+repo registers. The Aspire MCP (resource state, console logs, structured logs and traces from the
+Aspire dashboard; no `lgtm` needed; no metrics) is optional. To add it for yourself, at the repo
+root with the Aspire CLI on PATH:
 
-1. Start the full environment, then Grafana, and wait for `grafana-mcp` to be running.
-2. Open Claude Code at the repo root, run `/mcp`, select `aspire` and choose Disable (saved for
-   this folder only).
-3. `claude mcp list` (or `/mcp`) now shows `aspire` disabled and `grafana` connected.
+```bash
+claude mcp add --scope local aspire -- aspire agent mcp
+```
 
-In this setup the agent cannot restart resources; after a code change use Rebuild on the resource
-in the Aspire dashboard (Restart does not recompile).
+Or add this block to `mcpServers` in `.mcp.json` for everyone using the clone:
+
+```json
+"aspire": { "type": "stdio", "command": "aspire", "args": ["agent", "mcp"] }
+```
+
+`/mcp` (or `claude mcp list`) then shows `aspire` connected. Read tools are pre-approved; resource
+commands prompt on each call. Remove with `claude mcp remove --scope local aspire`.
+
+The agent cannot restart resources; after a code change use Rebuild on the resource in the Aspire
+dashboard (Restart does not recompile).
 
 ## Stable ports and URLs
 

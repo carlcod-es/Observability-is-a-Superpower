@@ -200,8 +200,8 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
   Windows may hit it. PO 2026-10-22: not before the talk.
 - [x] New act for queue errors: delivered as Act 3 by `extend-demo` (2026-10-23).
 - [ ] `extend-demo` task 5.1 (PO): copy `.temp/runthrough.md` to `docs/presenter/`; rehearse Morning and Act 3
-  with the agent on the Grafana MCP only; confirm `/mcp` -> `aspire` -> Disable shows `aspire` disabled in
-  `claude mcp list` (`extend-demo` task 3.3).
+  with the agent on the Grafana MCP only; confirm `claude mcp list` in the stage clone shows only `grafana`
+  (`extend-demo` task 3.4).
 - [ ] Before the talk (PO): decide whether the `demo` branch strips the explanatory lines under each
   `// Demo Code : Act N` (runthrough "Demo branch"; Act 3's names the fix). Review
   `openspec/changes/extend-demo/review-followups.md`.

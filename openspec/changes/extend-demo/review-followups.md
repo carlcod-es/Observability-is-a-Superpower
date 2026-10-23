@@ -22,14 +22,14 @@
 - minor: `tests/smoke/smoke.cs` (~492) `countedBefore` falls back to 0 when Prometheus cannot answer before the
   booking; a stale non-zero series could then pass without a real increase. Fix: fail on a null baseline or retry once.
 - nit: README "Tests" intro still says run right after start; the `-- running` note covers the alternative.
-- Task 3.3: `/mcp` -> `aspire` -> Disable is interactive; PO verifies `claude mcp list` shows `aspire` disabled.
+- Task 3.3: `/mcp` -> `aspire` -> Disable is interactive; PO verifies `claude mcp list` shows `aspire` disabled. Obsolete 2026-10-23: `aspire` removed from `.mcp.json` (tasks 3.3, 3.4).
 - Architect: Tempo search lag measured 30.6-32.5 s; smoke Tempo polls raised to 60 s (pre-existing borderline).
 
 ## Supervisor, section 3 (APPROVED)
 - major (task 4.1, fixed by the Architect): `claude-stage.md` asked for a "restart"; Aspire Restart does not recompile.
   Now "rebuild". Runthrough uses Rebuild in every act; design.md D4/D6 updated.
 - minor (README, fixed in rework): "restart them from the Aspire dashboard" -> Rebuild; "Demo site" panel list lacks
-  "Bookings: stored vs counted"; Match-the-talk step 3 should say `aspire` disabled.
+  "Bookings: stored vs counted"; Match-the-talk step 3 should say `aspire` disabled (obsolete 2026-10-23: section replaced, task 3.3).
 - nit: specs `agent-telemetry-access` / `event-booking-count` say "restart" generically; acceptable.
 - nit: README load-test section (~301) "restart the site" after a change; fix in a later pass.
 - nit: `tests/smoke/smoke.cs` counted check compares raw values; a rebuild of `api` seconds before smoke #2 with no
@@ -48,3 +48,11 @@
 - nit: runthrough Act 2 step 7 "Optional" sub-bullets malformed (PO text); tidy when copying.
 - risk: `aspire resource <name> rebuild` CLI form used in the runthrough Scripts table; ran for `api` on 2026-10-22
   (section 1 worker); dashboard Rebuild is the primary path. Rehearse in task 5.1.
+
+## Reviewer, tasks 3.3-3.4 (APPROVED; 3.3 macOS check deferred to PO)
+- PO check (task 3.3): this machine's `~/.claude.json` has `disabledMcpServers: ["aspire"]` for the folder (earlier
+  `/mcp` Disable), so `claude mcp add` shows `aspire` "Disabled for this project". Re-enable via `/mcp`, then confirm
+  `aspire` connected and `mcp__aspire__list_resources` runs without a prompt.
+- nit: `README.md:242-246` second enable path (`.mcp.json` block) is optional under the demo bar. Kept: design.md D4.
+- nit: `README.md:210-211` Aspire pre-approval note duplicates line 227; keep one.
+- nit: `README.md:62-63` over-long line (pre-existing); reflow.

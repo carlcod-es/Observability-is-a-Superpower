@@ -57,14 +57,14 @@ runnable by attendees.
 - Booking service `api` (minimal API, ADR-0030) with Redis `cache` (ADR-0031) and RabbitMQ
   `queue` (ADR-0032): event pages read the booking count over HTTP; stored event bookings are
   counted through the queue. The site works without all three (2 s cap, fail-soft).
-- Agent: Claude Code CLI. The repo registers two MCP servers (ADR-0022): Aspire MCP over the
-  Aspire dashboard (traces, structured logs, resource state, console logs; resource commands
-  prompt every call; no metrics) and Grafana MCP (read-only) over Grafana LGTM, fed by an
+- Agent: Claude Code CLI. The repo registers only the Grafana MCP (ADR-0033, PO 2026-10-23); the
+  Aspire MCP over the Aspire dashboard (traces, structured logs, resource state, console logs;
+  resource commands prompt every call; no metrics) is opt-in via the README, its read tools
+  pre-approved (ADR-0022). Grafana MCP (read-only) runs over Grafana LGTM, fed by an
   OpenTelemetry Collector alongside the Aspire dashboard (logs, traces, metrics). LGTM and its MCP
   server are explicit-start resources. Metric counters are cumulative and reset on a service restart.
 - On stage (ADR-0033, PO 2026-10-22): Grafana runs from the morning for the whole talk; the agent
-  uses only the Grafana MCP in every act (Aspire MCP disabled per folder in the stage clone; README
-  explains how to match). The Aspire dashboard is the presenter's view. The agent cannot restart
+  uses only the Grafana MCP in every act. The Aspire dashboard is the presenter's view. The agent cannot restart
   services: it asks, the presenter rebuilds the resource from the Aspire dashboard. Go-live is the
   tunnel and demo traffic only. Three acts: Act 1 personal data in logs, Act 2 load breaks
   submissions, Act 3 booking processing failure (fail-soft, seen only in telemetry).

@@ -3,7 +3,8 @@
 ## Status
 Accepted (2026-10-23, change `extend-demo`). Deviation: the presenter applies a fix with Rebuild, not
 Restart (Aspire's Restart does not recompile). Supersedes the stage split of ADR-0022 for the talk.
-ADR-0022's repo setup (both MCP servers registered, `lgtm` explicit-start) stays.
+Amended 2026-10-23 (PO): `aspire` removed from `.mcp.json`, opt-in via the README; supersedes
+ADR-0022's two-server registration. `lgtm` explicit-start stays.
 
 ## Context
 ADR-0022 gave the agent the Aspire MCP before go-live and the Grafana MCP after, so the Act 1
@@ -11,21 +12,27 @@ personal-data leak never reached "production". The PO (2026-10-22) wants Grafana
 whole talk and the agent on one source in every act: the Aspire dashboard stays the presenter's
 view for logs, traces and metrics, and the agent no longer spends queries on a second server.
 The PO accepts that Act 1's unmasked values reach Grafana and stay there (made-up details only).
-Attendees should still be able to use the Aspire MCP.
+Attendees should still be able to use the Aspire MCP. The PO (2026-10-23) wants a fresh clone to
+match the talk with no disable step; the Aspire MCP becomes opt-in.
 
 ## Decision
-- Repo unchanged: `.mcp.json` keeps `aspire` and `grafana`; `.claude/settings.json` unchanged;
+- `.mcp.json` registers only `grafana` (PO 2026-10-23). `.claude/settings.json` keeps the
+  `mcp__aspire__*` allow entries, so the Aspire read tools are pre-approved once enabled.
   `lgtm` stays explicit-start in the AppHost.
 - Stage clone: the presenter starts `lgtm` in the morning after the final AppHost restart, before
-  opening Claude Code, and disables `aspire` with `/mcp` (saved per folder). The agent uses only
-  `grafana` from the first act.
+  opening Claude Code. The agent uses only `grafana` from the first act.
 - The stage agent instructions (`claude-stage.md`) name only the Grafana MCP and tell the agent to
   ask the presenter for any restart; it must not restart services itself.
-- README gains a section on matching the talk's setup (disable `aspire` for the folder).
+- README section "Enable the Aspire MCP": `claude mcp add --scope local aspire -- aspire agent mcp`,
+  or add the block back into `.mcp.json`.
 
 ## Alternatives
-- Remove `aspire` from `.mcp.json`: attendees lose the lighter agent path (no `lgtm` needed) and
-  the dev clone loses it too; rejected (PO 2026-10-22).
+- Keep `aspire` in `.mcp.json` and disable it per folder with `/mcp` (this ADR as first accepted,
+  PO 2026-10-22): a fresh clone does not match the talk and the stage clone needs a disable step;
+  replaced by the PO 2026-10-23.
+- Keep `aspire` registered and turn it off with `disabledMcpjsonServers` in `.claude/settings.json`:
+  conflicts with `enableAllProjectMcpServers`, and settings lists merge across scopes, so a local
+  setting may not re-enable it; rejected.
 - `lgtm` started by `aspire start` (not explicit-start): heavier start for attendees and the
   smoke pre-start check loses its meaning; the presenter starts it anyway; rejected.
 - Keep ADR-0022's split: two sources on stage, agent queries split by act; rejected by the PO.
@@ -41,4 +48,6 @@ Attendees should still be able to use the Aspire MCP.
   not recompile).
 - Metrics are queried from Grafana in every act (the Aspire MCP had none), so local-stage check
   queries can use counters.
-- The talk no longer demonstrates the Aspire MCP; the README states it is available.
+- The talk no longer demonstrates the Aspire MCP; the README states how to enable it.
+- Dev clones and attendees who want the Aspire MCP (the agent path without `lgtm`) run one
+  `claude mcp add` command.

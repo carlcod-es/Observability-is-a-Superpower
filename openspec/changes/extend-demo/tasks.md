@@ -11,17 +11,20 @@ design.md D2) -> 3 -> 4 -> 5 (PO). The Act 3 planted problem is given in the sec
 
 - [x] 2.1 Shrink "Form submissions by outcome" to the left half and add "Bookings: stored vs counted" as design.md D3; verify the JSON parses (`node -e "require('./src/SuperPower.AppHost/grafana/dashboards/demo-site.json')"`) and, after section 1 is merged, with `lgtm` running and bookings made in the fixed and the planted state, the panel shows matching lines when fixed and counted at 0 when planted (spec `demo-dashboard`, "Bookings counted", "Bookings lost"); report observations
 
-## 3. Smoke check and README (worker-backend by brief; shared: `tests/smoke/smoke.cs`, `README.md`; depends on 1)
+## 3. Smoke check and README (worker-backend by brief; shared: `tests/smoke/smoke.cs`, `README.md`, `.mcp.json`; depends on 1)
 
 - [x] 3.1 Smoke `-- running` mode as design.md D5: skips the first-load and pre-start checks (printed `N/A`), no `/smoke-pre/` request; header documents it without naming acts or problems; verify on an AppHost that has served pages: `dotnet run tests/smoke/smoke.cs -- running` reports `ALL CHECKS PASSED` with two N/A lines
 - [x] 3.2 Smoke check: counted-bookings metric increases within 60 s of the smoke booking (apphost, both modes; design.md D5); verify `dotnet run tests/smoke/smoke.cs` on a freshly started AppHost passes with the new check (existing expected results unchanged) and `-- standalone` is unchanged
-- [ ] 3.3 README: section "Match the talk's agent setup" (design.md D4, ADR-0033); "Tests" lists `-- running`; no planted problems described; verify the `/mcp` steps on macOS: after Disable, `claude mcp list` shows `aspire` disabled for the folder and `grafana` connected with `lgtm` running
+- [ ] 3.3 README: section "Enable the Aspire MCP" replaces "Match the talk's agent setup"; "Connecting Claude Code" says only `grafana` is registered (design.md D4, ADR-0033); "Tests" lists `-- running`; no planted problems described; verify on macOS: after `claude mcp add --scope local aspire -- aspire agent mcp`, `claude mcp list` shows `aspire` connected and `mcp__aspire__list_resources` runs without a prompt; then `claude mcp remove --scope local aspire`
+- [x] 3.4 Remove `aspire` from `.mcp.json` (design.md D4, ADR-0033); verify `claude mcp list` at the repo root in a fresh shell lists only `grafana` (connected with `lgtm` running)
 
 ## 4. Docs, stage instructions and runthrough (Architect; `docs/`, `openspec/`, `CLAUDE.md`, `PLANNING.md`, `claude-stage.md`, `.temp/runthrough.md`; depends on 1-3)
 
 - [x] 4.1 `claude-stage.md` per design.md D4 (Grafana MCP only, ask the presenter to restart, resources incl. `api`, `cache`, `queue`); no planted problem or fix details; verify by reading it against spec `agent-telemetry-access` "Agent works from the production-stage platform alone"
 - [x] 4.2 `.temp/runthrough.md` per design.md D7 (Act 3 row and entry, Morning reorder with smoke #1 before initial states, `lgtm` from the morning, `aspire` disabled, Go-live tunnel and traffic only, Act 1 and check queries on Grafana, Act 3 section, rule no bookings before Act 3, Close smoke #2); verify every command in changed steps runs as written on the Mac
 - [x] 4.3 CLAUDE.md "Stack" and "Telemetry" (Grafana MCP throughout, counted metric, Act 3), `openspec/config.yaml` context, ADR-0033 and ADR-0034 Status -> Accepted with deviations, PLANNING.md change order and todos (replace the queue-errors todo); talk date unchanged (PO 2026-10-22); verify `openspec validate extend-demo --strict` passes and no doc outside the runthrough and the code comment describes the planted problem
+- [x] 4.4 `.temp/runthrough.md`: remove the `/mcp` -> `aspire` -> Disable steps (Morning Claude Code step, Close); Morning checks `claude mcp list` shows only `grafana`, connected (design.md D4, D7); verify no `aspire` disable step remains
+- [x] 4.5 Aspire MCP opt-in in docs: ADR-0033 amended (Status, Decision, Alternatives, Consequences), ADR-0022 Status, CLAUDE.md "Stack", `docs/project-setup.md` "Agent access", PLANNING.md (`extend-demo` task 5.1 todo); verify `openspec validate extend-demo --strict` passes and no doc outside archives and spikes says the repo registers `aspire`
 
 ## 5. Rehearsal (PO; depends on 4)
 

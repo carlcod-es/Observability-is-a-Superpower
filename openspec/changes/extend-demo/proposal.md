@@ -28,9 +28,9 @@ Grafana throughout:
 - The production-stage platform runs from the morning for the whole talk. The Aspire dashboard
   remains the presenter's view for showing logs, traces and metrics; the agent uses only the
   Grafana MCP in every act. Go-live becomes the tunnel and demo traffic only.
-- The Aspire MCP is disabled in the stage clone only; the repo keeps both servers. The README
-  states that the talk ran the agent on the Grafana MCP only and how to disable the Aspire MCP to
-  match. The runthrough's morning steps include disabling it and checking Grafana is connected.
+- The repo registers only the Grafana MCP (PO 2026-10-23), so a fresh clone matches the talk. The
+  README explains how to enable the Aspire MCP. The runthrough's morning steps check that Grafana is
+  connected.
 - The agent cannot restart services on stage: it asks the presenter, who restarts from the Aspire
   dashboard.
 - Accepted (PO 2026-10-22): Act 1's unmasked values reach Grafana and stay there for the talk; the
@@ -46,8 +46,8 @@ Presenter runthrough (private): Act 3 section (prompt, expected path, check quer
 notes), Planted problems row for Act 3, reordered morning steps, Act 1 prompt and check queries moved
 to Grafana, rule "no event bookings before Act 3". Timings are set by the PO, not planned.
 
-Out of scope: retrying or recovering lost bookings, an error panel for the booking service, removing
-the Aspire MCP from the repo, Windows verification.
+Out of scope: retrying or recovering lost bookings, an error panel for the booking service, Windows
+verification.
 
 ## Capabilities
 
@@ -60,15 +60,17 @@ None.
 - `event-booking-count`: booking processing failures are recorded in telemetry (error on the
   booking's trace, error log in the booking service, event identity only).
 - `agent-telemetry-access`: the agent can diagnose and verify every act from the production-stage
-  platform alone, with the Aspire MCP disabled; restarts go through the presenter.
+  platform alone, with only the Grafana MCP registered; restarts go through the presenter. The
+  Aspire MCP is opt-in.
 - `local-environment`: README and demo run-through describe running with the production-stage
-  platform from the start and disabling the Aspire MCP to match the talk.
+  platform from the start; README describes enabling the Aspire MCP.
 
 ## Impact
 
 - Booking service: the planted, marked problem; telemetry on processing failure.
 - Demo dashboard definition and its spec.
 - Smoke check: new mode for an already-running environment; morning order.
+- `.mcp.json`: `aspire` removed (PO 2026-10-23).
 - README, stage agent instructions (`claude-stage.md`), presenter runthrough working copy.
 - ADR-0022 (Aspire MCP local, Grafana at go-live): the talk no longer follows its stage split;
   the Architect records a superseding or amending ADR at propose.
