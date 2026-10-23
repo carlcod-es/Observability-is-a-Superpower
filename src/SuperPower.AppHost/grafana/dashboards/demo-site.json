@@ -76,7 +76,7 @@
       "id": 5,
       "type": "timeseries",
       "title": "Form submissions by outcome",
-      "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
       "targets": [
@@ -85,6 +85,28 @@
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "sum by (acme_form, acme_form_outcome) (increase(acme_forms_submissions_total{job=\"site\"}[1m]))",
           "legendFormat": "{{acme_form}} {{acme_form_outcome}}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Bookings: stored vs counted",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(increase(acme_forms_submissions_total{job=\"site\",acme_form=\"event_booking\",acme_form_outcome=\"stored\"}[1m])) or vector(0)",
+          "legendFormat": "stored"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(increase(acme_bookings_counted_total{job=\"api\"}[1m])) or vector(0)",
+          "legendFormat": "counted"
         }
       ]
     }

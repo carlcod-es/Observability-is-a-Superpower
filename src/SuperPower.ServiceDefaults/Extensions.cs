@@ -75,7 +75,8 @@ public static class Extensions
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
-                    .AddMeter("Acme.Forms");
+                    .AddMeter("Acme.Forms")
+                    .AddMeter("Acme.Bookings"); // ADR-0034; literal because ServiceDefaults must not reference the api project
             })
             .WithTracing(tracing =>
             {

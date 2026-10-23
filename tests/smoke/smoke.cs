@@ -2,6 +2,9 @@
 //
 //   dotnet run tests/smoke/smoke.cs                 target "apphost": AppHost freshly started (aspire run), SQL Server, `lgtm` not started;
 //                                                   run it before any page is loaded (its first request is the first Home load)
+//   dotnet run tests/smoke/smoke.cs -- running      target "apphost" on an environment that has already served traffic (extend-demo design D5):
+//                                                   skips "home trace (first load)" and "no pre-start telemetry in Grafana" (printed N/A), makes no /smoke-pre/ request;
+//                                                   everything else is unchanged. `lgtm` is started if it is not running.
 //   dotnet run tests/smoke/smoke.cs -- standalone   target "standalone": `dotnet run --project src/SuperPower.Web`, SQLite
 //
 // Run from inside the repo. Exit code is non-zero if any check FAILs. Submissions are fake and never deleted.
@@ -22,6 +25,7 @@
 //   add-booking-api (design D10): apphost: booking count on the first upcoming event page rises by one within 5 s of a booking, Tempo has
 //   `api` spans with acme.event.key and a booking trace with `site` acme.forms.submit and `api` deliver booking-stored (with acme.event.key) (needs `lgtm`); standalone: no event-bookings element,
 //   a booking still returns a reference.
+//   extend-demo (design D5): apphost, both modes (needs `lgtm`): acme_bookings_counted_total{job="api"} increases within 60 s of the smoke booking.
 // Not scripted (PO 2026-10-14): Event booking post to a past event; check it manually (verification.md).
 // Passing both targets also proves the raw FieldsJson is identical on SQL Server and SQLite.
 #:package Microsoft.Data.SqlClient
@@ -50,6 +54,7 @@ var eventKey = Guid.Parse("a1c0f3d2-5b7e-4c81-9a2d-0e6f4b8c1a03");
 const string ExpectedContactJson = "{\"Name\":\"Smoke Test\",\"Email\":\"smoke@example.com\",\"Message\":\"Line one: \\\"quoted\\\" caf\u00e9 \u00fc\\nLine two\"}";
 
 var standalone = args.Contains("standalone");
+var running = args.Contains("running") && !standalone;
 var failures = 0;
 void Report(bool ok, string name, string detail)
 {
@@ -62,7 +67,7 @@ while (!File.Exists(Path.Combine(root, "SuperPower.slnx")))
     root = Path.GetDirectoryName(root) ?? throw new InvalidOperationException("Run from inside the repo.");
 var appHostProject = Path.Combine(root, "src", "SuperPower.AppHost", "SuperPower.AppHost.csproj");
 
-Console.WriteLine($"Target: {(standalone ? "standalone (SQLite)" : "apphost (SQL Server)")}, site {Site}");
+Console.WriteLine($"Target: {(standalone ? "standalone (SQLite)" : running ? "apphost (SQL Server), running mode" : "apphost (SQL Server)")}, site {Site}");
 
 DbConnection OpenDb()
 {
@@ -184,9 +189,9 @@ if (!standalone)
         var lgtmState = JsonDocument.Parse(lgtmJson[lgtmJson.IndexOf('{')..]).RootElement.GetProperty("resources")[0].GetProperty("state").GetString();
         if (lgtmState == "NotStarted")
         {
-            await NewClient().GetAsync("/smoke-pre/?smoke-pre=" + preMarker);
+            if (!running) await NewClient().GetAsync("/smoke-pre/?smoke-pre=" + preMarker);
             Run("aspire", "resource", "lgtm", "start", "--apphost", appHostProject, "--non-interactive", "--nologo");
-            preStart = true;
+            preStart = !running;
             homeSince = DateTime.UtcNow.AddSeconds(-5);
             using var probe = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
             var ready = false;
@@ -302,7 +307,8 @@ async Task TelemetryCheck()
         // Counts SqlClient spans and server spans of a trace; null if Tempo does not have it yet.
         async Task<(int Db, int Server)?> Spans(string traceId)
         {
-            for (var i = 0; i < 15; i++)
+            // Tempo makes new spans available after ~30 s, so poll up to 60 s.
+            for (var i = 0; i < 30; i++)
             {
                 var resp = await g.GetAsync("/api/datasources/proxy/uid/tempo/api/traces/" + traceId);
                 if (resp.IsSuccessStatusCode)
@@ -317,6 +323,14 @@ async Task TelemetryCheck()
             return null;
         }
 
+        const string homeName = "home trace (first load): database spans + linked logs";
+        const string preName = "no pre-start telemetry in Grafana";
+        if (running)
+        {
+            Console.WriteLine($"N/A  {homeName} - not applicable: running mode");
+            Console.WriteLine($"N/A  {preName} - not applicable: running mode");
+            return;
+        }
         // The first request of the run (section 0): its log lines carry the trace id.
         var homeIds = await TraceIds($$"""{service_name="site"} |= "smoke={{marker}}" | trace_id != "" """, homeSince);
         var home = homeIds.Count > 0 ? await Spans(homeIds[0]) : null;
@@ -324,10 +338,9 @@ async Task TelemetryCheck()
             : $"trace {homeIds[0]}: {home.Value.Server} server span, {home.Value.Db} database spans, request log line found with that trace_id";
         if (home is { Db: 0 })
             detail = "Home trace has no database spans: run the smoke check right after starting the AppHost (first Home load after start); " + detail;
-        Report(home is { Server: >= 1, Db: > 0 }, "home trace (first load): database spans + linked logs", detail);
+        Report(home is { Server: >= 1, Db: > 0 }, homeName, detail);
 
         // Request made before lgtm started must not appear; only meaningful once the pipeline is proven live (home lines found).
-        const string preName = "no pre-start telemetry in Grafana";
         if (!preStart) Console.WriteLine($"N/A  {preName} - not applicable: lgtm was already running");
         else if (homeIds.Count == 0) Report(false, preName, "pipeline not proven live (no Home log lines in Loki)");
         else
@@ -369,7 +382,8 @@ async Task DashboardCheck()
         async Task<List<(string Trace, Dictionary<string, string> Attrs)>> TempoWait(string q, Func<List<(string Trace, Dictionary<string, string> Attrs)>, bool> done)
         {
             var r = new List<(string, Dictionary<string, string>)>();
-            for (var i = 0; i < 15; i++)
+            // Tempo makes new spans searchable after ~30 s, so poll up to 60 s.
+            for (var i = 0; i < 30; i++)
             {
                 r = await Tempo(q);
                 if (done(r)) break;
@@ -411,7 +425,7 @@ async Task DashboardCheck()
         Report(types.Contains("service"), "page-type label on form post", $"POST server spans: {(types.Count == 0 ? "none found" : string.Join(", ", types.GroupBy(t => t).Select(t => $"{t.Key} x{t.Count()}")))}");
 
         var sentinel = await TempoWait($$"""{resource.service.name="site" && span.url.path="{{sentinelPath}}"}""" + select, r => r.Count > 0);
-        if (sentinel.Count == 0) { Report(false, "assets excluded", "pipeline not proven live (sentinel request span not in Tempo after 30 s)"); return; }
+        if (sentinel.Count == 0) { Report(false, "assets excluded", "pipeline not proven live (sentinel request span not in Tempo after 60 s)"); return; }
         var assets = await Tempo("""{resource.service.name="site" && span.url.path=~"/assets/.*"}""" + select, strict: true);
         Report(assets.Count == 0 && assetStatus == 200, "assets excluded", $"GET /assets/rubber-duck.svg {assetStatus}; {assets.Count} span(s) with an /assets url.path");
     }
@@ -464,6 +478,18 @@ async Task BookingCheck()
         var m = Regex.Match(await NewClient().GetStringAsync(upcomingEvent), @"event-bookings"">\s*(\d+)");
         return m.Success ? int.Parse(m.Groups[1].Value) : 0;
     }
+    using var prom = new HttpClient { BaseAddress = new Uri(Grafana), Timeout = TimeSpan.FromSeconds(20) };
+    prom.DefaultRequestHeaders.Authorization = new("Basic", Convert.ToBase64String("admin:admin"u8.ToArray()));
+    // Sum over series of the raw counted-bookings counter; null while Prometheus cannot answer, 0 when the series is absent.
+    async Task<double?> Counted()
+    {
+        var resp = await prom.GetAsync("/api/datasources/proxy/uid/prometheus/api/v1/query?query=" + Uri.EscapeDataString("""sum(acme_bookings_counted_total{job="api"})"""));
+        if (!resp.IsSuccessStatusCode) return null;
+        var res = JsonDocument.Parse(await resp.Content.ReadAsStringAsync()).RootElement.GetProperty("data").GetProperty("result");
+        return res.GetArrayLength() > 0 ? double.Parse(res[0].GetProperty("value")[1].GetString()!, CultureInfo.InvariantCulture) : 0;
+    }
+    double countedBefore = 0;
+    try { countedBefore = await Counted() ?? 0; } catch { }
     try
     {
         var before = await Count();
@@ -480,13 +506,26 @@ async Task BookingCheck()
 
     try
     {
+        double? countedNow = null;
+        for (var i = 0; i < 30 && !(countedNow > countedBefore); i++)
+        {
+            if (i > 0) await Task.Delay(2000);
+            countedNow = await Counted();
+        }
+        Report(countedNow > countedBefore, "counted bookings metric increases", countedNow > countedBefore ? $"acme_bookings_counted_total {countedBefore} -> {countedNow}" : $"no increase from {countedBefore} after 60 s (now {countedNow?.ToString() ?? "no answer"})");
+    }
+    catch (Exception e) { Report(false, "counted bookings metric increases", e.Message); }
+
+    try
+    {
         using var g = new HttpClient { BaseAddress = new Uri(Grafana), Timeout = TimeSpan.FromSeconds(20) };
         g.DefaultRequestHeaders.Authorization = new("Basic", Convert.ToBase64String("admin:admin"u8.ToArray()));
         // Tempo TraceQL search; polls for exporter delay. Returns the number of matching traces and the first trace id.
         async Task<(int Traces, string First)> Tempo(string q)
         {
             var n = 0; var first = "";
-            for (var i = 0; i < 15 && n == 0; i++)
+            // Tempo makes new spans searchable after ~30 s, so poll up to 60 s.
+            for (var i = 0; i < 30 && n == 0; i++)
             {
                 var resp = await g.GetAsync("/api/datasources/proxy/uid/tempo/api/search?limit=50&start=" + since + "&end=" + DateTimeOffset.UtcNow.AddMinutes(1).ToUnixTimeSeconds() + "&q=" + Uri.EscapeDataString(q));
                 if (resp.IsSuccessStatusCode && JsonDocument.Parse(await resp.Content.ReadAsStringAsync()).RootElement.TryGetProperty("traces", out var t) && t.GetArrayLength() > 0)
@@ -496,9 +535,9 @@ async Task BookingCheck()
             return (n, first);
         }
         var api = await Tempo("""{resource.service.name="api" && span.acme.event.key != nil}""");
-        Report(api.Traces > 0, "api spans with acme.event.key", api.Traces > 0 ? $"{api.Traces} trace(s), e.g. {api.First}" : "none found in Tempo after 30 s");
+        Report(api.Traces > 0, "api spans with acme.event.key", api.Traces > 0 ? $"{api.Traces} trace(s), e.g. {api.First}" : "none found in Tempo after 60 s");
         var both = await Tempo("""{resource.service.name="site" && name="acme.forms.submit"} && {resource.service.name="api" && name="deliver booking-stored" && span.acme.event.key != nil}""");
-        Report(both.Traces > 0, "booking trace spans site and api", both.Traces > 0 ? $"{both.Traces} trace(s), e.g. {both.First}" : "no trace with spans from both services after 30 s");
+        Report(both.Traces > 0, "booking trace spans site and api", both.Traces > 0 ? $"{both.Traces} trace(s), e.g. {both.First}" : "no trace with spans from both services after 60 s");
     }
     catch (Exception e) { Report(false, "booking telemetry", e.Message); }
 }

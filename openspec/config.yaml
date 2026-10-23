@@ -6,8 +6,8 @@ context: |
   Demo repo for the conference talk "Observability is a Superpower" (16 Oct 2026,
   45 min, live demo). Published for attendees afterwards.
   Fixed talk constraints: .NET 10, Umbraco 17 LTS, .NET Aspire, OpenTelemetry,
-  Claude Code CLI with MCP: Aspire MCP for the local stage; Grafana MCP read-only for the
-  production stage, Grafana started on demand at go-live (ADR-0022).
+  Claude Code CLI with MCP: the repo registers Aspire MCP and Grafana MCP (read-only) (ADR-0022);
+  on stage Grafana runs all talk and the agent uses only the Grafana MCP (ADR-0033).
   Prod hosting (PO 2026-10-15): the local environment behind a Cloudflare tunnel; Grafana plays
   production. Azure dropped.
   No custom package: the three forms are fixed in the site (PO 2026-10-10).

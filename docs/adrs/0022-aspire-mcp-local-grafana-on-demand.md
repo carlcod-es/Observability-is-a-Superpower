@@ -3,6 +3,7 @@
 ## Status
 Accepted (2026-10-15, change `rework-aspire-first`, accepted by the PO after its section 6
 checks); supersedes the "one MCP server" and "Grafana runs from start-up" parts of ADR-0017.
+Stage split superseded for the talk by ADR-0033 (accepted 2026-10-23); repo setup unchanged.
 
 ## Context
 The PO's talk story (2026-10-15): fix bugs locally with Aspire only, then go live through the

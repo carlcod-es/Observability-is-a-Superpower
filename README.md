@@ -113,8 +113,9 @@ restarted.
 - Dashboards are provisioned on every `lgtm` start, under Dashboards > Demo (Demo site:
   http://localhost:3000/d/demo-site):
   - "Demo site": request rate and p95 duration per page type, 5xx share, error logs, form
-    submissions per minute by form and outcome ("Form submissions by outcome"). Click a p95
-    exemplar point to open its trace.
+    submissions per minute by form and outcome ("Form submissions by outcome"), event bookings
+    stored vs counted per minute ("Bookings: stored vs counted"). Click a p95 exemplar point to
+    open its trace.
   - "ASP.NET Core": community dashboard 19924; pick job `site`.
   - UI edits are not saved: change the JSON in `src/SuperPower.AppHost/grafana/dashboards/` and
     restart `lgtm`. Panels fill once the site has traffic.
@@ -229,6 +230,19 @@ Notes:
 - The Aspire MCP has no metrics tool; metrics come from Grafana.
 - The agent has no database tool and no write access to Grafana.
 
+## Match the talk's agent setup
+
+The talk ran Grafana (`lgtm`) from the start and gave the agent only `grafana`. The repo registers
+both servers and keeps `aspire` usable. To match the talk:
+
+1. Start the full environment, then Grafana, and wait for `grafana-mcp` to be running.
+2. Open Claude Code at the repo root, run `/mcp`, select `aspire` and choose Disable (saved for
+   this folder only).
+3. `claude mcp list` (or `/mcp`) now shows `aspire` disabled and `grafana` connected.
+
+In this setup the agent cannot restart resources; after a code change use Rebuild on the resource
+in the Aspire dashboard (Restart does not recompile).
+
 ## Stable ports and URLs
 
 Fixed ports are pinned in `launchSettings.json` files or the AppHost code; everything else
@@ -260,13 +274,18 @@ the notification subject and body.
 End-to-end smoke check (pages, form submissions, stored rows, the reference on the success page
 matching the stored row, the notification email in smtp4dev (full environment), Home trace with
 database spans and linked logs, provisioned dashboards, page-type label `acme.page_type`,
-`/assets` exclusion, booking count rising after a booking, `api` spans and the site-to-api booking
+`/assets` exclusion, booking count rising after a booking, counted-bookings metric
+(`acme_bookings_counted_total`) rising within 60 s, `api` spans and the site-to-api booking
 trace in Tempo; standalone: no booking count, booking still returns a reference):
 
 ```sh
 dotnet run tests/smoke/smoke.cs               # full environment, SQL Server
+dotnet run tests/smoke/smoke.cs -- running    # full environment that has already served pages
 dotnet run tests/smoke/smoke.cs -- standalone # site on its own, SQLite
 ```
+
+`-- running` skips the two first-load checks (Home database spans, no pre-start telemetry) and
+prints them as N/A.
 
 Run the full-environment check right after starting the AppHost, before loading any page: Home
 makes database calls only on its first load after start. The check adds test submissions to the

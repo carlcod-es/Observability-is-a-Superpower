@@ -57,14 +57,17 @@ runnable by attendees.
 - Booking service `api` (minimal API, ADR-0030) with Redis `cache` (ADR-0031) and RabbitMQ
   `queue` (ADR-0032): event pages read the booking count over HTTP; stored event bookings are
   counted through the queue. The site works without all three (2 s cap, fail-soft).
-- Agent: Claude Code CLI with two MCP servers (ADR-0022, PO 2026-10-15):
-  - Local stage: Aspire MCP over the Aspire dashboard; traces, structured logs, resource state
-    and console logs, read tools pre-approved; resource commands prompt every call. No metrics
-    (the presenter shows them in the dashboard).
-  - Production stage: Grafana MCP (read-only) over Grafana LGTM, fed by an OpenTelemetry
-    Collector alongside the Aspire dashboard; logs, traces and metrics. LGTM and its MCP server
-    are explicit-start resources, started on demand at go-live; LGTM holds only traces and logs
-    from then on (no replay); metric counters are cumulative.
+- Agent: Claude Code CLI. The repo registers two MCP servers (ADR-0022): Aspire MCP over the
+  Aspire dashboard (traces, structured logs, resource state, console logs; resource commands
+  prompt every call; no metrics) and Grafana MCP (read-only) over Grafana LGTM, fed by an
+  OpenTelemetry Collector alongside the Aspire dashboard (logs, traces, metrics). LGTM and its MCP
+  server are explicit-start resources. Metric counters are cumulative and reset on a service restart.
+- On stage (ADR-0033, PO 2026-10-22): Grafana runs from the morning for the whole talk; the agent
+  uses only the Grafana MCP in every act (Aspire MCP disabled per folder in the stage clone; README
+  explains how to match). The Aspire dashboard is the presenter's view. The agent cannot restart
+  services: it asks, the presenter rebuilds the resource from the Aspire dashboard. Go-live is the
+  tunnel and demo traffic only. Three acts: Act 1 personal data in logs, Act 2 load breaks
+  submissions, Act 3 booking processing failure (fail-soft, seen only in telemetry).
 - Prod hosting (PO 2026-10-15): the whole talk runs locally; "production" is the local
   environment exposed to attendees through a Cloudflare tunnel, with Grafana playing the
   production observability platform. Azure dropped.
@@ -119,6 +122,10 @@ runnable by attendees.
   Serilog console sink: logs leave the site only through OpenTelemetry.
 - `api` (ADR-0030): ServiceDefaults telemetry and log masking as the site; server and consumer
   spans tagged `acme.event.key` (event GUID only), log `Booking recorded for {EventKey}, count {Count}`.
+  Meter `Acme.Bookings`, counter `acme.bookings.counted` (no attributes; `Add(0)` at start so the first
+  booking shows in `increase()`) (ADR-0034). On processing failure: deliver span marked error with the
+  exception, error log `Booking update failed for {EventKey}`. Demo dashboard panel "Bookings: stored vs
+  counted" compares it with the site's stored bookings.
 
 ## Scope
 - Protect PII from the observability platform only. The database is out of scope;
