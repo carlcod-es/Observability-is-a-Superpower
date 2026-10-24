@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="Probe.AppHost/Probe.AppHost.csproj" />
-  <Project Path="Probe.Api/Probe.Api.csproj" />
-  <Project Path="Probe.Web/Probe.Web.csproj" />
-  <Project Path="../../src/SuperPower.ServiceDefaults/SuperPower.ServiceDefaults.csproj" />
-</Solution>

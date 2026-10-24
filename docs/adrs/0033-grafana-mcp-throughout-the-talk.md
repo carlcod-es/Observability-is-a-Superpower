@@ -20,7 +20,7 @@ match the talk with no disable step; the Aspire MCP becomes opt-in.
   and `site` and `api` wait for `collector`, so start-up telemetry reaches Grafana as well as the Aspire
   dashboard (the LGTM exporter has no retry). `grafana-mcp` waits for `lgtm`. The smoke check's
   pre-start check is removed.
-- Stage clone: Grafana runs from the morning's final AppHost start; Claude Code is opened after
+- On stage: Grafana runs from the morning's final AppHost start; Claude Code is opened after
   `grafana-mcp` is Running. The agent uses only `grafana` from the first act.
 - The stage agent instructions (`CLAUDE.md`) name only the Grafana MCP and tell the agent to
   ask the presenter for any restart; it must not restart services itself.
@@ -29,7 +29,7 @@ match the talk with no disable step; the Aspire MCP becomes opt-in.
 
 ## Alternatives
 - Keep `aspire` in `.mcp.json` and disable it per folder with `/mcp` (this ADR as first accepted,
-  PO 2026-10-22): a fresh clone does not match the talk and the stage clone needs a disable step;
+  PO 2026-10-22): a fresh clone does not match the talk and needs a disable step;
   replaced by the PO 2026-10-23.
 - Keep `aspire` registered and turn it off with `disabledMcpjsonServers` in `.claude/settings.json`:
   conflicts with `enableAllProjectMcpServers`, and settings lists merge across scopes, so a local

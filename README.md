@@ -306,3 +306,13 @@ gitignored):
 ```sh
 cloudflared tunnel run --token-file .cloudflared-token
 ```
+
+## Pending cleanup (maintainer)
+
+The talk's planning and agent workflow files are still in the repo. To remove them, run from the
+repo root, then delete this section:
+
+```sh
+git mv -f CLAUDE.learning.md CLAUDE.md
+git rm -r -q openspec .claude/commands .claude/agents .claude/skills docs/feature-requests docs/research PLANNING.md claude-stage.md docs/demo-setup.md docs/presenter/macos-performance.md docs/adrs/0011-*.md docs/adrs/0018-*.md docs/adrs/0020-*.md docs/adrs/0029-*.md
+```

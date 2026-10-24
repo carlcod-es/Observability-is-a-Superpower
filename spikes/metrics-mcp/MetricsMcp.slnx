@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="Metrics.AppHost/Metrics.AppHost.csproj" />
-  <Project Path="../aspire-probe/Probe.Api/Probe.Api.csproj" />
-  <Project Path="../aspire-probe/Probe.Web/Probe.Web.csproj" />
-  <Project Path="../../src/SuperPower.ServiceDefaults/SuperPower.ServiceDefaults.csproj" />
-</Solution>

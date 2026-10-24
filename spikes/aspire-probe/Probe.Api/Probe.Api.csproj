@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" />
-    <ProjectReference Include="..\..\..\src\SuperPower.ServiceDefaults\SuperPower.ServiceDefaults.csproj" />
-  </ItemGroup>
-
-</Project>

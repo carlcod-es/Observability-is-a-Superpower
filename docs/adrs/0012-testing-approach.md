@@ -39,5 +39,4 @@ the riskiest integration is startup (install, migrations, seeding) on two databa
   container start time and setup; candidate for a later change.
 
 ## Consequences
-- Regression risk on startup paths is covered by manual smoke checks before each demo branch
-  is cut.
+- Regression risk on startup paths is covered by manual smoke checks before each demo.

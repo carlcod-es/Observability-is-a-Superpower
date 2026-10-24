@@ -1,8 +1,6 @@
 # Presenter runthrough (private; contains demo answers)
 
-Fri 16 Oct 2026, 13:30-14:15 BST. Tracked on `main` in `docs/presenter/`; the stage clone's `demo` branch
-deletes it (see "Demo branch"), so the stage agent never sees it. Never copy into CLAUDE.md, PLANNING.md, openspec/
-or other docs/. All commands run from the stage clone root.
+Fri 16 Oct 2026, 13:30-14:15 BST. Never copy into CLAUDE.md or other docs/. All commands run from the repo root.
 
 ## Scripts
 
@@ -22,47 +20,10 @@ Burst output: one line per post (`302 ACME-nnnn` or `500`), then
 Fixed: every post returns 302. No failures: raise posts per round (`-- 5 16`).
 Every successful post is stored and sends an owner email to smtp4dev; a failed post sends none.
 
-## Database
-
-No local `sqlcmd`; use the one inside the SQL Server container. Run in the clone whose AppHost is running.
-
-Export the password (and port, for a GUI client) from the AppHost user secrets (zsh/bash):
-
-```sh
-export SQL_PASSWORD="$(dotnet user-secrets list --project src/SuperPower.AppHost | sed -n 's/^Parameters:sql-password = //p')"
-export SQL_PORT="$(dotnet user-secrets list --project src/SuperPower.AppHost | sed -n 's/^Resources:sql:tcp:port = //p')"
-```
-
-Connect (interactive; `GO` runs a batch, `exit` quits):
-
-```sh
-docker exec -it -e SQLCMDPASSWORD="$SQL_PASSWORD" oisp-sql \
-  /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -d umbraco -W
-```
-
-GUI client: `127.0.0.1,$SQL_PORT`, user `sa`, database `umbraco`, trust server certificate.
-
-Queries (`FormKey` ends `...01` Contact, `...02` Service enquiry, `...03` Event booking).
-Leave `FieldsJson` off screen: it holds what attendees typed.
-
-```sql
--- Latest submissions
-SELECT TOP 20 Id, ReferenceNumber, FormKey, SubmittedUtc FROM acmeFormSubmission ORDER BY Id DESC;
-
--- Count and last reference
-SELECT COUNT(*) AS Submissions, MAX(ReferenceNumber) AS LastReference FROM acmeFormSubmission;
-
--- Stored in the last 10 minutes, per form
-SELECT FormKey, COUNT(*) AS Submissions FROM acmeFormSubmission
-WHERE SubmittedUtc > DATEADD(minute, -10, SYSUTCDATETIME()) GROUP BY FormKey;
-
--- The unique index that rejects the duplicate reference
-SELECT name, is_unique FROM sys.indexes WHERE object_id = OBJECT_ID('acmeFormSubmission');
-```
 
 ## Planted problems (marked `// Demo Code : Act N`)
 
-`main` is committed in the fixed state. Set the initial state by hand in the stage clone from this list
+`main` is committed in the fixed state. Set the initial state by hand from this list
 (Morning step 7, after smoke #1), following the comment above each line.
 
 | Act | File | Line | Initial state | Fix on stage |
@@ -100,63 +61,17 @@ SELECT name, is_unique FROM sys.indexes WHERE object_id = OBJECT_ID('acmeFormSub
    `SetTag`); the trace links it to the site's `acme.forms.publish` span. The `api` Error logs are not on the
    Demo site dashboard (site only); the bookings panel is the only dashboard sign.
 
-One `demo` branch for stage (see "Demo branch"), no per-act branches. Fallback for an act = apply its fix by hand
-in the stage clone, Rebuild `site` (`api` for Act 3). Code changes never need a database reset.
-
-## Demo branch
-
-`demo` = `main` minus everything that tells the stage agent the planted problems or their fixes. Built in the
-stage clone only, never pushed, never merged into `main`. Rebuild (new clone) after any `main` change.
-
-Delete:
-- `docs/` (ADRs incl. ADR-0026 write lock and ADR-0028 redaction, `research/`, `feature-requests/`,
-  `presenter/`, `project-setup.md`, `demo-setup.md`; the dev repo keeps them)
-- `openspec/` (specs and archived changes describe the lock and the redaction)
-- `spikes/`
-- `PLANNING.md`
-- `README.md` (describes the redaction key, ADR-0028)
-- `.claude/agents/`, `.claude/commands/`, `.claude/skills/` (planning workflow; makes the agent role-play)
-
-Keep: `.claude/settings.json`, `.mcp.json`, `src/`, `tests/`, `banners/`, build files.
-
-Replace: `CLAUDE.md` with `claude-stage.md` (committed on `main` under that name so it is not loaded there;
-site summary, diagnose and verify from telemetry; no redaction processor, `Demo Code` or fix details).
-
-Decide: strip the explanatory lines under each `// Demo Code : Act N` (Act 2 says "Fix: take the lock"; Act 3 in
-`src/SuperPower.Api/BookingStoredConsumer.cs` names the property and the fix). Keep the Act 2 low-traffic
-fallback line either way.
-
-### Building the demo branch
-
-```sh
-cd ~/Work/Talks
-rm -rf stage
-git clone --depth 1 git@github.com:carlcod-es/Observability-is-a-Superpower.git ~/Work/Talks/stage
-cd ~/Work/Talks/stage
-git switch -c demo
-git rm -r -q docs openspec spikes PLANNING.md README.md .claude/agents .claude/commands .claude/skills
-git rm -q CLAUDE.md && git mv claude-stage.md CLAUDE.md
-git commit -a -q -m "demo: strip docs, planning and agent workflow"
-cp ~/Work/Talks/Observability-is-a-Superpower/.cloudflared-token .
-```
-
-Leave the code in the fixed state here: initial states are Morning step 7, after smoke #1.
-
-Check:
-- `ls` shows no `docs/`, `openspec/`, `spikes/`, `PLANNING.md`, `README.md`, `claude-stage.md`; `CLAUDE.md` starts
-  "# Rubber Duck Agency site"; `ls .claude` shows only `settings.json`.
-- `git branch` shows `* demo`; `git remote -v` points at the dev repo. Never `git push`.
-- `dotnet build SuperPower.slnx` succeeds.
+Fallback for an act = apply its fix by hand, Rebuild `site` (`api` for Act 3). Code changes never need a database reset.
 
 ## Cloudflare tunnel
 
 Public URL https://observability.carlcod.es/ -> the local site. Remotely managed tunnel: the hostname and
 origin service are set in Cloudflare Zero Trust (Networks > Tunnels), not in the repo.
 
-- Needs: `cloudflared` installed (`brew install cloudflared`), `.cloudflared-token` in the stage clone root
-  (copied in "Building the demo branch"; token from the Zero Trust tunnel page). The token is a credential:
+- Needs: `cloudflared` installed (`brew install cloudflared`), `.cloudflared-token` in the repo root
+  (gitignored; token from the Zero Trust tunnel page). The token is a credential:
   never on screen, never committed; rotate in Zero Trust if it leaks.
-- Start only after the AppHost is up and Home loads locally. In its own terminal, from the stage clone root:
+- Start only after the AppHost is up and Home loads locally. In its own terminal, from the repo root:
   `cloudflared tunnel run --token-file .cloudflared-token`
 - Up when the log shows "Registered tunnel connection" (normally 4). Check the public URL on the phone (mobile
   data, not venue Wi-Fi): Home loads, then a form page.
@@ -192,11 +107,11 @@ What exists to query:
   (error, with exception; deliver span marked error).
 
 ### Morning
-1. Stop the dev AppHost: `aspire stop` in the dev clone (frees ports 2525, 3000, 5290, 8091, 17210, 44368;
+1. Stop any running AppHost: `aspire stop` (frees ports 2525, 3000, 5290, 8091, 17210, 44368;
    5290 is `api`, fixed). The AppHost also runs `api`, `cache` (`oisp-cache`) and `queue` (`oisp-queue`);
    `site` does not wait for them.
-2. Clone: "Building the demo branch", including its checks. Leave the code in the fixed state for now.
-3. Clean up: reset the database, booking counts and queue (AppHost stopped; all clones share `oisp-sql-data`,
+2. Leave the code in the fixed state for now.
+3. Clean up: reset the database, booking counts and queue (AppHost stopped; every clone shares `oisp-sql-data`,
    `oisp-cache-data` and the persistent containers, so a new clone is not enough). `-v` on `oisp-queue` removes
    its anonymous volume (queued messages):
    ```sh
@@ -221,20 +136,19 @@ What exists to query:
    - Expected: `ALL CHECKS PASSED`, including `counted bookings metric increases`, no N/A line. Any FAIL is a real problem. The check
      stores test submissions, so the first stage reference is not ACME-0001.
 6. Tunnel check on the phone, then stop the tunnel ("Cloudflare tunnel").
-7. Initial state: in the stage clone, set each line in the "Planted problems" table to its initial state.
-   Then `git commit -a -q --amend --no-edit`, so `git status` and `git diff` show nothing for the agent to read.
+7. Initial state: set each line in the "Planted problems" table to its initial state.
 8. Restart for the talk: `aspire stop`; clear the smoke check's booking count and queue (`docker rm -f oisp-cache`,
    `docker rm -f -v oisp-queue`, `docker volume rm oisp-cache-data`); then the build and `aspire start`
    commands from step 4 (builds the initial state). This clears Grafana and the smoke traffic and makes the next
    Home load hit the database again. Event pages show no booking count; `booking-stored` is empty.
 9. Wait until all resources are Running, including `lgtm` and `grafana-mcp`. Grafana runs from here to the
    end of the talk. Do not load a page until "Local X-ray"; no event bookings until Act 3.
-10. Claude Code in the stage clone, default permission mode, `/fast` on. The agent never starts, stops or
-    restarts anything (`claude-stage.md`); deny any `aspire` prompt. Check: `claude mcp list` shows only
+10. Claude Code at the repo root, default permission mode, `/fast` on. The agent never starts, stops or
+    restarts anything (`CLAUDE.md`); deny any `aspire` prompt. Check: `claude mcp list` shows only
     `grafana`, connected (the repo does not register `aspire`). `grafana` failed: `/mcp` -> `grafana` ->
     Reconnect.
 11. Tabs: site, Aspire (Resources, Structured logs, Traces), Grafana (Demo site dashboard), smtp4dev. VSCodium on
-    the stage clone. Fallback videos ready.
+    the repo. Fallback videos ready.
 
 ### 1. Local X-ray (5 min)
 1. Submit a Service enquiry -> "Thank you, we'll be in touch. Your reference is ACME-nnnn."
@@ -399,7 +313,7 @@ Optional smoke #2 (if time; good-state proof): `dotnet run tests/smoke/smoke.cs 
 
 ### After the talk
 1. Stop the tunnel and `traffic.cs`.
-2. Stop the AppHost. Delete the stage clone, its SQL Server, Redis and RabbitMQ containers and volumes:
+2. Stop the AppHost. Delete the SQL Server, Redis and RabbitMQ containers and volumes:
 
 ```sh
 docker rm -f oisp-sql
@@ -407,4 +321,32 @@ docker volume rm oisp-sql-data
 docker rm -f oisp-cache
 docker rm -f -v oisp-queue
 docker volume rm oisp-cache-data
+```
+
+
+## Database
+
+To get access to the server, the aspire dashboard should be able to tell you the credentials under the properties of the container.
+
+You can also export the password (and port, for a GUI client) from the AppHost user secrets (zsh/bash):
+
+```sh
+export SQL_PASSWORD="$(dotnet user-secrets list --project src/SuperPower.AppHost | sed -n 's/^Parameters:sql-password = //p')"
+export SQL_PORT="$(dotnet user-secrets list --project src/SuperPower.AppHost | sed -n 's/^Resources:sql:tcp:port = //p')"
+```
+### SQL queries
+
+```sql
+-- Latest submissions
+SELECT TOP 20 Id, ReferenceNumber, FormKey, SubmittedUtc FROM acmeFormSubmission ORDER BY Id DESC;
+
+-- Count and last reference
+SELECT COUNT(*) AS Submissions, MAX(ReferenceNumber) AS LastReference FROM acmeFormSubmission;
+
+-- Stored in the last 10 minutes, per form
+SELECT FormKey, COUNT(*) AS Submissions FROM acmeFormSubmission
+WHERE SubmittedUtc > DATEADD(minute, -10, SYSUTCDATETIME()) GROUP BY FormKey;
+
+-- The unique index that rejects the duplicate reference
+SELECT name, is_unique FROM sys.indexes WHERE object_id = OBJECT_ID('acmeFormSubmission');
 ```
