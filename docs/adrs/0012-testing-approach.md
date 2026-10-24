@@ -1,8 +1,7 @@
 # ADR-0012: Testing approach
 
 ## Status
-Accepted (2026-10-07; revised 2026-10-13 — ADR-0016 removed the forms package, so all tests
-live in `tests/SuperPower.Web.Tests`; amended 2026-10-14 — smoke check tooling, PO)
+Accepted (2026-10-07).
 
 ## Context
 Days to the talk. The riskiest logic in this change is validation and submission mapping;

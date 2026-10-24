@@ -1,11 +1,8 @@
 # ADR-0033: Grafana from the start of the talk, Grafana MCP as the agent's only stage source
 
 ## Status
-Accepted (2026-10-23, change `extend-demo`). Deviation: the presenter applies a fix with Rebuild, not
-Restart (Aspire's Restart does not recompile). Supersedes the stage split of ADR-0022 for the talk.
-Amended 2026-10-23 (PO): `aspire` removed from `.mcp.json`, opt-in via the README; supersedes
-ADR-0022's two-server registration. Amended 2026-10-23 (PO): `lgtm` starts with the AppHost and the
-collector waits for it; supersedes ADR-0022's explicit start.
+Accepted (2026-10-23). Supersedes ADR-0022's stage split, two-server registration and explicit
+`lgtm` start.
 
 ## Context
 ADR-0022 gave the agent the Aspire MCP before go-live and the Grafana MCP after, so the Act 1
@@ -25,7 +22,7 @@ match the talk with no disable step; the Aspire MCP becomes opt-in.
   pre-start check is removed.
 - Stage clone: Grafana runs from the morning's final AppHost start; Claude Code is opened after
   `grafana-mcp` is Running. The agent uses only `grafana` from the first act.
-- The stage agent instructions (`claude-stage.md`) name only the Grafana MCP and tell the agent to
+- The stage agent instructions (`CLAUDE.md`) name only the Grafana MCP and tell the agent to
   ask the presenter for any restart; it must not restart services itself.
 - README section "Enable the Aspire MCP": `claude mcp add --scope local aspire -- aspire agent mcp`,
   or add the block back into `.mcp.json`.

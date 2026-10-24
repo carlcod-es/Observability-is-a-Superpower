@@ -1,8 +1,7 @@
 # ADR-0010: Local mail path and fault injection
 
 ## Status
-Accepted (2026-10-07). Toxiproxy and the Slow / Break / Heal commands superseded by ADR-0025
-(2026-10-15); smtp4dev decision still holds.
+Accepted (2026-10-07). Partly superseded by ADR-0025 (Toxiproxy and its commands removed; smtp4dev stands).
 
 ## Context
 Spec `local-environment` requires a local mail catcher and Slow / Break / Heal controls on
@@ -36,4 +35,4 @@ replies per message), so a downstream latency toxic multiplies per message.
 ## Consequences
 - No external mail can leave the machine.
 - Fixed port 2525 must be free on the presenter's machine.
-- Resource commands are also callable by the agent through MCP; ADR-0011 requires approval.
+- Resource commands are also callable by the agent through MCP; each call requires approval.

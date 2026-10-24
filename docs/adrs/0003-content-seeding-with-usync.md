@@ -1,7 +1,7 @@
 # ADR-0003: Site content seeded by uSync first-boot import
 
 ## Status
-Accepted (2026-10-07; direction confirmed by the Product Owner)
+Accepted (2026-10-07).
 
 ## Context
 The site must populate itself on an empty database (fresh SQL container, SQLite clone, first
@@ -34,6 +34,6 @@ first-boot import.
 ## Consequences
 - A database that has booted once with the flag off never imports; reset by deleting the
   SQLite file or the SQL data volume. Documented in the README.
-- uSync import failures are logged and boot continues; the startup check in the tasks verifies
-  that pages exist.
+- uSync import failures are logged and boot continues; the smoke check verifies that pages
+  exist.
 - First boot on SQL Server shows a burst of database spans in telemetry.

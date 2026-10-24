@@ -1,12 +1,11 @@
 # ADR-0023: Demo dashboards as JSON in the repo, provisioned into Grafana LGTM on start
 
 ## Status
-Accepted (2026-10-15, change `add-demo-dashboard`, PO sign-off). Closes FR-0001.
+Accepted (2026-10-15).
 
 ## Context
-Grafana LGTM (`grafana/otel-lgtm:0.36.0`, Grafana 13.2.3) plays production and is started on
-demand (ADR-0022). Dashboards live inside the container and are lost whenever it is recreated
-(every AppHost restart). `spike-grafana-dashboard` `findings.md`: a custom dashboard authored as
+Grafana LGTM (`grafana/otel-lgtm:0.36.0`, Grafana 13.2.3) plays production (ADR-0033). Dashboards live inside the container and are lost whenever it is recreated
+(every AppHost restart). Tested: a custom dashboard authored as
 JSON rendered on first load; community dashboard 19924 works unchanged against the site's
 built-in ASP.NET Core metrics; the image provisions fixed datasource UIDs (`prometheus`, `loki`,
 `tempo`); the LGTM Prometheus datasource sets `timeInterval: 60s`, so `$__rate_interval` is
@@ -22,24 +21,23 @@ PO 2026-10-14: provision 19924 too, with `${DS_PROMETHEUS}` replaced by the lite
 - Demo dashboard: request rate and p95 duration per page type (label from ADR-0024), 5xx share
   with an `or 0 *` guard for "no data", Loki error-level logs for `service_name="site"`; fixed
   `[1m]` rate windows; exemplars on the p95 query; literal datasource UIDs; window `now-15m`,
-  refresh 10 s. Form panel (added 2026-10-15, `add-form-emails`): submissions per minute by
+  refresh 10 s. Form panel: submissions per minute by
   form and outcome from `acme_forms_submissions_total` (ADR-0027).
 - Provisioning: a provider file `src/SuperPower.AppHost/grafana/acme-dashboards.yaml`
   (folder "Demo", `allowUiUpdates: false`) and the dashboards directory bind-mounted read-only
   into the `lgtm` container by the AppHost. Load on start only; no live reload.
-- Fallback if the mount does not load (verified first in apply): on the `lgtm`
-  `ResourceReadyEvent` the AppHost posts each file to `/api/dashboards/db` with
-  `overwrite: true`.
+- The mount loads; no AppHost import fallback (posting each file to `/api/dashboards/db` on the
+  `lgtm` `ResourceReadyEvent`) is needed.
 
 ## Alternatives
-- Import by hand from the files after each start (spike route): a step to forget on stage and
-  for attendees; FR-0001 rejects it.
-- AppHost import as the primary route: more code than two mounts; kept as the fallback.
+- Import by hand from the files after each start: a step to forget on stage and for attendees;
+  rejected.
+- AppHost import as the primary route: more code than two mounts; rejected.
 - Custom image with dashboards baked in: a build step and an image to maintain; no gain.
 - Community dashboards only (19924, 19925): generic HTTP health, no page types, no logs, no
   trace links.
 - Building panels in the Grafana UI and exporting: needs the PO's time; JSON-first took one
-  iteration in the spike.
+  iteration.
 
 ## Consequences
 - Dashboards exist on every go-live, for presenter and attendees, from repo files only. Edits in

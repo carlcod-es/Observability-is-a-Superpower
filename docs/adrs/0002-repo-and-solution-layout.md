@@ -1,8 +1,7 @@
 # ADR-0002: Repo and solution layout
 
 ## Status
-Accepted (2026-10-07; revised 2026-10-13 — ADR-0016 removed the forms package, so
-`src/SuperPower.Forms` and `tests/SuperPower.Forms.Tests` are gone)
+Accepted (2026-10-07).
 
 ## Context
 The site exists as `src/SuperPower.Web` with `src/SuperPower.slnx` and a

@@ -1,47 +1,28 @@
-# ADR-0019: Self-hosted open-licence webfonts in the prototype
+# ADR-0019: Self-hosted open-licence webfonts
 
 ## Status
-Accepted (2026-10-14); prototype font path amended by ADR-0020 (2026-10-14); prototype removed (ADR-0021), site outcome below stands
+Accepted (2026-10-14).
 
 ## Context
-The PO rebranded the prototype to Rubber Duck Consulting (the Umbraco demo site
-later became Rubber Duck Agency) and chose Baloo 2 (headings) + Nunito (body), both SIL Open Font License.
-ADR-0018 specified a system font stack; the PO overrides that for the prototype. Spec
-`site-prototype` "Minimal page dependencies" exists so page-request telemetry contains only the
-site's own work: fonts must therefore be served from the site's own files, never a CDN. The repo
-is published for attendees, so licences must permit redistribution.
+The site's brand uses Baloo 2 (headings) and Nunito (body), both SIL Open Font License.
+Page-request telemetry should contain only the site's own work, so fonts must be served from
+the site's own files, never a CDN. The repo is published for attendees, so licences must
+permit redistribution.
 
 ## Decision
-- Baloo 2 and Nunito as `@fontsource/baloo-2` and `@fontsource/nunito` dev dependencies in
-  `prototype/package.json` (latin subset WOFF2, OFL licence files included in the packages).
-- Eleventy passthrough copies the needed WOFF2 files to `_site/fonts/`; `site.css` declares the
-  `@font-face` rules by hand (one stylesheet stays the deliverable, design D3) with
-  `font-display: swap` and the previous system stack as fallback.
-- No binary font files committed to the repo; they arrive via `npm install` like Eleventy itself.
-- Umbraco integration later copies the built `fonts/` output and the `@font-face` CSS as static
-  site assets.
+- The latin-subset WOFF2 files of Baloo 2 and Nunito and their OFL licences are committed under
+  `src/SuperPower.Web/wwwroot/css/fonts/` (the site has no npm build).
+- `site.css` declares the `@font-face` rules by hand with `font-display: swap` and a system font
+  stack as fallback.
+- Served from `/css/fonts/`: `/css` is already excluded from telemetry (ADR-0008), so font
+  requests add no traces.
 
 ## Alternatives
-- Keep the system font stack (ADR-0018): no payload, but the PO wants the brand typography;
-  overridden by the PO.
-- Google Fonts CDN: violates "no externally hosted fonts" and leaks visitor requests to a third
-  party; rejected.
-- Commit downloaded WOFF2 binaries: works, but adds binaries to the repo and hand-managed
-  licence copies; npm packages version and licence them cleanly; rejected.
+- System font stack: no payload, but no brand typography; rejected.
+- Google Fonts CDN: an external resource in every page load and visitor requests leaked to a
+  third party; rejected.
+- Fonts from npm packages (`@fontsource/*`): needs a Node build the site does not have; rejected.
 
 ## Consequences
-- ADR-0018's "system font stack" point is superseded for typography; the single-stylesheet and
-  no-preprocessor decisions stand.
 - Page weight grows by the WOFF2 files (~100-200 KB total, latin subsets only).
-- Attendees need nothing new: `npm install` already required for Eleventy.
-
-## Outcome in the Umbraco site (change `add-demo-foundation` task 7.1, 2026-10-14)
-- The site has no npm build, so the three WOFF2 files and their OFL licences are committed under
-  `src/SuperPower.Web/wwwroot/css/fonts/`. "No binary font files committed" applies to
-  `prototype/` only.
-- Served from `/css/fonts/`, not `/fonts/`: `/css` is already excluded from telemetry
-  (ADR-0008), so font requests add no traces.
-
-## Amendment (ADR-0020, 2026-10-14)
-- The prototype passthrough-copies the WOFF2 files to `css/fonts/`, so the shared stylesheet
-  declares `/css/fonts/` URLs that work in both the prototype and the site.
+- Binary font files and their licence copies live in the repo.

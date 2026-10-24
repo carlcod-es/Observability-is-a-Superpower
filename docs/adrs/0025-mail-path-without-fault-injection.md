@@ -1,11 +1,10 @@
 # ADR-0025: Mail path without fault injection
 
 ## Status
-Accepted (2026-10-15, PO). Supersedes the Toxiproxy parts of ADR-0010.
+Accepted (2026-10-15). Supersedes the Toxiproxy parts of ADR-0010.
 
 ## Context
-The acts were simplified the day before the talk (PO 2026-10-15). No act injects mail faults;
-the production-stage problem comes from load (`add-form-emails`). Toxiproxy, its proxy set-up
+No demo act injects mail faults; the production-stage problem comes from load. Toxiproxy, its proxy set-up
 and the Slow / Break / Heal commands have no remaining use. The mail catcher stays: the
 presenter shows notification emails in its inbox.
 

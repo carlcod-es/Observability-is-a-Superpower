@@ -1,21 +1,16 @@
 # ADR-0031: Booking count cache
 
 ## Status
-Accepted (2026-10-22, `add-booking-api`). Proposed 2026-10-21. No deviations. Image `redis:8.6`
-(package default). Generated password stable across AppHost restarts (`add-booking-api` task 1.5).
-A failed Redis call marks the `api` server span Error; the Redis client span itself carries no
-Error status (instrumentation behaviour, `add-booking-api` task 4.2).
+Accepted (2026-10-22).
 
 ## Context
 The booking service (ADR-0030) keeps a count per event in its own store, and the cache calls
-must show in traces (spec `event-booking-count`, "Booking service telemetry"). Counts survive
-environment restarts and reset with the database (spec `local-environment`, "One-command
-start"). Packages already in the Aspire 13.6.1 line used by the AppHost (ADR-0001).
+must show in traces. Counts survive environment restarts and reset with the database. Packages already in the Aspire 13.6.1 line used by the AppHost (ADR-0001).
 
 ## Decision
 - Redis via `Aspire.Hosting.Redis` 13.6.1 (AppHost): `AddRedis("cache")`, container
   `oisp-cache`, data volume `oisp-cache-data`, `ContainerLifetime.Persistent` (as `oisp-sql`,
-  ADR-0009). Image tag: the package default.
+  ADR-0009). Image tag: the package default (`redis:8.6`).
 - Client via `Aspire.StackExchange.Redis` 13.6.1 in `api` only: `AddRedisClient("cache")`,
   tracing on (package default), so each command is a span on the `api` resource.
 - Keys `event:{eventKey}:bookings`; `INCR` per `booking-stored` message (ADR-0032), `GET` on
@@ -33,10 +28,11 @@ start"). Packages already in the Aspire 13.6.1 line used by the AppHost (ADR-000
 
 ## Consequences
 - Two new packages under central package management.
-- Database reset in the presenter runthrough also removes `oisp-cache` and `oisp-cache-data`.
+- Database reset also removes `oisp-cache` and `oisp-cache-data`.
 - Redis persistence snapshots on an interval: counts from the last seconds before a hard stop
   can be lost; accepted.
 - StackExchange.Redis spans are collected by a profiler and flushed on an interval, so they
   can reach the dashboard a few seconds after the request spans.
-- Generated cache password must stay stable across restarts of the persistent container
-  (verified in `add-booking-api` tasks).
+- Generated cache password stays stable across restarts of the persistent container (verified).
+- A failed Redis call marks the `api` server span Error; the Redis client span itself carries no
+  Error status (instrumentation behaviour).

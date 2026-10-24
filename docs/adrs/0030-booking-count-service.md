@@ -1,25 +1,20 @@
 # ADR-0030: Booking count service
 
 ## Status
-Accepted (2026-10-22, `add-booking-api`). Proposed 2026-10-21; revised 2026-10-21: bookings counted
-through the queue, ADR-0032. Deviation (PO 2026-10-22): the site wraps the publish in its own span
-`acme.forms.publish` (Acme.Forms source, ADR-0027), Error on failure, because a publish that fails
-before RabbitMQ.Client starts its span left no span in the trace (`add-booking-api` task 4.2).
-`api` keeps a launch profile on http://localhost:5290 (local only, no external endpoint).
+Accepted (2026-10-22).
 
 ## Context
-Every span comes from `site`; SQL Server and smtp4dev show only as uninstrumented peers
-(FR-0006). The PO (2026-10-21) wants a website -> API -> cache path so traces cross services
-and problems can be hidden deeper than the site. Feature chosen by the PO: a booking count on
-event pages (spec `event-booking-count`). The site must keep working when the service fails
-(PO 2026-10-21). The site also runs alone on SQLite with no AppHost (spec `local-environment`,
-"File-based database mode"). ServiceDefaults (ADR-0008, ADR-0028) already gives any .NET
+Every span comes from `site`; SQL Server and smtp4dev show only as uninstrumented peers. A
+website -> API -> cache path lets traces cross services and hides problems deeper than the site.
+Feature: a booking count on event pages. The site must keep working when the service fails. The
+site also runs alone on SQLite with no AppHost. ServiceDefaults (ADR-0008, ADR-0028) already gives any .NET
 project OTLP export, HttpClient service discovery and resilience, and log redaction.
 
 ## Decision
 - New ASP.NET Core minimal API project `src/SuperPower.Api` (.NET 10), Aspire resource `api`,
   referencing `SuperPower.ServiceDefaults` (`AddServiceDefaults`, `MapDefaultEndpoints`). HTTP
-  only, no auth (local, not exposed through the tunnel).
+  only, no auth (local, not exposed through the tunnel). Launch profile on
+  http://localhost:5290; no external endpoint.
 - Read path, HTTP (event key = Umbraco content key, a GUID):
   `GET /events/{eventKey:guid}/bookings` -> `200 {"count": n}`; `n = 0` when no entry.
 - Write path, queue (ADR-0032): a hosted consumer in `api` takes `booking-stored` messages and
@@ -35,7 +30,8 @@ project OTLP export, HttpClient service discovery and resilience, and log redact
   the submission is stored and before the owner notification (ADR-0027 order otherwise
   unchanged). The AppHost does not make `site` wait for `api` or the queue.
 - Telemetry: no new ActivitySource or Meter in the site; one span `acme.forms.publish` on the
-  existing `Acme.Forms` source around the publish (tag `acme.event.key`, Error on failure). HttpClient spans and W3C propagation
+  existing `Acme.Forms` source around the publish (tag `acme.event.key`, Error on failure), so a
+  publish that fails before RabbitMQ.Client starts its own span still shows in the trace. HttpClient spans and W3C propagation
   (ServiceDefaults) link the read; RabbitMQ client spans link the write (ADR-0032). `api`
   emits ASP.NET Core server spans and metrics, tags its server span and its message-handling
   span `acme.event.key`, and logs `Booking recorded for {EventKey}, count {Count}` per message.

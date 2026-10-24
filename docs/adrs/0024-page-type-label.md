@@ -1,13 +1,13 @@
 # ADR-0024: Page-type label on request metrics and spans
 
 ## Status
-Accepted (2026-10-15, change `add-demo-dashboard`, PO sign-off). Closes FR-0003.
+Accepted (2026-10-15).
 
 ## Context
 Umbraco serves every content page through one catch-all route, so the ASP.NET Core
 `http.server.request.duration` metric has no useful `http.route`: Home cannot be separated
-from other pages, and form posts share one series (`rework-aspire-first` `verification.md` F1).
-The demo dashboard (ADR-0023) and the agent (Grafana MCP, ADR-0022) need per-page rate and
+from other pages, and form posts share one series.
+The demo dashboard (ADR-0023) and the agent (Grafana MCP, ADR-0033) need per-page rate and
 latency from metrics. The label must stay low-cardinality and free of personal data.
 
 ## Decision
@@ -25,12 +25,12 @@ latency from metrics. The label must stay low-cardinality and free of personal d
 ## Alternatives
 - Overwrite `http.route` with the page type: breaks the semantic convention and the community
   dashboard's route panels.
-- Tag the URL path: unbounded cardinality, can carry query strings; FR-0003 forbids it.
+- Tag the URL path: unbounded cardinality, can carry query strings; rejected.
 - Page name or key instead of type: grows with content and splits single pages; the PO chose
   page type (2026-10-15).
 - Umbraco routing notification: runs mid-routing and needs the HTTP context accessor; the
   middleware sees the final result in one place.
-- Per-page durations from traces only: sampled, no dashboard rate panel; FR-0003 rejects it.
+- Per-page durations from traces only: sampled, no dashboard rate panel; rejected.
 
 ## Consequences
 - Request rate and duration can be split by page type in Grafana and queried by the agent.

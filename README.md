@@ -5,8 +5,6 @@ Vision". Local Umbraco site with .NET Aspire, OpenTelemetry and read-only agent 
 telemetry over MCP.
 
 - How the repo, local environment, data and telemetry are set up: `docs/project-setup.md`.
-- Fresh environment before a demo (database reset, smoke check, tunnel): `docs/demo-setup.md`.
-- The talk's act-by-act runthrough: `docs/presenter/`.
 - Decisions and their reasons: `docs/adrs/`.
 
 ## Prerequisites
@@ -53,16 +51,11 @@ docker pull rabbitmq:4.3-management
    the request-duration metric (Metrics > `site` > `http.server.request.duration`). The form post
    trace has an `acme.forms.submit` span with a child `acme.forms.notify`. Form field values never
    appear in telemetry.
-6. Optional: [enable the Aspire MCP](#enable-the-aspire-mcp) and ask Claude Code, for example,
-   "show the latest trace for the Home page and its logs".
-7. Go live: the [demo traffic](#demo-traffic) and the [submission burst](#submission-burst)
-   (Grafana is already running, see [Grafana](#grafana)). Open Dashboards > Demo > Demo site
+6. Start the [demo traffic](#demo-traffic) and run the [submission burst](#submission-burst). Open
+   the [Grafana](#grafana) dashboard Dashboards > Demo > Demo site
    (http://localhost:3000/d/demo-site); the "Form submissions by outcome" panel follows the burst.
-8. Ask Claude Code a metrics question through Grafana (see
-   [Connecting Claude Code](#connecting-claude-code)), for example "how long do requests to the
-   Home page take, from metrics?".
-9. Optional: look at the stored submissions ([Connect to the database](#connect-to-the-database));
-   run the [tests](#tests).
+7. Ask Claude Code about the telemetry (see [Connecting Claude Code](#connecting-claude-code)),
+   for example "how long do requests to the Home page take, from metrics?".
 
 ## Run the full environment
 
@@ -94,7 +87,7 @@ runs.
 
 ## Grafana
 
-Grafana LGTM (the production-stage platform, ADR-0022) starts with the AppHost. The Collector waits
+Grafana LGTM (playing the production observability platform) starts with the AppHost. The Collector waits
 for it, so start-up telemetry reaches Grafana (ADR-0033). It is up in about 15 s with the image
 pulled (see "Pre-pull the container images"; a first start without it is slow).
 
@@ -119,8 +112,7 @@ dotnet run tests/traffic/traffic.cs                       # optional: -- <site-u
 ```
 
 Default site URL `https://localhost:44368`. GET requests only, about one page per second; never
-posts a form. Prints `requests=<n> failures=<n>` each minute. Stop with Ctrl+C. Start it at
-go-live; earlier it only clutters the local traces.
+posts a form. Prints `requests=<n> failures=<n>` each minute. Stop with Ctrl+C.
 
 ### Submission burst
 
@@ -132,8 +124,7 @@ Default site URL `https://localhost:44368`, 50 submissions, 10 in parallel. Post
 concurrently, round-robin over Contact, Service enquiry and Event booking, with made-up data
 (`Burst Visitor <n>`, `burst<n>@example.com`). These are real submissions: each stores a row and
 sends a notification email to smtp4dev. Prints `ok=<n> failed=<n>`, the references, the distinct
-reference count and any failures; exit code 1 on any failure. Run it after go-live to load the
-production stage.
+reference count and any failures; exit code 1 on any failure.
 
 ## Run the site on its own (SQLite)
 
@@ -198,35 +189,24 @@ the raw entries are in `src/SuperPower.Web/umbraco/Logs/`.
 
 ## Connecting Claude Code
 
-`.mcp.json` registers only `grafana`, the talk's setup. `.claude/settings.json` enables it and
-pre-approves its tools, plus the Aspire MCP read tools for when that is
-[enabled](#enable-the-aspire-mcp).
-
 | Server | Transport | Gives the agent |
 |---|---|---|
-| `grafana` | http://localhost:8091/mcp (Grafana MCP container, read-only) | Traces, logs and metrics from Grafana |
-| `aspire` (opt-in, see [Enable the Aspire MCP](#enable-the-aspire-mcp)) | stdio, `aspire agent mcp` (Aspire CLI on PATH) | Resource state, console logs, structured logs and traces from the Aspire dashboard; resource commands |
+| `grafana` (registered in `.mcp.json`) | http://localhost:8091/mcp (Grafana MCP container, read-only) | Traces, logs and metrics from Grafana |
+| `aspire` (opt-in, below) | stdio, `aspire agent mcp` (Aspire CLI on PATH) | Resource state, console logs, structured logs and traces from the Aspire dashboard; resource commands; no metrics |
 
 1. Start the full environment.
 2. Open Claude Code at the repo root (trust the folder if asked).
-3. `/mcp` shows `grafana` connected. (If Claude Code was opened before `grafana-mcp` was Running, reconnect it
-   in `/mcp`.)
+3. `/mcp` shows `grafana` connected. If Claude Code was opened before `grafana-mcp` was Running,
+   reconnect it in `/mcp`.
 4. Ask for telemetry, for example "show the latest trace for the Home page and its logs".
 
-Notes:
+`.claude/settings.json` pre-approves all `grafana` tools and the `aspire` read tools;
+`execute_resource_command` prompts on each call. The agent has no database tool and no write
+access to Grafana.
 
-- Pre-approved: all `grafana` tools, and the Aspire read tools once `aspire` is enabled.
-- With `aspire` enabled: several AppHosts live under the repo (`spikes/`), so the agent must call
-  `select_apphost` first (pre-approved); `execute_resource_command` is not pre-approved, Claude
-  Code prompts on each call; there is no metrics tool, metrics come from Grafana.
-- The agent has no database tool and no write access to Grafana.
+### Enable the Aspire MCP
 
-## Enable the Aspire MCP
-
-The talk ran Grafana (`lgtm`) from the start and gave the agent only `grafana`, which is what the
-repo registers. The Aspire MCP (resource state, console logs, structured logs and traces from the
-Aspire dashboard; no `lgtm` needed; no metrics) is optional. To add it for yourself, at the repo
-root with the Aspire CLI on PATH:
+At the repo root with the Aspire CLI on PATH:
 
 ```bash
 claude mcp add --scope local aspire -- aspire agent mcp
@@ -258,7 +238,6 @@ Fixed ports are pinned in `launchSettings.json` files or the AppHost code; every
 | Grafana | http://localhost:3000 (admin/admin) | AppHost code (ADR-0017) |
 | Grafana MCP | http://localhost:8091/mcp | AppHost code (ADR-0017) |
 | SMTP (site -> smtp4dev) | localhost:2525 | AppHost code (ADR-0025) |
-| Public site (Cloudflare tunnel) | https://observability.carlcod.es/ | Cloudflare; origin is the local site |
 
 Ports 3000, 8091 and 2525 must be free (the AppHost binds them at start); 3000 often clashes with Node dev servers.
 
@@ -271,12 +250,7 @@ dotnet test
 Unit tests for form validation, stored field values, the event date rules, the reference format and
 the notification subject and body.
 
-End-to-end smoke check (pages, form submissions, stored rows, the reference on the success page
-matching the stored row, the notification email in smtp4dev (full environment), Home trace with
-database spans and linked logs, provisioned dashboards, page-type label `acme.page_type`,
-`/assets` exclusion, booking count rising after a booking, counted-bookings metric
-(`acme_bookings_counted_total`) rising within 60 s, `api` spans and the site-to-api booking
-trace in Tempo; standalone: no booking count, booking still returns a reference):
+End-to-end smoke check of pages, forms, stored rows, emails, traces, metrics and dashboards:
 
 ```sh
 dotnet run tests/smoke/smoke.cs               # full environment, SQL Server
@@ -294,13 +268,12 @@ database.
 
 Simulated users request the ten public pages (GET only, no form submissions) for a fixed time,
 then report requests, failures and response times (min, avg, p50, p95, p99, max) per page and in
-total. Targets the public URL by default, so the full environment and the Cloudflare tunnel must
-be running.
+total. The default `--base` is the talk's public URL; pass the local site instead:
 
 ```sh
-node tests/load/load-test.mjs --label before
-# make the change, restart the site
-node tests/load/load-test.mjs --label after --compare tests/load/results/<before-run-id>.json
+node tests/load/load-test.mjs --base http://localhost:21258 --label before
+# make the change, rebuild the site
+node tests/load/load-test.mjs --base http://localhost:21258 --label after --compare tests/load/results/<before-run-id>.json
 ```
 
 | Option | Default | Meaning |
@@ -311,7 +284,7 @@ node tests/load/load-test.mjs --label after --compare tests/load/results/<before
 | `--ramp` | 10 | Seconds over which users start |
 | `--seed` | 1 | Page order per user; same seed and options give the same request sequence |
 | `--timeout` | 30000 | Per-request timeout in ms; a timeout counts as a failure |
-| `--base` | `https://observability.carlcod.es` | Site root; `http://localhost:21258` tests the local site without the tunnel |
+| `--base` | `https://observability.carlcod.es` | Site root |
 | `--compare` | - | Earlier result `.json`; adds before → after per page (avg, p50, p95, failed) |
 
 Each run writes `tests/load/results/<run-id>.json` (input for `--compare`) and `<run-id>.md`
@@ -323,17 +296,13 @@ range. Requests carry `User-Agent: SuperPower-LoadTest/1.0 (run <run-id>)`.
 - Timings vary by about ±30% per page between identical short runs. Compare the TOTAL row and
   p95 from runs of 60 s or more.
 
-## Cloudflare tunnel (presenter, before the demo)
+## Public tunnel (optional)
 
-The public URL above is served by a `cloudflared` tunnel from the presenter's machine to the
-local site. Put the tunnel token in `.cloudflared-token` at the repo root (gitignored; token
-from the Cloudflare Zero Trust tunnel page). Start the tunnel manually before the talk, after
-the site is running (same command on every OS; full order in `docs/demo-setup.md`):
+The talk exposed the local site to attendees through a Cloudflare tunnel, with Grafana playing the
+production observability platform. To do the same, create your own tunnel to
+`https://localhost:44368` and keep its token out of the repo (`.cloudflared-token` is
+gitignored):
 
 ```sh
 cloudflared tunnel run --token-file .cloudflared-token
 ```
-
-The token file is a credential (it lets anyone serve content on the public hostname). Never
-commit it, and keep the token out of shell history and screen captures; rotate it in
-Cloudflare Zero Trust if it leaks. Smoke test the public URL the morning of the talk.

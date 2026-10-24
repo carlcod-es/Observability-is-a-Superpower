@@ -1,8 +1,7 @@
 # ADR-0034: Counted-bookings metric in the booking service and a stored vs counted panel
 
 ## Status
-Accepted (2026-10-23, change `extend-demo`). Deviation (PO 2026-10-22): `Add(0)` at consumer start, found
-in `extend-demo` task 2.1 (see Decision and Consequences). Series confirmed as `acme_bookings_counted_total{job="api"}`.
+Accepted (2026-10-23).
 
 ## Context
 The booking flow is fail-soft (ADR-0030, ADR-0032): a booking the booking service fails to
@@ -43,4 +42,4 @@ restart during the talk (fixes), which resets cumulative counters.
   after each `api` start, including the proof booking after the Act 3 fix. The site's stored counter
   has the same gap after a `site` restart; the Act 2 burst recreates it before Act 3, so unchanged.
 - Prometheus series names depend on the collector's naming (`_total` suffix, `job` = service
-  name); verified in the change's tasks.
+  name); verified: `acme_bookings_counted_total{job="api"}`.

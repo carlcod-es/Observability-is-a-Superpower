@@ -1,8 +1,7 @@
 # ADR-0014: Event content model
 
 ## Status
-Accepted (2026-10-08; revised 2026-10-13 — PO: one event type, no format or capacity, no form
-picker)
+Accepted (2026-10-08).
 
 ## Context
 Spec `agency-site` "Events": each event has a title, description, and start date and time;
@@ -27,11 +26,7 @@ Verified in the site's uSync files: Umbraco 17.7.1 ships a Date Time with time z
   capacity left the requirements on 2026-10-13; rejected.
 - Plain Date Time picker interpreted as Europe/London: works, but the stored value carries no
   zone and every reader must know the convention; rejected.
-- Form picker on pages: editors must not choose forms (spec `form-submission` "Fixed form
-  text"); rejected.
+- Form picker on pages: editors must not choose forms; rejected.
 
 ## Consequences
-- The stored value shape of Date Time with time zone is checked before the past-event rule is
-  written (`add-demo-foundation` task 3.4).
-- Events authored before this revision as `eventInPerson`/`eventOnline` are recreated as
-  `event` by the PO.
+- The past-event rule depends on the stored value shape of Date Time with time zone.

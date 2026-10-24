@@ -15,6 +15,7 @@ src/
     collector/config.yaml    OpenTelemetry Collector pipelines
     grafana/                 dashboard provider + dashboards/ JSON, mounted into `lgtm` (ADR-0023)
   SuperPower.ServiceDefaults/ OpenTelemetry, health checks, exporter switch, Serilog forwarding
+  SuperPower.Api/            booking service `api`: booking count over HTTP, queue consumer (ADR-0030)
   SuperPower.Web/            Umbraco 17 site (Rubber Duck Agency; code names keep `Acme`)
 banners/                     banner SVG generator `generate.mjs` (Node) and its output
 tests/
@@ -23,20 +24,14 @@ tests/
   traffic/                   demo traffic source `traffic.cs` (GET only) and submission burst
                              `burst.cs` (ADR-0012)
   load/                      load test `load-test.mjs` (Node), results in `load/results/`
-spikes/                      throwaway investigations, removed before the talk
 docs/
   adrs/                      architecture decision records
-  feature-requests/          feature requests (FR-NNNN)
-  research/                  background research with sources
   presenter/                 presenter runthrough for the talk
-  demo-setup.md              fresh environment before a demo
-openspec/                    planning: specs (openspec/specs) and changes (openspec/changes)
 .mcp.json                    MCP server for Claude Code: grafana; aspire opt-in (ADR-0033)
-.claude/settings.json        pre-approved read tools (grafana; aspire once enabled); denies reading `docs/presenter/`
+.claude/settings.json        pre-approved read tools (grafana; aspire once enabled)
 ```
 
-Layout decisions: ADR-0002. Versions: .NET 10, Umbraco 17.7.1, Aspire 13.6 (SDK 13.6.0, hosting
-packages 13.6.x, Community Toolkit collector hosting 13.4.0; ADR-0001).
+Layout decisions: ADR-0002. Versions: ADR-0001 and `Directory.Packages.props`.
 
 ## Two ways to run the site
 
@@ -57,12 +52,14 @@ start, and nothing syncs them afterwards.
 
 ```
  browser --> site ------------------+---------------------------+
-             |  umbracoDbDSN        | SMTP localhost:2525       | OTLP
-             v                      v                           v
-           sql (SQL Server)      smtp4dev                    collector --+--> Aspire dashboard
-                                                                         +--> lgtm (Grafana :3000)
-                                                                                 ^
-                                                                         grafana-mcp :8091
+             |  |  |                | SMTP localhost:2525       | OTLP (site and api)
+             |  |  | umbracoDbDSN   v                           v
+             |  |  +--> sql      smtp4dev                    collector --+--> Aspire dashboard
+             |  | HTTP (count)                                           +--> lgtm (Grafana :3000)
+             |  +-----> api --> cache (Redis)                                    ^
+             | publish   ^                                               grafana-mcp :8091
+             +--> queue -+ consume
+                (RabbitMQ)
 ```
 
 Claude Code reads Grafana through `grafana-mcp` (and the Aspire dashboard through the opt-in
@@ -76,6 +73,9 @@ Claude Code reads Grafana through `grafana-mcp` (and the Aspire dashboard throug
 | `collector` | OpenTelemetry Collector contrib 0.162.0, waits for `lgtm` | dynamic | none | ADR-0017, ADR-0033 |
 | `grafana-mcp` | `grafana/mcp-grafana:2.0.2`, waits for `lgtm` | 8091 (`/mcp`) | none | ADR-0017, ADR-0022 |
 | `site` | `SuperPower.Web` project | 44368 (https), 21258 (http) | - | ADR-0002 |
+| `api` | `SuperPower.Api` project, booking count service | dynamic, no external endpoint | - | ADR-0030 |
+| `cache` | Redis `redis:8.6`, container `oisp-cache` | dynamic | persistent container + volume `oisp-cache-data` | ADR-0031 |
+| `queue` | RabbitMQ `rabbitmq:4.3-management`, container `oisp-queue` | dynamic, management UI linked in the dashboard | persistent container, no volume | ADR-0032 |
 
 Start order: `lgtm` -> `collector` and `grafana-mcp` -> `site` (also waits for `sql` and `smtp4dev`)
 and `api` (also waits for `cache` and `queue`), so start-up telemetry reaches Grafana (ADR-0033). All
@@ -90,11 +90,11 @@ submissions per minute by form and outcome) and
 `aspnetcore-19924.json` (community ASP.NET Core dashboard, MIT, source in the README there). UI
 edits cannot be saved; change the JSON and restart `lgtm` (ADR-0023).
 `tests/traffic/traffic.cs` requests the site's pages (GET only, about one per second) until
-Ctrl+C; optional argument: site URL (default `https://localhost:44368`). Start it at go-live.
+Ctrl+C; optional argument: site URL (default `https://localhost:44368`).
 `tests/traffic/burst.cs` posts valid forms concurrently, round-robin over the three forms, with
 made-up names and `@example.com` addresses: `dotnet run tests/traffic/burst.cs [-- <site-url>]
 [--count 50] [--parallel 10]`. Prints `ok=<n> failed=<n>` and the references; exit 1 on any
-failure. Each post stores a row and sends a notification email (`add-form-emails` design.md D6).
+failure. Each post stores a row and sends a notification email.
 
 ### Mail path
 The site sends SMTP to `localhost:2525`, smtp4dev's SMTP port (no TLS, not proxied by Aspire;
@@ -130,6 +130,12 @@ Configured once in ServiceDefaults; the site code does not depend on the exporte
 - **Metrics**: ASP.NET Core, HttpClient, .NET runtime, plus the site's `Acme.Forms` Meter:
   counter `acme.forms.submissions` (Prometheus `acme_forms_submissions_total`, labels `acme_form`
   `contact`/`service_enquiry`/`event_booking`, `acme_form_outcome`) (ADR-0027).
+- **Booking service** (`api`, same ServiceDefaults and log masking): a stored event booking adds
+  span `acme.forms.publish` on the site; `api` server and queue-consumer spans carry
+  `acme.event.key` (event GUID only), so one trace runs site -> queue -> api -> cache. Meter
+  `Acme.Bookings`, counter `acme.bookings.counted` (Prometheus `acme_bookings_counted_total`);
+  log `Booking recorded for {EventKey}, count {Count}`; a failed update marks the consumer span
+  as error and logs `Booking update failed for {EventKey}` (ADR-0030, ADR-0032, ADR-0034).
 - **Page type**: `PageTypeTelemetryMiddleware` tags the request span and
   `http.server.request.duration` with `acme.page_type` (Prometheus `acme_page_type`): the
   rendered content type alias (`home`, `page`, `contact`, `events`, `event`, `services`,
@@ -175,9 +181,8 @@ replayed; the collector waits for `lgtm` at start, so this only matters if `lgtm
 
 - `aspire` (stdio, `aspire agent mcp`; opt-in): traces, structured logs, a trace's logs,
   resource state and console logs from the running AppHost; no metrics. `.claude/settings.json`
-  pre-approves its 13 read tools by name; `execute_resource_command` prompts every call. While
-  `spikes/` holds other AppHosts the agent calls `select_apphost` first.
-- `grafana` (`http://localhost:8091/mcp`; production stage): the Grafana MCP with writes
+  pre-approves its read tools by name; `execute_resource_command` prompts every call.
+- `grafana` (`http://localhost:8091/mcp`): the Grafana MCP with writes
   disabled and only the Prometheus (metrics), Loki (logs), Tempo (traces) and datasource tools,
   22 read-only tools, all pre-approved (ADR-0017). Reachable once `grafana-mcp` is Running;
   opened earlier, Claude Code shows it failed and `/mcp` reconnects it.
@@ -213,19 +218,11 @@ SQLite and SQL Server.
   mapping, past/upcoming event rules with a fake `TimeProvider`, page-type tag values, reference
   format, notification subject and body.
 - `dotnet run tests/smoke/smoke.cs` (full environment, run right after starting the AppHost) or
-  `... -- standalone` (SQLite): pages, form submissions and stored rows, Home trace with database
-  spans and linked logs, reference on the success page matching the stored row, and (full
-  environment) a notification email with that reference in smtp4dev (ADR-0012). The full-environment
-  run waits for Grafana and `grafana-mcp`, then checks that both dashboards
-  are provisioned, `acme.page_type` is on the Home metric, span and the service-enquiry post, and
-  `/assets` leaves no span. No Umbraco or Aspire integration harness.
+  `... -- standalone` (SQLite): end-to-end check of pages, forms, stored rows, notification email,
+  traces, metrics, dashboards and the booking count (ADR-0012). No Umbraco or Aspire integration
+  harness.
 
-## Planning and branches
+## Branches
 
-- OpenSpec: in-progress changes in `openspec/changes/` (proposal, design, specs, tasks);
-  their specs move to `openspec/specs/` when a change is archived.
-  Change order: `add-demo-foundation`, `add-demo-dashboard`, `add-form-emails`,
-  `add-production-environment`.
-- ADRs in `docs/adrs/`; `PLANNING.md` holds open decisions and todos (temporary).
-- Branches: `main` only. Planted demo problems are marked `// Demo Code : Act N` in the code, with the fix beside them.
-- `spikes/` holds throwaway investigations; removed before the talk.
+- `main` only. Planted demo problems are marked `// Demo Code : Act N` in the code, with the fix
+  commented beside them.

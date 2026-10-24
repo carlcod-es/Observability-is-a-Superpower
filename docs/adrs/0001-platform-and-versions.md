@@ -24,10 +24,10 @@ management. The installed Aspire CLI is 9.3.1-preview; current stable Aspire is 
 - Platform: none; fixed by the talk.
 - Floating or per-project versions: less maintenance, but an unplanned update can break a
   rehearsed demo; rejected.
-- Stay on Aspire CLI 9.3.1-preview: predates the CLI-hosted MCP server (ADR-0011); rejected.
+- Stay on Aspire CLI 9.3.1-preview: predates the CLI-hosted MCP server; rejected.
 
 ## Consequences
-- The MCP setup follows the 13.6 CLI model (ADR-0011), not the older dashboard MCP.
+- The Aspire MCP setup follows the 13.6 CLI model (`aspire agent mcp`), not the older dashboard MCP.
 - Version freeze avoids surprise breaks during rehearsal; security updates are applied only
   if critical.
 - Attendees need the Aspire CLI 13.6+ to use the agent setup.

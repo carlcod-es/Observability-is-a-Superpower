@@ -1,11 +1,8 @@
 # ADR-0022: Aspire MCP for the local stage, Grafana started on demand as production
 
 ## Status
-Accepted (2026-10-15, change `rework-aspire-first`, accepted by the PO after its section 6
-checks); supersedes the "one MCP server" and "Grafana runs from start-up" parts of ADR-0017.
-Stage split superseded for the talk by ADR-0033 (accepted 2026-10-23); two-server `.mcp.json`
-registration and `lgtm` explicit start superseded by ADR-0033 (amended 2026-10-23: `aspire` opt-in,
-`lgtm` starts with the AppHost).
+Accepted (2026-10-15). Partly superseded by ADR-0033 (stage split, two-server registration,
+explicit `lgtm` start); the Aspire MCP pre-approvals and the no-retry LGTM pipelines stand.
 
 ## Context
 The PO's talk story (2026-10-15): fix bugs locally with Aspire only, then go live through the
@@ -13,7 +10,7 @@ Cloudflare tunnel with Grafana playing production. No real production environmen
 dropped). ADR-0017 gives the agent only the Grafana MCP, and the Collector sends every signal
 to Grafana LGTM from start-up, so the local acts' data, including the planted personal-data
 leak, would already be in "production". The Aspire MCP (`aspire agent mcp`, stdio, 14 tools,
-no metrics; `spike-aspire-probe` findings) was the original agent server (ADR-0011).
+no metrics) was the original agent server.
 
 ## Decision
 - `.mcp.json` registers two servers: `aspire` (stdio, `aspire agent mcp`) and `grafana`
@@ -37,11 +34,11 @@ no metrics; `spike-aspire-probe` findings) was the original agent server (ADR-00
 - Grafana running from start with a Collector filter switched off at go-live: runtime toggle
   the Collector does not offer without a restart or extra component; rejected.
 - Aspire CLI skills instead of the Aspire MCP: act through shell commands, bypassing MCP
-  permissions (ADR-0011); rejected.
+  permissions; rejected.
 
 ## Consequences
 - The agent reads resource state and console logs at the local stage; database credentials
-  must not appear in pre-approved tool output (verified in the change's checks).
+  must not appear in pre-approved tool output (verified).
 - Before go-live the Collector logs export errors for LGTM; expected, not shown on stage.
 - Traces and logs from before go-live never reach LGTM. Metrics are cumulative: counters
   exported after go-live include totals from before it (accepted by the PO 2026-10-15; delta
