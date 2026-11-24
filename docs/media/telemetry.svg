@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 650" width="1280" height="650" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <title>Rubber Duck Agency demo: telemetry flow</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-tel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#15803d"/>
+    </marker>
+    <style>
+      .box   { stroke-width: 2; rx: 10; }
+      .app   { fill: #dbeafe; stroke: #2563eb; }
+      .tel   { fill: #dcfce7; stroke: #16a34a; }
+      .agent { fill: #ede9fe; stroke: #7c3aed; }
+      .ext   { fill: #ffffff; stroke: #94a3b8; stroke-dasharray: 6 4; }
+      .h     { font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .t     { font-size: 13px; fill: #334155; }
+      .m     { font-size: 12px; fill: #334155; font-family: Consolas, Menlo, monospace; }
+      .lbl   { font-size: 12px; fill: #475569; }
+      .edge  { fill: none; stroke: #475569; stroke-width: 2; }
+      .otlp  { fill: none; stroke: #15803d; stroke-width: 2.5; }
+      .otlpl { font-size: 12px; fill: #15803d; font-weight: 600; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="650" fill="#ffffff"/>
+
+  <text x="40" y="42" font-size="24" font-weight="700" fill="#0f172a">Rubber Duck Agency demo: telemetry flow</text>
+  <text x="40" y="64" class="t">Logs, traces and metrics leave each service only through OpenTelemetry, with personal data masked before export.</text>
+
+  <!-- Sources -->
+  <rect x="40" y="100" width="330" height="160" class="box app"/>
+  <text x="60" y="128" class="h">site  <tspan class="t" font-weight="400">ActivitySource + Meter Acme.Forms</tspan></text>
+  <text x="60" y="152" class="t">Spans</text>
+  <text x="70" y="170" class="m">acme.forms.submit / notify / publish</text>
+  <text x="60" y="192" class="t">Counter</text>
+  <text x="70" y="210" class="m">acme.forms.submissions {form, outcome}</text>
+  <text x="60" y="232" class="t">Log</text>
+  <text x="70" y="250" class="m">Form {Form} for {Page} stored as {Ref}</text>
+
+  <rect x="40" y="290" width="330" height="160" class="box app"/>
+  <text x="60" y="318" class="h">api  <tspan class="t" font-weight="400">Meter Acme.Bookings</tspan></text>
+  <text x="60" y="342" class="t">Spans (server, consumer)</text>
+  <text x="70" y="360" class="m">tagged acme.event.key (GUID only)</text>
+  <text x="60" y="382" class="t">Counter</text>
+  <text x="70" y="400" class="m">acme.bookings.counted</text>
+  <text x="60" y="422" class="t">Logs</text>
+  <text x="70" y="440" class="m">Booking recorded / update failed</text>
+
+  <!-- Masking -->
+  <rect x="400" y="100" width="56" height="350" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="434" y="275" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e" transform="rotate(-90 434 275)">PersonalDataLogProcessor · masks logs</text>
+  <path d="M370 180 H396" class="otlp" marker-end="url(#arrow-tel)"/>
+  <path d="M370 370 H396" class="otlp" marker-end="url(#arrow-tel)"/>
+
+  <!-- Collector -->
+  <path d="M456 275 H526" class="otlp" marker-end="url(#arrow-tel)"/>
+  <text x="462" y="266" class="otlpl">OTLP</text>
+  <rect x="530" y="225" width="180" height="100" class="box tel"/>
+  <text x="620" y="262" text-anchor="middle" class="h">collector</text>
+  <text x="620" y="284" text-anchor="middle" class="t">OpenTelemetry</text>
+  <text x="620" y="302" text-anchor="middle" class="t">Collector</text>
+
+  <!-- Destinations -->
+  <path d="M710 255 H740 V150 H766" class="otlp" marker-end="url(#arrow-tel)"/>
+  <path d="M710 295 H740 V390 H766" class="otlp" marker-end="url(#arrow-tel)"/>
+
+  <rect x="770" y="105" width="230" height="90" class="box tel"/>
+  <text x="885" y="138" text-anchor="middle" class="h">Aspire dashboard</text>
+  <text x="885" y="160" text-anchor="middle" class="t">traces · structured logs</text>
+  <text x="885" y="178" text-anchor="middle" class="t">resource state · restart</text>
+
+  <rect x="770" y="340" width="230" height="110" class="box tel"/>
+  <text x="885" y="370" text-anchor="middle" class="h">lgtm  <tspan class="t" font-weight="400">Grafana :3000</tspan></text>
+  <text x="885" y="392" text-anchor="middle" class="t">Loki · Tempo · Prometheus</text>
+  <text x="885" y="412" text-anchor="middle" class="t">"Bookings: stored vs counted"</text>
+  <text x="885" y="432" text-anchor="middle" class="lbl">plays production observability</text>
+
+  <!-- Consumers -->
+  <rect x="1050" y="105" width="170" height="90" class="box ext"/>
+  <text x="1135" y="142" text-anchor="middle" class="h">Presenter</text>
+  <text x="1135" y="164" text-anchor="middle" class="t">rebuilds resources</text>
+  <path d="M1050 150 H1004" class="edge" marker-end="url(#arrow)"/>
+
+  <rect x="1050" y="340" width="170" height="110" class="box agent"/>
+  <text x="1135" y="372" text-anchor="middle" class="h">grafana-mcp</text>
+  <text x="1135" y="394" text-anchor="middle" class="m">:8091/mcp</text>
+  <text x="1135" y="414" text-anchor="middle" class="t">read-only</text>
+  <text x="1135" y="432" text-anchor="middle" class="t">logs · traces · metrics</text>
+  <path d="M1050 395 H1004" class="edge" marker-end="url(#arrow)"/>
+  <text x="1008" y="386" class="lbl">queries</text>
+
+  <rect x="1050" y="510" width="170" height="90" class="box agent"/>
+  <text x="1135" y="545" text-anchor="middle" class="h">Claude Code</text>
+  <text x="1135" y="566" text-anchor="middle" class="t">diagnoses and</text>
+  <text x="1135" y="584" text-anchor="middle" class="t">verifies from evidence</text>
+  <path d="M1135 510 V454" class="edge" marker-end="url(#arrow)"/>
+  <text x="1143" y="487" class="lbl">MCP</text>
+
+  <path d="M1220 555 H1240 V175 H1224" fill="none" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+  <text x="1250" y="365" text-anchor="middle" font-size="12" fill="#6d28d9" transform="rotate(90 1250 365)">asks the presenter to restart a service</text>
+
+  <!-- Privacy note -->
+  <rect x="40" y="490" width="670" height="110" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="60" y="518" font-size="14" font-weight="700" fill="#0f172a">What goes into telemetry</text>
+  <text x="60" y="542" class="t"><tspan font-weight="700" fill="#15803d">Recorded:</tspan> form, event or service, outcome, reference (ACME-nnnn), event GUID.</text>
+  <text x="60" y="564" class="t"><tspan font-weight="700" fill="#b91c1c">Never recorded:</tspan> Name, Email, Message, Notes, Company, Website.</text>
+  <text x="60" y="586" class="t">The masking processor is a safety net: code logs what happened, never field values.</text>
+</svg>

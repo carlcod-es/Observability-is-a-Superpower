@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 590" width="1240" height="590" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <title>Rubber Duck Agency demo: system architecture</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+    <style>
+      .box   { stroke-width: 2; rx: 10; }
+      .app   { fill: #dbeafe; stroke: #2563eb; }
+      .infra { fill: #f1f5f9; stroke: #64748b; }
+      .msg   { fill: #fef3c7; stroke: #d97706; }
+      .ext   { fill: #ffffff; stroke: #94a3b8; stroke-dasharray: 6 4; }
+      .h     { font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .t     { font-size: 13px; fill: #334155; }
+      .m     { font-size: 12px; fill: #334155; font-family: Consolas, Menlo, monospace; }
+      .lbl   { font-size: 12px; fill: #475569; }
+      .edge  { fill: none; stroke: #475569; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <rect width="1240" height="590" fill="#ffffff"/>
+
+  <text x="40" y="42" font-size="24" font-weight="700" fill="#0f172a">Rubber Duck Agency demo: system architecture</text>
+  <text x="40" y="64" class="t">Everything runs locally under the .NET Aspire AppHost; attendees reach the site through a Cloudflare tunnel.</text>
+
+  <!-- Row 1: entry -->
+  <rect x="60" y="96" width="180" height="60" class="box ext"/>
+  <text x="150" y="124" text-anchor="middle" class="h">Attendees</text>
+  <text x="150" y="143" text-anchor="middle" class="t">browser</text>
+
+  <rect x="310" y="96" width="200" height="60" class="box ext"/>
+  <text x="410" y="124" text-anchor="middle" class="h">Cloudflare tunnel</text>
+  <text x="410" y="143" text-anchor="middle" class="t">"production"</text>
+
+  <path d="M240 126 H306" class="edge" marker-end="url(#arrow)"/>
+  <path d="M510 126 H576" class="edge" marker-end="url(#arrow)"/>
+
+  <rect x="580" y="84" width="440" height="106" class="box app"/>
+  <text x="600" y="110" class="h">site  <tspan class="t" font-weight="400">Umbraco 17 · SuperPower.Web</tspan></text>
+  <text x="600" y="132" class="t">Contact, service enquiry and event booking forms</text>
+  <text x="600" y="152" class="t">Event pages show the booking count</text>
+  <text x="600" y="171" class="t">Stored event bookings are queued for counting</text>
+
+  <!-- site -> dependencies -->
+  <path d="M620 190 V240 H150 V296" class="edge" marker-end="url(#arrow)"/>
+  <text x="160" y="232" class="lbl">store submission</text>
+  <path d="M660 190 V256 H360 V296" class="edge" marker-end="url(#arrow)"/>
+  <text x="370" y="276" class="lbl">SMTP :2525</text>
+  <path d="M760 190 V296" class="edge" marker-end="url(#arrow)"/>
+  <text x="768" y="226" class="lbl">HTTP GET count</text>
+  <text x="768" y="242" class="lbl">(2 s cap, fail-soft)</text>
+  <path d="M980 190 V296" class="edge" marker-end="url(#arrow)"/>
+  <text x="988" y="226" class="lbl">AMQP publish</text>
+  <text x="988" y="242" class="m">{ eventKey }</text>
+
+  <!-- Row 2 -->
+  <rect x="60" y="300" width="180" height="90" class="box infra"/>
+  <text x="150" y="332" text-anchor="middle" class="h">sql</text>
+  <text x="150" y="352" text-anchor="middle" class="t">SQL Server container</text>
+  <text x="150" y="370" text-anchor="middle" class="t">submissions table</text>
+
+  <rect x="270" y="300" width="180" height="90" class="box infra"/>
+  <text x="360" y="332" text-anchor="middle" class="h">smtp4dev</text>
+  <text x="360" y="352" text-anchor="middle" class="t">owner notification</text>
+  <text x="360" y="370" text-anchor="middle" class="t">inbox</text>
+
+  <rect x="540" y="300" width="260" height="110" class="box app"/>
+  <text x="560" y="326" class="h">api  <tspan class="t" font-weight="400">minimal API</tspan></text>
+  <text x="560" y="348" class="m">GET /events/{key}/bookings</text>
+  <text x="560" y="368" class="m">BookingStoredConsumer</text>
+    <text x="560" y="392" class="lbl">no external endpoint</text>
+
+  <rect x="880" y="300" width="220" height="90" class="box msg"/>
+  <text x="990" y="330" text-anchor="middle" class="h">queue</text>
+  <text x="990" y="350" text-anchor="middle" class="t">RabbitMQ</text>
+  <text x="990" y="370" text-anchor="middle" class="m">booking-stored</text>
+
+  <path d="M880 345 H804" class="edge" marker-end="url(#arrow)"/>
+  <text x="812" y="337" class="lbl">consume</text>
+
+  <rect x="540" y="470" width="260" height="80" class="box msg"/>
+  <text x="670" y="500" text-anchor="middle" class="h">cache</text>
+  <text x="670" y="520" text-anchor="middle" class="t">Redis</text>
+  <text x="670" y="538" text-anchor="middle" class="m">event:{guid}:bookings</text>
+  <path d="M670 410 V466" class="edge" marker-end="url(#arrow)"/>
+  <text x="678" y="444" class="lbl">+1 on message · read count</text>
+
+  <!-- Act 3 callout -->
+  <rect x="860" y="430" width="300" height="104" rx="10" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+  <text x="878" y="456" font-size="14" font-weight="700" fill="#b91c1c">Act 3: booking processing fails</text>
+  <text x="878" y="477" class="t">Consumer reads the wrong field → nack.</text>
+  <text x="878" y="495" class="t">Site still renders; event pages show a</text>
+  <text x="878" y="513" class="t">stale count. Nothing looks broken to a</text>
+  <text x="878" y="529" class="t">visitor.</text>
+  <path d="M860 440 L804 392" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="4 4"/>
+
+</svg>
