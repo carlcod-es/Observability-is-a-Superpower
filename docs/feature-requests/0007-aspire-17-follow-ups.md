@@ -1,7 +1,7 @@
 # FR-0007: Aspire 17 follow-ups
 
 ## Status
-Open (2026-11-25). Source: PO 2026-11-24, after the first-round Aspire 17 upgrade (ADR-0035). That round
+Folded into `aspire-17-follow-ups` (2026-11-25, ADR-0036, ADR-0037). Event dates: relative to the import day (PO 2026-11-25). Opened 2026-11-25. Source: PO 2026-11-24, after the first-round Aspire 17 upgrade (ADR-0035). That round
 was Aspire 17.0.0 packages, the AppHost SDK and the collector toolkit; these items were deferred.
 
 ## Request

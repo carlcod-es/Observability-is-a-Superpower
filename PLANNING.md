@@ -145,7 +145,9 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
 
 ## Aspire 17 follow-ups (ADR-0035, PO 2026-11-24)
 - [ ] FR-0007 (`docs/feature-requests/0007-aspire-17-follow-ups.md`): AppHost migration, library and image
-  updates, smoke check fixes, presenter runthrough, Aspire skills decision. Fold in via `/opsx:propose`.
+  updates, smoke check fixes, presenter runthrough, Aspire skills decision. Folded into change
+  `aspire-17-follow-ups` (proposed 2026-11-25); phases: Now (sections 1, 2, 6, 7.1, 8), next if needed (3-4),
+  after the demo (5).
 
 ## Todos
 - [x] Static site prototype (`add-site-prototype`, ADR-0018/0019) used as the basis for the
