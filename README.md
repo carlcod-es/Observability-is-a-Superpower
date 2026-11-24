@@ -11,7 +11,7 @@ telemetry over MCP.
 
 - .NET 10 SDK.
 - A container runtime: Docker Desktop (Windows: Linux containers mode) or Podman.
-- Aspire CLI 13.6 or later: install from https://aspire.dev, then check `aspire --version`.
+- Aspire CLI 17.0 or later: install from https://aspire.dev, then check `aspire --version`.
   An older CLI cannot connect to this AppHost and stops it during start-up.
 - A trusted HTTPS development certificate: `dotnet dev-certs https --trust`.
 - Optional: Claude Code, to let an agent query the telemetry (see "Connecting Claude Code").

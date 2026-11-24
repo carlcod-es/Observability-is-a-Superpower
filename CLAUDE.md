@@ -53,7 +53,7 @@ runnable by attendees.
   on the prod hosting decision (see "Stack").
 
 ## Stack
-- .NET 10, Umbraco 17 LTS, .NET Aspire (AppHost + ServiceDefaults), OpenTelemetry.
+- .NET 10, Umbraco 17 LTS, .NET Aspire 17 (AppHost + ServiceDefaults, ADR-0035), OpenTelemetry.
 - Booking service `api` (minimal API, ADR-0030) with Redis `cache` (ADR-0031) and RabbitMQ
   `queue` (ADR-0032): event pages read the booking count over HTTP; stored event bookings are
   counted through the queue. The site works without all three (2 s cap, fail-soft).
