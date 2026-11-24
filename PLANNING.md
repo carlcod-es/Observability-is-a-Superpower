@@ -144,34 +144,8 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
 - [ ] Azure Monitor exporter switch (ADR-0008; code in task 2.4) verified against Application Insights.
 
 ## Aspire 17 follow-ups (ADR-0035, PO 2026-11-24)
-First round done: Aspire 17.0.0 packages, AppHost SDK and collector toolkit. Recorded for later:
-- [ ] Migrate the AppHost off deprecated APIs (ASPIRE012, CS0618): `Sdk="Microsoft.NET.Sdk"`, add
-  `Aspire.Hosting.AppHost` + `Aspire.Hosting.Dotnet` (17.0.0), drop the two `ProjectReference`s,
-  `AddProject<Projects.SuperPower_Api>("api")` -> `AddDotnetProject("api", "../SuperPower.Api/SuperPower.Api.csproj")`,
-  same for `site`. Tried on a scratch copy 2026-11-24: builds clean, 75/75 tests.
-- [ ] Library updates (stay on .NET 10): Umbraco.Cms.* 17.7.1 -> 17.8.2, uSync 17.4.3 -> 17.6.3, OpenTelemetry.*
-  1.17.0 -> 1.21.0, Microsoft.Extensions.Http.Resilience/ServiceDiscovery 10.10.0 -> 10.11.1 (not 11.x: pulls
-  .NET 11 libraries into the net10 app), xunit.v3 4.0.1 -> 4.0.3. Tried together on a scratch copy: builds, 75/75.
-  The current build reports NuGet audit warnings (high: SixLabors.ImageSharp 3.1.12,
-  System.Security.Cryptography.Pkcs/Xml; moderate: MessagePack 3.1.8), transitive from Umbraco; they did not
-  appear with Umbraco 17.8.2 in the scratch build.
-- [ ] Container images (verify all three acts after bumping): `grafana/otel-lgtm` 0.36.0 -> 0.41.1 (dashboard
-  provisioning paths), `grafana/mcp-grafana` 2.0.2 -> 2.4.0 (`--disable-write`, `--enabled-tools`,
-  `--allowed-hosts`), collector 0.162.0 and smtp4dev 3.15.0 to their latest stable tags (`config.yaml`).
-- [ ] Smoke check does not build: `tests/smoke/smoke.cs` uses `#:package Microsoft.Data.SqlClient`, but
-  `Directory.Packages.props` no longer has its `PackageVersion` (NU1010). Add it back (6.1.6, the version
-  Umbraco resolves) or pin it in the script.
-- [ ] Smoke booking checks need an upcoming event: all uSync events are in the past (latest 2026-11-13). PO:
-  move event dates forward in the backoffice and re-export uSync.
-- [ ] Presenter runthrough against the redesigned Aspire 17 dashboard (resource Rebuild, logs, traces, metrics
-  pages); update `docs/presenter/` steps and screenshots.
-- [ ] `.claude/settings.json`: pre-approve the new Aspire MCP read tool `mcp__aspire__get_integration_docs`.
-- [ ] Aspire skills (`aspire agent init --skills aspire`): keep out of the repo. `aspire-orchestration` restarts
-  resources through the CLI, which breaks "the agent asks, the presenter restarts" and bypasses MCP permissions
-  (ADR-0022). At most a README note for attendees' own projects. PO to confirm.
-- [ ] Umbraco: `src/SuperPower.Web/Events/UpcomingEvents.cs:29` uses `IPublishedContent.Children`, removed in
-  v18; fix before any move to 18/19. Umbraco 19 (net11) when stable: re-evaluate.
-- [ ] `tests/SuperPower.Web.Tests/BookingCountsTests.cs`: xUnit1051 warnings (pass `TestContext.Current.CancellationToken`).
+- [ ] FR-0007 (`docs/feature-requests/0007-aspire-17-follow-ups.md`): AppHost migration, library and image
+  updates, smoke check fixes, presenter runthrough, Aspire skills decision. Fold in via `/opsx:propose`.
 
 ## Todos
 - [x] Static site prototype (`add-site-prototype`, ADR-0018/0019) used as the basis for the
