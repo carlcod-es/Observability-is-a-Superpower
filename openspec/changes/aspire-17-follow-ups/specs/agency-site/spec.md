@@ -25,7 +25,7 @@ the following four weeks (ADR-0037).
 
 #### Scenario: Fresh site on any date
 - **WHEN** the site starts on a new database on any date
-- **THEN** the Events page lists at least three upcoming events, all starting within four weeks of
+- **THEN** the Events page lists at least three upcoming events, all starting within 28 days (by date) of
   that day, and one event page shows "This event has ended"
 
 #### Scenario: Committed content unchanged

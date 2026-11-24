@@ -140,6 +140,8 @@ pages (no `api`, `cache` or `queue`); event bookings still work. Use it for cont
 
 Content, document types and media live in `src/SuperPower.Web/uSync/` and
 `src/SuperPower.Web/wwwroot/media/`; a fresh database imports them on first start.
+A fresh database dates the events relative to that day (one past, the rest upcoming over the next four
+weeks), so a reset gives fresh event dates.
 
 - SQL Server: stop the AppHost, then remove the container and its volume:
   ```sh
@@ -223,6 +225,10 @@ commands prompt on each call. Remove with `claude mcp remove --scope local aspir
 
 The agent cannot restart resources; after a code change use Rebuild on the resource in the Aspire
 dashboard (Restart does not recompile).
+
+The Aspire agent skills (`aspire agent init --skills aspire`) are left out of this repo: they let the agent
+start, stop and restart services through the CLI without the approval prompt, and in this demo the agent
+asks and the presenter restarts. To use them in your own projects, run `aspire agent init`.
 
 ## Stable ports and URLs
 

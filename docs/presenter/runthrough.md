@@ -1,12 +1,14 @@
 # Presenter runthrough (private; contains demo answers)
 
-Fri 16 Oct 2026, 13:30-14:15 BST. Never copy into CLAUDE.md or other docs/. All commands run from the repo root.
+Talk day: 45 min, live demo (Aspire 17). Never copy into CLAUDE.md or other docs/. All commands run from the repo root.
 
 ## Scripts
 
 | When | Command | Notes |
 |---|---|---|
-| Morning | `aspire start --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj` | After the Release build; first boot imports content (minutes) |
+| Morning | `aspire start --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj` | After the Release build; first boot imports content (minutes) and dates the events from today |
+| Morning | `aspire wait site --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj --timeout 600` | Returns when `site` is healthy; `aspire describe --apphost ...` lists every resource |
+| Morning, After | `aspire stop --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj` | Always pass `--apphost`: another running AppHost on the machine would otherwise be a candidate |
 | Morning | `dotnet run tests/smoke/smoke.cs` | Smoke #1: fixed state, right after start (`lgtm` starts with the AppHost), before loading a page |
 | Any act | `aspire resource site rebuild --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj` | Applies a code fix (`api` for Act 3). Dashboard: Rebuild, not Restart (Restart does not recompile) |
 | Go-live | `cloudflared tunnel run --token-file .cloudflared-token` | Ctrl+C to stop |
@@ -107,7 +109,7 @@ What exists to query:
   (error, with exception; deliver span marked error).
 
 ### Morning
-1. Stop any running AppHost: `aspire stop` (frees ports 2525, 3000, 5290, 8091, 17210, 44368;
+1. Stop the AppHost: `aspire stop --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj` (frees ports 2525, 3000, 5290, 8091, 17210, 44368;
    5290 is `api`, fixed). The AppHost also runs `api`, `cache` (`oisp-cache`) and `queue` (`oisp-queue`);
    `site` does not wait for them.
 2. Leave the code in the fixed state for now.
@@ -122,6 +124,9 @@ What exists to query:
    docker volume rm oisp-cache-data
    rm -rf src/SuperPower.Web/umbraco/Data/TEMP
    ```
+   The reset is what dates the events: first boot imports them relative to today (ADR-0037), one past
+   ("This event has ended") and four upcoming, the first in 4 days ("How to get the most out of your CMS";
+   smoke #1 books it). Skip the reset and the events keep the dates of the last import.
 4. Build and run:
    ```sh
    dotnet clean SuperPower.slnx
@@ -137,9 +142,9 @@ What exists to query:
      stores test submissions, so the first stage reference is not ACME-0001.
 6. Tunnel check on the phone, then stop the tunnel ("Cloudflare tunnel").
 7. Initial state: set each line in the "Planted problems" table to its initial state.
-8. Restart for the talk: `aspire stop`; clear the smoke check's booking count and queue (`docker rm -f oisp-cache`,
+8. Restart for the talk: `aspire stop --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj`; clear the smoke check's booking count and queue (`docker rm -f oisp-cache`,
    `docker rm -f -v oisp-queue`, `docker volume rm oisp-cache-data`); then the build and `aspire start`
-   commands from step 4 (builds the initial state). This clears Grafana and the smoke traffic and makes the next
+   commands from step 4 (builds the initial state). Keep `oisp-sql`: the event dates from step 4 stay. This clears Grafana and the smoke traffic and makes the next
    Home load hit the database again. Event pages show no booking count; `booking-stored` is empty.
 9. Wait until all resources are Running, including `lgtm` and `grafana-mcp`. Grafana runs from here to the
    end of the talk. Do not load a page until "Local X-ray"; no event bookings until Act 3.

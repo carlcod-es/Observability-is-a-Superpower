@@ -14,8 +14,8 @@ All worker sections: run `dotnet build SuperPower.slnx` and `dotnet test SuperPo
 
 ## 1. Event dates relative to the import day (Now; worker-backend; `src/SuperPower.Web/Events/`, a new composer there, `tests/SuperPower.Web.Tests/`; no dependencies)
 
-- [ ] 1.1 Confirm uSync 17.4.3's importing-item notification fires during `ImportOnFirstBoot` and lets a handler change the item before it is saved; if not, confirm the ADR-0037 fallback (shift after import with export on save disabled for that save). If neither works, stop and report; verify by reporting the notification type, the property used, and evidence from a first-boot import on a fresh SQLite database (`dotnet run --project src/SuperPower.Web` after deleting `umbraco/Data/Umbraco.sqlite.db*` and `umbraco/Data/TEMP/`)
-- [ ] 1.2 Pure calculation per design.md D1:
+- [x] 1.1 Confirm uSync 17.4.3's importing-item notification fires during `ImportOnFirstBoot` and lets a handler change the item before it is saved; if not, confirm the ADR-0037 fallback (shift after import with export on save disabled for that save). If neither works, stop and report; verify by reporting the notification type, the property used, and evidence from a first-boot import on a fresh SQLite database (`dotnet run --project src/SuperPower.Web` after deleting `umbraco/Data/Umbraco.sqlite.db*` and `umbraco/Data/TEMP/`)
+- [x] 1.2 Pure calculation per design.md D1:
   - Shift by the whole days from the reference day 2026-10-16 to the import day (Europe/London dates).
   - Keep the local time and recompute the offset; `timeZone` unchanged.
   - Clock from `TimeProvider`.
@@ -27,7 +27,7 @@ All worker sections: run `dotnet build SuperPower.slnx` and `dotnet test SuperPo
   - The JSON round-trips with `timeZone` kept.
 
   `dotnet test SuperPower.slnx` passes.
-- [ ] 1.3 Handler and composer that apply 1.2 to `event` items during import (design.md D1, ADR-0037). Verify on a fresh SQLite database:
+- [x] 1.3 Handler and composer that apply 1.2 to `event` items during import (design.md D1, ADR-0037). Verify on a fresh SQLite database:
   - The Events page lists 4 upcoming events dated D+4, D+12, D+20 and D+28 at their original times (D = import day;
     design.md D1 "Planned dates").
   - The D−10 event page shows "This event has ended".
@@ -36,7 +36,7 @@ All worker sections: run `dotnet build SuperPower.slnx` and `dotnet test SuperPo
 
 ## 2. Smoke check builds (Now; worker-backend; `Directory.Packages.props` one line only; no dependencies)
 
-- [ ] 2.1 Add `PackageVersion` `Microsoft.Data.SqlClient` 6.1.6 (design.md D5, ADR-0036). Verify:
+- [x] 2.1 Add `PackageVersion` `Microsoft.Data.SqlClient` 6.1.6 (design.md D5, ADR-0036). Verify:
   - `dotnet run tests/smoke/smoke.cs` builds.
   - After section 1 is merged: stop the AppHost, reset SQL Server, cache and queue (README "Reset the
     databases"), `aspire start`, and the smoke check reports `ALL CHECKS PASSED`, booking checks included.
@@ -79,8 +79,8 @@ All worker sections: run `dotnet build SuperPower.slnx` and `dotnet test SuperPo
 
 ## 6. Agent settings and README (Now; worker-backend by brief; shared: `.claude/settings.json`, `README.md`; depends on 1)
 
-- [ ] 6.1 Add `mcp__aspire__get_integration_docs` to `.claude/settings.json` `allow` (design.md D7). Verify the JSON parses (`python3 -m json.tool .claude/settings.json`).
-- [ ] 6.2 README per design.md D7: the Aspire agent skills note (exists, left out and why, `aspire agent init` for own projects) and one line under "Reset the databases" that events get fresh dates. Verify the README has no planted problems or fixes and that spec `local-environment` "Attendee README" scenario "Attendee asks about agent skills" is met (reviewer reads it).
+- [x] 6.1 Add `mcp__aspire__get_integration_docs` to `.claude/settings.json` `allow` (design.md D7). Verify the JSON parses (`python3 -m json.tool .claude/settings.json`).
+- [x] 6.2 README per design.md D7: the Aspire agent skills note (exists, left out and why, `aspire agent init` for own projects) and one line under "Reset the databases" that events get fresh dates. Verify the README has no planted problems or fixes and that spec `local-environment` "Attendee README" scenario "Attendee asks about agent skills" is met (reviewer reads it).
 
 ## 7. Docs and runthrough (Architect; `docs/`, `openspec/`, `CLAUDE.md`, `PLANNING.md`)
 

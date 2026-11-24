@@ -15,6 +15,7 @@
       "mcp__aspire__list_docs",
       "mcp__aspire__search_docs",
       "mcp__aspire__get_doc",
+      "mcp__aspire__get_integration_docs",
       "mcp__grafana"
     ]
   }
