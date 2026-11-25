@@ -229,3 +229,19 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
 - Prod (either hosting): runs the finished build; Act 4 prod segment is about PII not
   reaching the observability platform. Tunnel first because it is the shorter route to a
   public site before 16 Oct (PO 2026-10-13).
+
+## Acts rework (PO 2026-11-25)
+- [x] Acts 1 and 2 on stage. Off stage, for attendees: Homework : Act 3 (booking processing failure) and
+  Homework : Act 4 (slow Contact page). README "The acts" describes all four. Done: README, presenter
+  runthrough, CLAUDE.md.
+- [ ] Code comments: the Act 3 and slow-page `// Demo Code` comments still describe a stage initial state,
+  and the slow page is marked "Act 2 - slow page"; rename to Homework : Act 3 / Act 4 (PO: not yet).
+  README refers only to "the `// Demo Code` comment in <file>".
+- [ ] Spec `local-environment` "Demo run-through" says the README SHALL NOT describe planted problems;
+  "The acts" now does. Update the spec (`/opsx:update` or the next change).
+- [ ] Stage: the agent can read README "The acts" (file names for Acts 1 and 2). Strip that section on
+  the `demo` branch.
+- [ ] `aspire-17-follow-ups` task 8.1 says "Acts 1-3" and FR-0007 / ADR-0036 say "all three acts":
+  now Acts 1-2 on stage plus homework Acts 3-4 (`/opsx:update`).
+- [x] `docs/media/architecture.svg` redrawn 2026-11-25: Act 3 callout replaced by a neutral fail-soft note.
+- [ ] Talk timing: Act 3 had no slot of its own; the 45 min plan now has spare time (PO).

@@ -66,8 +66,9 @@ runnable by attendees.
 - On stage (ADR-0033, PO 2026-10-22): Grafana runs from the morning for the whole talk; the agent
   uses only the Grafana MCP in every act. The Aspire dashboard is the presenter's view. The agent cannot restart
   services: it asks, the presenter rebuilds the resource from the Aspire dashboard. Go-live is the
-  tunnel and demo traffic only. Three acts: Act 1 personal data in logs, Act 2 load breaks
-  submissions, Act 3 booking processing failure (fail-soft, seen only in telemetry).
+  tunnel and demo traffic only. Two acts: Act 1 personal data in logs, Act 2 load breaks
+  submissions. Homework (not on stage, README "The acts", PO 2026-11-25): Act 3 booking processing failure
+  (fail-soft, seen only in telemetry), Act 4 slow Contact page.
 - Prod hosting (PO 2026-10-15): the whole talk runs locally; "production" is the local
   environment exposed to attendees through a Cloudflare tunnel, with Grafana playing the
   production observability platform. Azure dropped.
@@ -195,7 +196,3 @@ technology or dependencies; scope growth; anything destructive.
 
 After supervisor approval: summary to the PO (built, deviations, deferred, risks). Commit
 only once the PO approves.
-
-## Todo :
-
- - I'd li

@@ -1,6 +1,8 @@
 # Presenter runthrough (private; contains demo answers)
 
-Talk day: 45 min, live demo (Aspire 17). Never copy into CLAUDE.md or other docs/. All commands run from the repo root.
+Talk day: 45 min, live demo (Aspire 17), Acts 1 and 2. Homework : Act 3 (bookings never counted) and Homework : Act 4
+(slow Contact page) are not on stage: README "The acts" (PO 2026-11-25).
+Never copy into CLAUDE.md or other docs/. All commands run from the repo root.
 
 ## Scripts
 
@@ -10,7 +12,7 @@ Talk day: 45 min, live demo (Aspire 17). Never copy into CLAUDE.md or other docs
 | Morning | `aspire wait site --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj --timeout 600` | Returns when `site` is healthy; `aspire describe --apphost ...` lists every resource |
 | Morning, After | `aspire stop --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj` | Always pass `--apphost`: another running AppHost on the machine would otherwise be a candidate |
 | Morning | `dotnet run tests/smoke/smoke.cs` | Smoke #1: fixed state, right after start (`lgtm` starts with the AppHost), before loading a page |
-| Any act | `aspire resource site rebuild --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj` | Applies a code fix (`api` for Act 3). Dashboard: Rebuild, not Restart (Restart does not recompile) |
+| Any act | `aspire resource site rebuild --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj` | Applies a code fix. Dashboard: Rebuild, not Restart (Restart does not recompile) |
 | Go-live | `cloudflared tunnel run --token-file .cloudflared-token` | Ctrl+C to stop |
 | Go-live | `dotnet run tests/traffic/traffic.cs` | Steady GET traffic, ~1 req/s; Ctrl+C to stop |
 | Optional | `node tests/load/load-test.mjs --users 10 --duration 60` | GET-only page load, default `--base https://observability.carlcod.es`; results in `tests/load/results/` |
@@ -34,8 +36,8 @@ Every successful post is stored and sends an owner email to smtp4dev; a failed p
 | 1 | `src/SuperPower.Web/Forms/AcmeFormsController.cs` | `logger.LogInformation("Form Submitted {@Model}", model);` | Leave in | Leave in |
 | 2 | `src/SuperPower.Web/Forms/Storage/FormSubmissionRepository.cs` | `Scope.WriteLock(AcmeLocks.Submissions);` | Comment out | Uncomment |
 | 2 | `src/SuperPower.Web/Forms/Storage/FormSubmissionRepository.cs` | `if (DateTime.UtcNow.Second % 2 == 0) throw ...` | Leave commented | Low-traffic fallback only; re-comment to fix |
-| 2 | `src/SuperPower.Web/Views/Contact.cshtml` | `await Task.Delay(TimeSpan.FromSeconds(3));` | Leave in | Not fixed in the talk |
-| 3 | `src/SuperPower.Api/BookingStoredConsumer.cs` | `GetProperty("eventKey")` / `GetProperty("eventId")` lines | Comment out `eventKey`, uncomment `eventId` | Swap back; Rebuild `api` |
+| 3 | `src/SuperPower.Api/BookingStoredConsumer.cs` | `GetProperty("eventKey")` / `GetProperty("eventId")` lines | Leave as is (fixed) | Not on stage (Homework : Act 3) |
+| 4 | `src/SuperPower.Web/Views/Contact.cshtml` | `await Task.Delay(TimeSpan.FromSeconds(3));` | Leave commented | Not on stage (Homework : Act 4) |
 
 1. **Act 1, PII in logs.** `AcmeFormsController` logs `Form Submitted {@Model}` (every field, including Name
    and Email), and the `PersonalDataLogProcessor` line in `ServiceDefaults/Extensions.cs` is commented out, so
@@ -51,11 +53,9 @@ Every successful post is stored and sends an owner email to smtp4dev; a failed p
    Rebuild `site`. About half of posts fail, every 500 is an even second. Logs show `InvalidOperationException`,
    not SqlException 2601, and no duplicate emails. Re-comment it to fix.
 
-3. **Act 2, slow Contact page.** `Contact.cshtml` waits 3 s before rendering: Contact us sits about 3 s above
-   the other pages on p95, and burst posts to Contact take 3 s longer. Shown only through the optional
-   "slowest pages" query; not fixed in the talk.
+Not on stage (README "The acts"; the code comments still say "Act 2 - slow page" and "Initial Demo State" until reworked):
 
-4. **Act 3, booking never counted.** The consumer reads `eventId`, the site sends `eventKey`: `GetProperty`
+3. **Homework : Act 3, booking never counted.** The consumer reads `eventId`, the site sends `eventKey`: `GetProperty`
    throws `KeyNotFoundException` for every booking; the consumer logs `Booking update failed for (null)`, marks the
    deliver span as an error and drops the message (nack, no requeue). Visitor sees the confirmation, owner email
    arrives, count never moves; panel "Bookings: stored vs counted" shows counted at 0. Fix: read `eventKey`, Rebuild
@@ -63,7 +63,10 @@ Every successful post is stored and sends an owner email to smtp4dev; a failed p
    `SetTag`); the trace links it to the site's `acme.forms.publish` span. The `api` Error logs are not on the
    Demo site dashboard (site only); the bookings panel is the only dashboard sign.
 
-Fallback for an act = apply its fix by hand, Rebuild `site` (`api` for Act 3). Code changes never need a database reset.
+4. **Homework : Act 4, slow Contact page.** When switched on, `Contact.cshtml` waits 3 s before rendering:
+   Contact us sits about 3 s above the other pages on p95, and posts to Contact take 3 s longer.
+
+Fallback for an act = apply its fix by hand, Rebuild `site`. Code changes never need a database reset.
 
 ## Cloudflare tunnel
 
@@ -91,8 +94,6 @@ Prometheus from the morning restart on; counters are cumulative and reset on a s
 `increase`/`rate`. The Aspire dashboard is the presenter's view. The agent cannot restart anything: it asks,
 the presenter clicks Rebuild on the resource in the Aspire dashboard and says when it is Running.
 
-Rule: no event bookings by the presenter before Act 3 (Local X-ray and Act 1 use Service enquiry and Contact).
-Attendee and burst bookings in Act 2 are fine: they open the gap Act 3 explains.
 
 What exists to query:
 - Form post: request span (`acme.page_type` = `contact` / `service` / `event`) with child
@@ -141,16 +142,16 @@ What exists to query:
    - Expected: `ALL CHECKS PASSED`, including `counted bookings metric increases`, no N/A line. Any FAIL is a real problem. The check
      stores test submissions, so the first stage reference is not ACME-0001.
 6. Tunnel check on the phone, then stop the tunnel ("Cloudflare tunnel").
-7. Initial state: set each line in the "Planted problems" table to its initial state.
+7. Initial state: set each Act 1 and Act 2 line in the "Planted problems" table to its initial state.
 8. Restart for the talk: `aspire stop --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj`; clear the smoke check's booking count and queue (`docker rm -f oisp-cache`,
    `docker rm -f -v oisp-queue`, `docker volume rm oisp-cache-data`); then the build and `aspire start`
    commands from step 4 (builds the initial state). Keep `oisp-sql`: the event dates from step 4 stay. This clears Grafana and the smoke traffic and makes the next
    Home load hit the database again. Event pages show no booking count; `booking-stored` is empty.
 9. Wait until all resources are Running, including `lgtm` and `grafana-mcp`. Grafana runs from here to the
-   end of the talk. Do not load a page until "Local X-ray"; no event bookings until Act 3.
+   end of the talk. Do not load a page until "Local X-ray".
 10. Claude Code at the repo root, default permission mode, `/fast` on. The agent never starts, stops or
-    restarts anything (`CLAUDE.md`); deny any `aspire` prompt. Check: `claude mcp list` shows only
-    `grafana`, connected (the repo does not register `aspire`). `grafana` failed: `/mcp` -> `grafana` ->
+    restarts anything (`CLAUDE.md`); deny any `aspire` prompt. Check: `claude mcp list` shows `grafana`
+    connected and no `aspire` (the repo registers only `grafana`; user-level servers may also be listed). `grafana` failed: `/mcp` -> `grafana` ->
     Reconnect.
 11. Tabs: site, Aspire (Resources, Structured logs, Traces), Grafana (Demo site dashboard), smtp4dev. VSCodium on
     the repo. Fallback videos ready.
@@ -225,10 +226,8 @@ Speaking notes (Grafana, Demo site dashboard):
 - Form submissions by outcome: per minute, by form and stored / invalid / failed. Watch it when the QR code
   traffic arrives.
 - If asked: the ASP.NET Core dashboard (community 19924) is the generic view; ours answers our questions.
-- If someone spots it: Contact us sits about 3 s above the other pages on p95. Leave it for later or for
-  the agent ("slowest pages" query in Act 2).
-- Bookings: stored vs counted: stored by the site against counted by the booking service, per minute. Both
-  at 0 until someone books an event.
+- Bookings: stored vs counted: stored by the site against counted by the booking service, per minute. The
+  lines sit on top of each other: it checks an outcome, not errors. Breaking it is Homework : Act 3.
 
 Check queries (Grafana):
 - "Is Grafana receiving the site's telemetry? Show the request rate for the last 5 minutes by page type."
@@ -261,57 +260,17 @@ Check queries (Grafana):
    Speaking notes (after the fix):
    - Re-run the burst: rate jumps again, error rate stays at 0 %, only `stored` grows. Same panels, the
      proof is the absence of the failure.
-   - If anyone asks about the bookings panel (counted below stored): park it, "we'll come back to that one".
 7. Optional: 
  - "Who submitted forms today?" -> counts and references only.
  - How many visits have we had to the Services page
- - What are the slowest pages on the website?
  
 Fallback: apply Planted problems 2 by hand (re-comment the low-traffic fallback if on), Rebuild `site`,
 re-run the burst.
 
-### 5. Act 3: bookings never counted
-1. Book an upcoming event on the site (made-up details): "Thank you ... ACME-nnnn"; smtp4dev has the owner
-   email. Reload the event page: still no booking line (the page shows none at 0).
-2. Dashboard: Bookings: stored vs counted shows stored above counted (counted at 0 since the morning). Error
-   rate 0 %, Error logs empty, Form submissions `event_booking stored`.
-   Speaking notes (Demo site dashboard):
-   - Everything the site measures is green: the visitor got a confirmation, the email went out, no 5xx,
-     no error logs. The site is fail-soft: the booking service works behind a queue.
-   - Only one panel disagrees: stored vs counted. It doesn't measure errors, it measures an outcome:
-     did what the site promised actually happen downstream? The lines should sit on top of each other.
-   - The gap is every booking since this morning, including Act 2's burst; the panel shows the last 15
-     minutes, the agent can total the rest. Nobody noticed, and no error
-     panel would have shown it: the error is in another service's logs.
-3. Prompt:
-   > Visitors book our events and get a confirmation, but the booking count on the event pages never
-   > goes up. Use our production observability in Grafana to find out where the bookings go, fix it, and
-   > prove from the telemetry that new bookings are counted.
-
-   Expected: Tempo booking trace spans `site` (`acme.forms.submit`, `acme.forms.publish`, RabbitMQ publish) and
-   `api` `deliver booking-stored` with error status and `KeyNotFoundException` (no `acme.event.key` on it; linked
-   through `acme.forms.publish` in the same trace); Loki `{service_name="api"}`
-   `Booking update failed for (null)`; `acme_bookings_counted_total` flat at 0. Reads the consumer and the
-   site's publish (`src/SuperPower.Web/Events/BookingEvents.cs`, `eventKey`), swaps the line, asks for a
-   restart: Rebuild `api`, tell it when Running. You book again; the page shows "1 person has booked this event"; it confirms a new trace
-   without error, the `Booking recorded` log and `increase(acme_bookings_counted_total[5m])` above 0.
-   If it suggests recounting lost bookings: out of scope, they stay lost.
-4. Dashboard after the fix: counted rises with stored for the new booking. Speaking notes:
-   - The lines meet again for new bookings; the bookings lost before the fix stay lost. Telemetry told us
-     how many, not who: the agent can count them, nobody can replay them.
-   - Watch outcomes, not just errors.
-
-Fallback: apply Planted problems 4 by hand (Act 3 row), Rebuild `api`, book again.
-
-Check queries (Grafana):
-- "How many bookings were stored and how many counted in the last 30 minutes? Use `increase`."
-- "Show the latest booking trace end to end across site and api, with durations."
-- "Are there any error logs from the api since the fix?"
-- "How many bookings were lost before the fix?" (stored minus counted over the talk window)
-
-### 6. Close (7 min)
+### 5. Close (7 min)
 Useful telemetry: outcome counters (stored vs counted), spans with the reference, errors with context, nothing
-personal. Agent access: read-only Grafana MCP only, restarts by the presenter, no database.
+personal. Homework: README "The acts" has two more planted problems to find from telemetry, Act 3 (a booking that is
+never counted) and Act 4 (a slow page). Agent access: read-only Grafana MCP only, restarts by the presenter, no database.
 Console logs removed (ADR-0028): every output path can leak PII; close the ones you don't need.
 Optional smoke #2 (if time; good-state proof): `dotnet run tests/smoke/smoke.cs -- running`. Expected:
 `ALL CHECKS PASSED` with one N/A line (first-load check). It makes test submissions and a booking.

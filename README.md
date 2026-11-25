@@ -56,6 +56,8 @@ docker pull rabbitmq:4.3-management
    (http://localhost:3000/d/demo-site); the "Form submissions by outcome" panel follows the burst.
 7. Ask Claude Code about the telemetry (see [Connecting Claude Code](#connecting-claude-code)),
    for example "how long do requests to the Home page take, from metrics?".
+8. Work through [the acts](#the-acts): switch on a planted problem and find it from the
+   telemetry.
 
 ## Run the full environment
 
@@ -229,6 +231,76 @@ dashboard (Restart does not recompile).
 The Aspire agent skills (`aspire agent init --skills aspire`) are left out of this repo: they let the agent
 start, stop and restart services through the CLI without the approval prompt, and in this demo the agent
 asks and the presenter restarts. To use them in your own projects, run `aspire agent init`.
+
+## The acts
+
+The talk has two acts on stage; two more are homework to try yourself. Each is a problem planted
+in the code and marked with a `// Demo Code` comment. `main` runs without them: the comment says
+how to switch one on and gives the answer, so diagnose from the telemetry before you read it. Find
+the problem on your own in Grafana, or ask Claude Code (Grafana MCP). After every code change, use
+Rebuild on the resource in the Aspire dashboard (Restart does not recompile).
+
+| Act | Where | What it shows |
+|---|---|---|
+| [Act 1](#act-1---personal-data-in-logs) | On stage | Keeping personal form data out of telemetry |
+| [Act 2](#act-2---load-breaks-submissions) | On stage | A failure under load, found from the dashboard, logs and traces |
+| [Homework : Act 3](#homework--act-3---bookings-never-counted) | Try it yourself | A failure the visitor never sees, visible only in telemetry |
+| [Homework : Act 4](#homework--act-4---a-slow-page) | Try it yourself | A page that works but is slow |
+
+### Act 1 - personal data in logs
+
+Before going live: do form submissions leave personal data in the telemetry?
+
+1. Switch it on: follow the `// Demo Code` comment in `src/SuperPower.ServiceDefaults/Extensions.cs`,
+   then Rebuild `site`.
+2. Submit a form with made-up details.
+3. Look: Grafana Explore, Loki, the `site` log entries for that post.
+4. Or ask the agent: "We are about to put this site on the public internet. Using our telemetry in
+   Grafana, check whether form submissions leave any personal data in our logs or traces. If they
+   do, fix it at the source and prove the fix from the telemetry."
+5. Fixed when a new post's log entries show no name, email address or message.
+
+### Act 2 - load breaks submissions
+
+Visitors submitting at the same time get an error.
+
+1. Switch it on: follow the first `// Demo Code` comment in
+   `src/SuperPower.Web/Forms/Storage/FormSubmissionRepository.cs`, then Rebuild `site`.
+2. Run the [submission burst](#submission-burst). No failures? The second `// Demo Code` comment in
+   the same file makes them certain.
+3. Look: Grafana dashboard Demo site, panels "Error rate (5xx)", "Form submissions by outcome" and
+   "Error logs".
+4. Or ask the agent: "Some visitors get an error when they submit a form. Use our observability in
+   Grafana to find out what is failing and why, fix it, and tell me how we will know it is fixed."
+5. Fixed when the burst runs again with no failures.
+
+### Homework : Act 3 - bookings never counted
+
+A failure the visitor never sees: the site is fail-soft, so only the telemetry shows it.
+
+1. Switch it on: follow the `// Demo Code` comment in `src/SuperPower.Api/BookingStoredConsumer.cs`,
+   then Rebuild `api`.
+2. Book an upcoming event with made-up details. You get the confirmation and the owner email
+   arrives in smtp4dev, but the booking count on the event page never goes up.
+3. Look: Grafana dashboard Demo site, panel "Bookings: stored vs counted". The site's error rate
+   and error logs stay clean.
+4. Or ask the agent: "Visitors book our events and get a confirmation, but the booking count on
+   the event pages never goes up. Use our observability in Grafana to find out where the bookings
+   go, fix it, and prove from the telemetry that new bookings are counted."
+5. Fixed when a new booking shows on the event page and counted rises with stored. Bookings made
+   while it was broken stay lost.
+
+### Homework : Act 4 - a slow page
+
+A page that works but is slow.
+
+1. Switch it on: follow the `// Demo Code` comment in `src/SuperPower.Web/Views/Contact.cshtml`,
+   then Rebuild `site`.
+2. Start the [demo traffic](#demo-traffic) and wait a few minutes.
+3. Look: Grafana dashboard Demo site, panel "Request duration p95 by page type". Click an
+   exemplar point to open a trace for the slow page type.
+4. Or ask the agent: "What are the slowest pages on the website, and why?"
+5. Fixed when the page is back in line with the other pages on p95.
 
 ## Stable ports and URLs
 
