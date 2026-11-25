@@ -5,12 +5,15 @@ Commands run from the repo root. Full talk script: `docs/presenter/runthrough.md
 ## Setup
 
 1. Docker Desktop running, images pulled (README "Pre-pull the container images"), port 2525 free.
-2. Stop the AppHost and reset:
+   Fresh clone: copy the tunnel token from your working clone, e.g.
+   `cp ../Observability-is-a-Superpower/.cloudflared-token .`
+2. Stop every AppHost (from any clone: they share fixed ports and `oisp-*` containers) and reset
+   containers, volumes and Umbraco TEMP:
    ```sh
-   aspire stop --apphost src/SuperPower.AppHost/SuperPower.AppHost.csproj
-   docker rm -f oisp-sql && docker volume rm oisp-sql-data
-   docker rm -f oisp-cache && docker volume rm oisp-cache-data
-   docker rm -f -v oisp-queue
+   pkill -f 'SuperPower.AppHost/bin/.*/SuperPower.AppHost'; sleep 5
+   pkill -f 'aspire run .*SuperPower.AppHost.csproj'
+   docker ps -aq --filter name=oisp- | xargs docker rm -f -v
+   docker volume rm oisp-sql-data oisp-cache-data
    rm -rf src/SuperPower.Web/umbraco/Data/TEMP
    ```
 3. Start and wait until all resources are Running (first start takes a few minutes):
