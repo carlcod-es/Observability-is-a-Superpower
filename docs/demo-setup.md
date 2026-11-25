@@ -91,7 +91,7 @@ Commands run from the repo root. Full talk script: `docs/presenter/runthrough.md
 2. Grafana Demo site dashboard: 5xx error rate rises, `failed` submissions appear, Error logs show the SqlException.
    Main prompt:
    ```text
-   Since we went live, some visitors get an error when they submit a form. Use our production observability in Grafana to find out what is failing and why, fix it, and tell me how we will know it is fixed.
+   Since we went live, some visitors get an error when they submit a form. Use our production observability in Grafana to find out what is failing and why. Don't fix it - just identify the issue.
    ```
 3. Uncomment the `Scope.WriteLock` line, Rebuild `site`, run the burst again: every post returns `302 ACME-nnnn`.
    Ask Claude:
