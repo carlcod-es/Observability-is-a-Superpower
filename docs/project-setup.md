@@ -78,8 +78,9 @@ Claude Code reads Grafana through `grafana-mcp` (and the Aspire dashboard throug
 | `queue` | RabbitMQ `rabbitmq:4.3-management`, container `oisp-queue` | dynamic, management UI linked in the dashboard | persistent container, no volume | ADR-0032 |
 
 Start order: `lgtm` -> `collector` and `grafana-mcp` -> `site` (also waits for `sql` and `smtp4dev`)
-and `api` (also waits for `cache` and `queue`), so start-up telemetry reaches Grafana (ADR-0033). All
-fixed ports are listed in the root `README.md`.
+and `api` (also waits for `cache` and `queue`), so start-up telemetry reaches Grafana (ADR-0033). The
+Aspire dashboard is on https://localhost:17210. Ports 3000, 8091 and 2525 must be free (3000 often clashes
+with Node dev servers). The backoffice works over https only (login over http fails with OpenIddict ID2083).
 
 ### Dashboards and demo traffic
 
@@ -117,6 +118,12 @@ inbox. Without an owner address or SMTP host (standalone) no email is sent.
 
 The database is never committed. After any reset, uSync imports content, document types and
 media on first start (`ImportOnFirstBoot`, ADR-0003).
+
+To open the SQL Server database with a SQL client: server `127.0.0.1,<port>` (not `localhost`: the
+container listens on IPv4 only), database `umbraco`, user `sa`, trust the server certificate. The
+password and port are in the AppHost user secrets (`dotnet user-secrets list --project
+src/SuperPower.AppHost`, keys `Parameters:sql-password` and `Resources:sql:tcp:port`). Submissions are
+in table `acmeFormSubmission`.
 
 ## Telemetry
 
@@ -221,6 +228,10 @@ SQLite and SQL Server.
   `... -- standalone` (SQLite): end-to-end check of pages, forms, stored rows, notification email,
   traces, metrics, dashboards and the booking count (ADR-0012). No Umbraco or Aspire integration
   harness.
+- `node tests/load/load-test.mjs --base http://localhost:21258 --label before` (Node.js 18+): simulated
+  users request the public pages for a fixed time and report response times per page; `--compare
+  tests/load/results/<run-id>.json` adds before/after. Options are in the script header. 403 or 429
+  through the tunnel means Cloudflare rate limiting, not the site.
 
 ## Branches
 

@@ -29,6 +29,7 @@ Commands run from the repo root. Full talk script: `docs/presenter/runthrough.md
 6. Break the code (lines marked `// Demo Code : Act N`):
    - `src/SuperPower.ServiceDefaults/Extensions.cs`: comment out `logging.AddProcessor(new PersonalDataLogProcessor(...))`.
    - `src/SuperPower.Web/Forms/Storage/FormSubmissionRepository.cs`: comment out `Scope.WriteLock(AcmeLocks.Submissions);`.
+   - `src/SuperPower.Web/Views/Contact.cshtml`: leave `await Task.Delay(TimeSpan.FromSeconds(3));` in (slow Contact page).
 7. Rebuild `site` in the Aspire dashboard (Rebuild, not Restart).
 8. Move `docs/` out of the repo, then start `claude` in the repo root. `claude mcp list` shows `grafana` connected.
 
@@ -95,6 +96,11 @@ Commands run from the repo root. Full talk script: `docs/presenter/runthrough.md
    Main prompt:
    ```text
    Since we went live, some visitors get an error when they submit a form. Use our production observability in Grafana to find out what is failing and why. Don't fix it - just identify the issue.
+   ```
+   Slow pages: the Demo site dashboard panel "Request duration p95 by page type" shows Contact about 3 s above the rest.
+   Ask Claude:
+   ```text
+   Which pages on the site are slowest? List p95 response time by page type since go-live, slowest first.
    ```
 3. Uncomment the `Scope.WriteLock` line, Rebuild `site`, run the burst again: every post returns `302 ACME-nnnn`.
    Ask Claude:
