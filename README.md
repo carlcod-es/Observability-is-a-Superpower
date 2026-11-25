@@ -4,7 +4,8 @@ Demo for the talk "Observability is a Superpower - Giving Developers and AI Agen
 Vision". Local Umbraco site with .NET Aspire, OpenTelemetry and read-only agent access to
 telemetry over MCP.
 
-- How the repo, local environment, data and telemetry are set up: `docs/project-setup.md`.
+- How the application is built (solution, local environment, site, booking service, telemetry,
+  agent access): `Architecture.md`.
 - Decisions and their reasons: `docs/adrs/`.
 
 ## Prerequisites

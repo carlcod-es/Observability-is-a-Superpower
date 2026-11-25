@@ -1,7 +1,8 @@
 # Presenter runthrough (private; contains demo answers)
 
 Talk day: 45 min, live demo (Aspire 17), Acts 1 and 2. Homework : Act 3 (bookings never counted) and Homework : Act 4
-(slow Contact page) are not on stage: README "The acts" (PO 2026-11-25).
+(slow Contact page) are not on stage: 
+
 Never copy into CLAUDE.md or other docs/. All commands run from the repo root.
 
 ## Scripts

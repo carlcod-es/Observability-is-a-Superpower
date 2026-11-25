@@ -146,8 +146,8 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
 ## Aspire 17 follow-ups (ADR-0035, PO 2026-11-24)
 - [ ] FR-0007 (`docs/feature-requests/0007-aspire-17-follow-ups.md`): AppHost migration, library and image
   updates, smoke check fixes, presenter runthrough, Aspire skills decision. Folded into change
-  `aspire-17-follow-ups` (proposed 2026-11-25); phases: Now (sections 1, 2, 6, 7.1, 8), next if needed (3-4),
-  after the demo (5).
+  `aspire-17-follow-ups` (proposed 2026-11-25); phases: Now (sections 1, 2, 6, 7.1, 8), after the demo (5).
+  Sections 3-4 moved to "AppHost and library updates" below (PO 2026-11-25).
 
 ## Todos
 - [x] Static site prototype (`add-site-prototype`, ADR-0018/0019) used as the basis for the
@@ -245,3 +245,30 @@ Azure stretch: dropped (PO 2026-10-15); items kept for reference only.
   now Acts 1-2 on stage plus homework Acts 3-4 (`/opsx:update`).
 - [x] `docs/media/architecture.svg` redrawn 2026-11-25: Act 3 callout replaced by a neutral fail-soft note.
 - [ ] Talk timing: Act 3 had no slot of its own; the 45 min plan now has spare time (PO).
+
+## AppHost and library updates (PO 2026-11-25; moved from `aspire-17-follow-ups` sections 3-4)
+Not before the demo unless the smoke check and a rehearsal pass on them. Libraries first, then the AppHost.
+Run `dotnet build SuperPower.slnx` and `dotnet test SuperPower.slnx` after each step.
+
+Libraries (`Directory.Packages.props`; stay on .NET 10 and Umbraco 17 LTS):
+- [ ] Versions: Umbraco.Cms.* 17.8.2, uSync 17.6.3, OpenTelemetry.* 1.21.0,
+  Microsoft.Extensions.Http.Resilience and .ServiceDiscovery 10.11.1, xunit.v3 4.0.3. Not Microsoft.Extensions
+  11.x: it pulls .NET 11 runtime libraries into the .NET 10 site.
+  Done when the build has no high-severity NuGet audit warning (NU1901-NU1904; today SixLabors.ImageSharp,
+  System.Security.Cryptography.Pkcs/Xml through Umbraco 17.7.1). If one remains, stop: pinning that transitive
+  package is the fallback, an Architect decision.
+- [ ] `src/SuperPower.Web/Events/UpcomingEvents.cs`: use the `Children()` extension method instead of the
+  obsolete `IPublishedContent.Children` (removed in Umbraco 18). `tests/SuperPower.Web.Tests/BookingCountsTests.cs`:
+  pass `TestContext.Current.CancellationToken` (xUnit1051). No warnings for either.
+- [ ] On a reset environment: smoke check `ALL CHECKS PASSED`; note uSync/Umbraco start-up warnings
+  (`aspire otel logs site --severity Warning`).
+
+AppHost project model (removes ASPIRE012 / CS0618 warnings):
+- [ ] `src/SuperPower.AppHost/SuperPower.AppHost.csproj`: `Sdk="Microsoft.NET.Sdk"`, add packages
+  `Aspire.Hosting.AppHost` and `Aspire.Hosting.Dotnet` 17.0.0 (`Directory.Packages.props`), remove the two
+  `ProjectReference`s. Keep `UserSecretsId` and `AspireUseCliBundle`.
+- [ ] `AppHost.cs`: `AddProject<Projects.SuperPower_Api>("api")` -> `AddDotnetProject("api", "../SuperPower.Api/SuperPower.Api.csproj")`,
+  same for `site` (`SuperPower.Web`). Resource names and chained calls unchanged.
+- [ ] Verify: no ASPIRE012, ASPIRE013 or CS0618; `aspire start` brings every resource up healthy; an event page
+  shows the booking count after a booking (`site` still finds `api`); `aspire resource site rebuild` and
+  `aspire resource api rebuild` work; smoke check passes on a reset environment.
