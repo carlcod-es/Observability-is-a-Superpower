@@ -4,7 +4,7 @@
 Proposed (2026-10-15)
 
 ## Context
-Change `improve-local-performance`, spec `local-environment` ("Optimised stage run"). The talk
+Local performance work for the stage run. The talk
 runs on an M1 Pro (16 GB RAM, 8 GB for Docker Desktop). The PO wants every gain available
 without changing demo behaviour, proven with before/after telemetry, landing before 16 Oct.
 There is no backoffice use on stage. Current state:
@@ -18,8 +18,7 @@ There is no backoffice use on stage. Current state:
   is the default, `BackofficeDevelopment`.
 - `mcr.microsoft.com/mssql/server:2022-latest` is amd64 only and runs under Rosetta. smtp4dev,
   the collector, LGTM and grafana-mcp are arm64.
-- The first Home load after start must show database calls (spec `local-environment`,
-  "Telemetry in one place"). Later loads come from Umbraco's cache. PO 2026-10-15: no warm-up
+- The first Home load after start must show database calls (telemetry in one place). Later loads come from Umbraco's cache. PO 2026-10-15: no warm-up
   before the talk; warm speed matters more than start-up speed.
 
 ## Decision
@@ -29,8 +28,8 @@ There is no backoffice use on stage. Current state:
 2. **Release build for the stage run.** The documented stage command builds AppHost and site in
    Release and starts them through `aspire run`, so the Aspire MCP backchannel keeps working.
    The mechanism (the MSBuild `Configuration` property passed via the environment, or a
-   Release build followed by `aspire run --no-build`) is chosen by `improve-local-performance`
-   task 2.1, on evidence. The development default stays Debug.
+   Release build followed by `aspire run --no-build`) is chosen during the build,
+   on evidence. The development default stays Debug.
 3. **CMS debug off on the stage run only.** The AppHost sets `Umbraco__CMS__Hosting__Debug=false`
    on the site. `appsettings.Development.json` is unchanged, so the site run alone keeps debug.
 4. **Runtime mode unchanged** (`BackofficeDevelopment`).
@@ -39,8 +38,7 @@ There is no backoffice use on stage. Current state:
    LGTM running (so macOS does not swap: raising it starves the site), other heavy apps
    closed, on mains power, Docker and the AppHost restarted fresh before the talk. No warm-up.
 
-Every item is measured before and after with the demo's telemetry (`improve-local-performance`
-design, "Measurement") and is dropped if it shows no gain or changes behaviour.
+Every item is measured before and after with the demo's telemetry and is dropped if it shows no gain or changes behaviour.
 
 ## Alternatives
 - **Umbraco `Production` runtime mode.** Its startup validators require a Release build,

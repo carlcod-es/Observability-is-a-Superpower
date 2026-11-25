@@ -1,7 +1,7 @@
 # ADR-0036: Aspire 17 completion: AppHost model, versions, agent skills
 
 ## Status
-Proposed (2026-11-25, change `aspire-17-follow-ups`, FR-0007). Supersedes ADR-0035's "keep `Aspire.AppHost.Sdk`".
+Proposed (2026-11-25, FR-0007). Supersedes ADR-0035's "keep `Aspire.AppHost.Sdk`".
 
 ## Context
 ADR-0035 moved the demo to Aspire 17.0.0 and left these problems:

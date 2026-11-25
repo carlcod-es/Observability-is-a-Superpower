@@ -188,7 +188,7 @@ Umbraco logs through Serilog, and only Serilog's levels decide what reaches the 
 Grafana: change `Serilog:MinimumLevel` in `src/SuperPower.Web/appsettings*.json`.
 `Logging:LogLevel` has no effect.
 
-The site writes no log entries to its console (Serilog console sink removed, ADR-0028): read
+The site writes no log entries to its console (ADR-0028): read
 them in the dashboard's structured logs or Grafana, where personal data is masked. Run alone,
 the raw entries are in `src/SuperPower.Web/umbraco/Logs/`.
 
@@ -393,5 +393,5 @@ repo root, then delete this section:
 
 ```sh
 git mv -f CLAUDE.learning.md CLAUDE.md
-git rm -r -q openspec .claude/commands .claude/agents .claude/skills docs/feature-requests docs/research PLANNING.md claude-stage.md docs/demo-setup.md docs/presenter/macos-performance.md docs/adrs/0011-*.md docs/adrs/0018-*.md docs/adrs/0020-*.md docs/adrs/0029-*.md
+git rm -r -q .claude/agents docs/feature-requests docs/research docs/demo-setup.md docs/adrs/0011-*.md docs/adrs/0018-*.md docs/adrs/0020-*.md docs/adrs/0029-*.md
 ```

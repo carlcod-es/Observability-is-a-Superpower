@@ -1,15 +1,14 @@
 # FR-0002: Images on the site
 
 ## Status
-Done (2026-10-15) in `add-demo-foundation` task 6.4. Source: `add-demo-foundation` task 6.4, deferred by the PO 2026-10-14.
+Done (2026-10-15). Source: deferred from the site build by the PO 2026-10-14.
 
 ## Request
 Pages show banner and card images from the media library instead of the plain colour block.
 
 ## Why
 The site looks more believable on stage with imagery. The views already support it
-(`add-demo-foundation` design.md Decision 12, spec `agency-site` "Imagery from the media library");
-only the media and the page selections are missing.
+(imagery from the media library); only the media and the page selections are missing.
 
 ## Acceptance criteria
 - Events and services each have a `mainBanner` image; other pages optional.

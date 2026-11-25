@@ -1,7 +1,7 @@
 # ADR-0037: Event dates relative to the import day
 
 ## Status
-Proposed (2026-11-25, change `aspire-17-follow-ups`, PO 2026-11-25). Amends ADR-0003 (content seeding)
+Proposed (2026-11-25, FR-0007, PO 2026-11-25). Amends ADR-0003 (content seeding)
 and ADR-0014 (event content model).
 
 ## Context
@@ -51,4 +51,4 @@ is stored as JSON: `{"date": "2026-10-20T12:50:00+01:00", "timeZone": "Europe/Lo
 - Days are counted from the import, not the talk: an import on talk day D keeps the first upcoming event
   4 days ahead.
 - Editors who re-import content from the backoffice get dates shifted to that day.
-- Spec `agency-site` "Events" drops "all starting after 16 Oct 2026" in favour of import-relative dates.
+- The events requirement (CLAUDE.md "Demo site") drops "all starting after 16 Oct 2026" in favour of import-relative dates.

@@ -1,7 +1,7 @@
 # FR-0006: Second instrumented resource in the trace
 
 ## Status
-Delivered by `add-booking-api` (2026-10-22). Folded in 2026-10-21 (PO): site -> booking service (`api`) -> Redis over HTTP
+Done (2026-10-22). Folded in 2026-10-21 (PO): site -> booking service (`api`) -> Redis over HTTP
 for reads; site -> RabbitMQ -> `api` -> Redis for bookings (ADR-0030, ADR-0031, ADR-0032). Analytics
 service not built: the booking count replaces it. Opened 2026-10-16. Source: PO 2026-10-16, on the Home trace in the Aspire
 dashboard listing only `site`.
@@ -31,7 +31,7 @@ across services. A cache (e.g. Redis) would not change this: it is another unins
   and LGTM.
 
 ## Notes
-- Options for `/opsx:propose`: queue broker (e.g. RabbitMQ container) with a .NET worker
+- Options considered in planning: queue broker (e.g. RabbitMQ container) with a .NET worker
   consumer; or direct HTTP from site to a small .NET API (simpler, synchronous unless
   fire-and-forget). The broker itself stays an uninstrumented peer; the second resource is the
   consumer.

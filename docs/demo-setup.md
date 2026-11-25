@@ -7,6 +7,7 @@ Background for each step is in `README.md`; the talk itself is in `docs/presente
 - Docker Desktop is running.
 - Container images are pulled (`README.md` "Pre-pull the container images").
 - Port 2525 (smtp4dev SMTP) is free.
+- Move the /docs folder out of the repo before you start claude in the root.
 
 ## 2. Reset the database
 Stop the AppHost, then remove the SQL Server container, its volume and the Umbraco temp cache:

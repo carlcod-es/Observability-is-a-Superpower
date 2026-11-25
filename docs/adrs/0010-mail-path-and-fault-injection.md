@@ -4,7 +4,7 @@
 Accepted (2026-10-07). Partly superseded by ADR-0025 (Toxiproxy and its commands removed; smtp4dev stands).
 
 ## Context
-Spec `local-environment` requires a local mail catcher and Slow / Break / Heal controls on
+The requirements call for a local mail catcher and Slow / Break / Heal controls on
 the mail path. Localhost SMTP is too fast to show realistic latency. Umbraco 17 sends mail with
 MailKit through `Umbraco:CMS:Global:Smtp` (`SecureSocketOptions` defaults to `Auto`), one
 connection per message, MailKit default I/O timeout 120 s. SMTP is lock-step (about 6-7 server

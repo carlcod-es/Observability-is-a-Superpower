@@ -4,9 +4,9 @@
 Superseded by ADR-0021 (2026-10-14, PO: prototype removed)
 
 ## Context
-Change `add-mobile-responsive` makes the demo site and the static prototype responsive and adds
+The mobile-responsive work makes the demo site and the static prototype responsive and adds
 a small navigation script. The prototype's `site.css` (ADR-0018) was hand-copied into
-`src/SuperPower.Web/wwwroot/css/site.css` in `add-demo-foundation` task 7.1 and has drifted:
+`src/SuperPower.Web/wwwroot/css/site.css` during the site build and has drifted:
 class names (`form__field` vs `form-field`), token names (`--color-duck` vs `--color-accent`),
 font paths (`/fonts/` vs `/css/fonts/`), prototype-only and site-only rules. The PO wants one
 stylesheet and one script usable unchanged by both. The site has no npm build (ADR-0019

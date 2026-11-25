@@ -4,7 +4,7 @@
 Accepted (2026-10-15)
 
 ## Context
-Spec `form-submission`: each stored submission gets a reference `ACME-` + at least four
+The requirement: each stored submission gets a reference `ACME-` + at least four
 digits, unique across all forms, shown to the visitor and used in the owner notification.
 Submissions must work on SQLite and SQL Server with NPoco `Sql<ISqlContext>` builders, no raw
 SQL (CLAUDE.md). The demo database is SQL Server under concurrent submissions.
