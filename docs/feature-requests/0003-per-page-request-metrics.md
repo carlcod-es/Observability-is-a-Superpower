@@ -1,7 +1,7 @@
 # FR-0003: Request metrics per page type
 
 ## Status
-Built in change `add-demo-dashboard` (2026-10-15; ADR-0024). Source: `rework-aspire-first` task 6.3 (`verification.md` finding F1).
+Done (2026-10-15; ADR-0024). Source: verification finding during the Aspire-first rework.
 Built together with the dashboard (PO 2026-10-15).
 
 ## Request
@@ -28,6 +28,6 @@ agent should answer "how long does page X take" from metrics.
 ## Notes
 - Candidate route: after Umbraco resolves the published request, add the tag through
   `IHttpMetricsTagsFeature` and set it on `Activity.Current`. Small site change, no new
-  package; design and ADR in `add-demo-dashboard`.
-- Once built, `agent-telemetry-access` scenario "Agent checks a metric" can be tightened back
-  to a page's request-duration metric (reworded 2026-10-15 in `rework-aspire-first`).
+  package; ADR-0024.
+- Once built, the agent's metric check can be tightened back to a page's request-duration
+  metric (reworded 2026-10-15).

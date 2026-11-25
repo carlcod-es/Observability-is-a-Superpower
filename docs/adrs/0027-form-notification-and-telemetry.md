@@ -4,7 +4,7 @@
 Accepted (2026-10-15)
 
 ## Context
-Spec `form-submission`: owner notification for every stored submission, and submission
+The requirement: owner notification for every stored submission, and submission
 telemetry (spans, a count by form and outcome, a log entry) without personal data. ADR-0016
 reserved the names `Acme.Forms` for the site's `ActivitySource` and `Meter`; ServiceDefaults
 already registers both. Umbraco 17 sends mail through `IEmailSender` (MailKit) using

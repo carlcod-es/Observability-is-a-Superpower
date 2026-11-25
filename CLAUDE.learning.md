@@ -4,7 +4,7 @@ Demo repo for the talk "Observability is a Superpower - Giving Developers and AI
 Vision": a local Umbraco site run by .NET Aspire, with logs, traces and metrics in the Aspire
 dashboard and Grafana LGTM, and read-only agent access to that telemetry over MCP. Kept for
 experimenting with Aspire and OpenTelemetry. Run instructions: `README.md`; architecture:
-`docs/project-setup.md`; decisions: `docs/adrs/` (cited as ADR-NNNN).
+`Architecture.md`; decisions: `docs/adrs/` (cited as ADR-NNNN).
 
 ## Principle
 - Keep it simple: the simplest option that shows the observability point. No edge-case

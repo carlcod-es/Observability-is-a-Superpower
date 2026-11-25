@@ -2,7 +2,7 @@
 
 ## Status
 Rejected (PO 2026-10-15): the generated password stays in AppHost user secrets; README
-"Connect to the database" says how to find it (change `add-demo-dashboard`, design.md D8).
+"Connect to the database" says how to find it.
 Source: PO 2026-10-15.
 
 ## Request

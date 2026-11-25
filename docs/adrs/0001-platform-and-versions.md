@@ -1,7 +1,7 @@
 # ADR-0001: Platform and versions
 
 ## Status
-Accepted (2026-10-07)
+Accepted (2026-10-07). Aspire version superseded by ADR-0035 (Aspire 17, 2026-11-24).
 
 ## Context
 The talk fixes the platform: .NET 10, Umbraco 17 LTS, .NET Aspire with AppHost and

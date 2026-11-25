@@ -1,8 +1,7 @@
-# FR-0004: Clean up review nits from `add-demo-foundation`
+# FR-0004: Clean up review nits from the site build
 
 ## Status
-Open (2026-10-15). Source: `add-demo-foundation` `review-followups.md` open nits, extracted before
-archive at the PO's request. Line numbers checked against `main` on 2026-10-15.
+Open (2026-10-15). Source: open review nits from the site build, extracted at the PO's request. Line numbers checked against `main` on 2026-10-15.
 
 ## Request
 Fix the small code, test, view and doc nits that reviews accepted at the prototype bar, in one
@@ -81,9 +80,17 @@ warnings, inaccurate comments, README gaps).
 
 ### Content (PO, uSync)
 30. `events.config` mainContent "Free talks and workshops" / "session" names event kinds; keep or
-    reword (spec `agency-site`: no format).
+    reword (events have no format; CLAUDE.md "Demo site").
 31. Services `seo-audit`, `adwords-audit`, `umbraco-upgrade`: summary repeated as the first body
     sentence; keep or reword.
+
+### From the booking and Act 3 reviews (added 2026-11-25)
+32. Typo "Initail Demo State" in `src/SuperPower.Web/Forms/Storage/FormSubmissionRepository.cs` (two
+    lines) and `src/SuperPower.ServiceDefaults/Extensions.cs`: "Initial".
+33. `tests/smoke/smoke.cs` counted-bookings check: `countedBefore` falls back to 0 when Prometheus cannot
+    answer, so a stale non-zero series could pass without a real increase. Fail on a null baseline or
+    retry once.
+34. Grafana "Error rate (5xx)" panel shows no data, not 0 %, when there is no site traffic at all.
 
 ## Notes
 - Not included (accepted as-is by reviews, no action): NU1902/NU1903 via Umbraco (ADR-0001),

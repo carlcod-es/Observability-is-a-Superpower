@@ -4,7 +4,7 @@
 Accepted (2026-10-08).
 
 ## Context
-Spec `agency-site` "Events": each event has a title, description, and start date and time;
+The requirement: each event has a title, description, and start date and time;
 events have no format, capacity or places (PO 2026-10-13). Past events show "This event has
 ended". The page type decides which form a page shows (ADR-0016); editors cannot choose a
 form. The talk is in the UK (BST); the production container runs in UTC. The existing site

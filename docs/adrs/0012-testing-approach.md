@@ -19,9 +19,8 @@ the riskiest integration is startup (install, migrations, seeding) on two databa
   with `dotnet run tests/smoke/smoke.cs` against a running AppHost; no new toolchain for
   attendees. Database reads use Microsoft.Data.SqlClient and Microsoft.Data.Sqlite at the
   versions already in the site's dependency graph, pinned centrally. The past-event booking
-  post is not scripted (no past event in seeded content); it stays a manual check recorded in
-  `verification.md`.
-- No Umbraco integration-test harness in this change.
+  post is not scripted (no past event in seeded content); it stays a manual check.
+- No Umbraco integration-test harness.
 - Runner (added 2026-10-08): xunit.v3 4.x on
   Microsoft.Testing.Platform, opted in by a root `global.json`
   (`"test": { "runner": "Microsoft.Testing.Platform" }`, no SDK pin). The .NET 10 SDK's

@@ -1,7 +1,7 @@
 # FR-0001: Grafana dashboards present after start, no manual import
 
 ## Status
-Built in change `add-demo-dashboard` (2026-10-15; ADR-0023). Source: `spike-grafana-dashboard` task 4.4 (stretch, not attempted).
+Done (2026-10-15; ADR-0023). Source: Grafana dashboard spike (stretch goal, not attempted).
 
 ## Request
 The demo's Grafana dashboards exist as soon as the local environment is up. No import step
@@ -9,7 +9,7 @@ before or during the talk, and none for attendees running the repo.
 
 ## Why
 Dashboards live in the `lgtm` container and are lost on every AppHost restart
-(`spike-grafana-dashboard` `findings.md`). Re-importing by hand on stage costs time and is a
+(found in the Grafana dashboard spike). Re-importing by hand on stage costs time and is a
 step to forget; attendees would need the same manual step.
 
 ## Acceptance criteria
@@ -25,10 +25,10 @@ step to forget; attendees would need the same manual step.
   whether the image ships a dashboard provider config or one must be mounted too.
 - Startup load only; live reload of edited JSON is not required (file-change events may not
   reach the container on Windows).
-- Planned home: change `add-demo-dashboard` (PO 2026-10-14), via `/opsx:propose`; Windows
-  confirmation alongside `add-demo-foundation` task 9.3.
+- Planned with the demo dashboard (PO 2026-10-14); Windows confirmation alongside the
+  cross-platform check.
 - PO 2026-10-14: if the provisioning mount fails verification, the AppHost imports the JSON on
   start (`POST /api/dashboards/db` on the `lgtm` resource-ready event); no manual import.
 - PO 2026-10-14: provision the community ASP.NET Core dashboard 19924 as well, unchanged except
   `${DS_PROMETHEUS}` replaced by the literal UID `prometheus` (the share form fails when saved
-  directly, `spike-grafana-dashboard` `findings.md` section 4).
+  directly).

@@ -5,7 +5,7 @@ Accepted (2026-10-07)
 
 ## Context
 CLAUDE.md fixes `AddAzureSqlServer(...).RunAsContainer()` so the same AppHost model deploys to
-Azure SQL. Spec `local-environment` requires a file-based mode for attendees without a
+Azure SQL. The requirements call for a file-based mode for attendees without a
 container runtime. Umbraco reads `ConnectionStrings:umbracoDbDSN` and
 `umbracoDbDSN_ProviderName`.
 
