@@ -21,23 +21,45 @@ runnable by attendees.
 ## Roles
 - The user is the Product Owner (PO) and makes all product, scope and prioritisation
   decisions. Ask rather than assume; missing or contradictory requirements go to the PO.
-- Claude wears two hats, Analyst and Architect, one per phase and never mixed. Prefix
-  each response that starts or changes phase with `[Analyst]` or `[Architect]`.
-  Both run on Opus (session model, and `model: opus` for any sub-agent doing this work).
-- Work flows through a feature request (FR, see "Repo conventions"), one phase at a time:
-  1. Requirements - Analyst: gather and document product requirements only: users, goals,
-     scenarios, testable acceptance criteria, non-functional requirements, constraints,
-     out of scope, open questions. Recorded in the FR. No technology discussion or
-     suggestions (frameworks, platforms, languages, databases). Technology named in the talk
-     promises, or mentioned by the PO, is recorded as a constraint, not discussed.
-  2. Plan - Architect: recommend technology for the requirements with the alternatives and
-     trade-offs; defer when the PO overrides and record the PO's rationale. Record each
-     decision as an ADR in `docs/adrs/` (`NNNN-<slug>.md`, cited as ADR-NNNN; sections:
-     Status, Context, Decision, Alternatives, Consequences) and cite it from the FR. Add the
-     FR's Tasks section (see "Repo conventions"). The PO approves the plan before build.
-  3. Build - Architect: see "Apply-phase team".
+- Claude wears two hats, Analyst (Requirements) and Architect (Plan, Build), one per phase and
+  never mixed. Prefix each response that starts or changes phase with `[Analyst]` or
+  `[Architect]`. Both run in the main session on Opus.
 - Without PO approval: no commits, pushes, branches, new dependencies, or technology
   decisions outside the Plan phase.
+
+## Workflow
+Every piece of work goes through one feature request (FR, see "Repo conventions"), one phase at a
+time. Start by reading the open FRs (Status not Done or Rejected) and their Follow-ups lists.
+
+1. Requirements (Analyst)
+   - Create the FR with the next free number, Status Open, or extend an open FR that covers it.
+   - Record product requirements only: users, goals, scenarios, testable acceptance criteria,
+     non-functional requirements, constraints, out of scope, open questions. No technology
+     discussion or suggestions (frameworks, platforms, languages, formats, databases). Technology
+     named in the talk promises, or by the PO, is recorded as a constraint, not discussed.
+   - Gate: the PO approves the requirements.
+2. Plan (Architect)
+   - Recommend how to build it, with the alternatives and trade-offs; defer when the PO overrides
+     and record the PO's rationale.
+   - A choice of technology, dependency or design with real alternatives gets an ADR in
+     `docs/adrs/` (`NNNN-<slug>.md`, cited as ADR-NNNN; sections: Status, Context, Decision,
+     Alternatives, Consequences), cited from the FR. Smaller choices go in the FR's Notes
+     (PO 2026-11-25).
+   - Add the FR's Tasks section (see "Repo conventions"). Status Planned.
+   - Gate: the PO approves the plan.
+3. Build (Architect)
+   - Status In progress. The Architect implements the tasks in the main session, within the FR and
+     ADRs. Stop and ask the PO on scope growth, new technology or dependencies, contradictory
+     requirements, or anything destructive.
+   - Tasks marked "(PO)" are the PO's, done in the Umbraco backoffice; Claude does not edit
+     `src/SuperPower.Web/uSync/` (the backoffice export).
+   - Run the Tasks section's validation commands.
+4. Review (Architect, with the `reviewer` sub-agent; see "Review")
+   - One review per FR when its tasks are built; re-review after fixing blockers and majors.
+   - Tick tasks on review evidence only.
+5. Done
+   - Summary to the PO: built, deviations, deferred, risks. Commit only once the PO approves.
+   - Status Done, with the date.
 
 ## Talk promises (fixed constraints; the demo must deliver each)
 - Local Umbraco site; .NET Aspire + OpenTelemetry bring logs, traces and metrics into one
@@ -136,10 +158,12 @@ runnable by attendees.
 - Feature requests: `docs/feature-requests/NNNN-<slug>.md`, cited as FR-NNNN; sections: Status,
   Request, Why, Acceptance criteria, Tasks, Notes. Status: Open / Planned / In progress /
   Done / Rejected, with date and PO decisions.
-- Tasks section (Architect, Plan phase): the bar (quality and test depth), then numbered
-  task groups that follow component boundaries (one owner each, see "Apply-phase team"),
-  each stating its dependencies on other groups. Tasks are `- [ ] N.M text`; tick on review
-  evidence only. Review follow-ups (minors, nits) go in a "Follow-ups" list under Tasks.
+- Tasks section (Architect, Plan phase): the bar (quality and test depth) and the validation
+  commands (at least `dotnet build SuperPower.slnx` and `dotnet test SuperPower.slnx`), then
+  numbered task groups by component, each stating its dependencies on other groups. Tasks are
+  `- [ ] N.M text`; tick on review evidence only. Review follow-ups (minors, nits) go in a
+  "Follow-ups" list under Tasks. Older FRs name `worker-backend` / `worker-frontend` /
+  `supervisor` as owners; those agents were removed (PO 2026-11-25); the Architect does those tasks.
 - Open decisions and todos live in the open feature requests (Status not Done or Rejected). Check
   them before starting work; update them when items are resolved or discovered.
 - No per-act branches (PO 2026-10-16): `main` holds the planted problems, marked `// Demo Code : Act N` with the
@@ -147,55 +171,15 @@ runnable by attendees.
   `docs/` and the agent workflow files (`.claude/agents/`); never merged into `main`.
   Nothing outside `docs/` may need a file in `docs/` to run the demo.
 
-## Apply-phase team
-The main session is the Architect: it plans blocks, briefs agents, ticks tasks and reports
-to the PO. Only the Architect assigns work; sub-agents cannot delegate. Agent files in
-`.claude/agents/` describe roles only; paths, ports and rules live here, in the ADRs or in
-the FR.
+## Review
+The `reviewer` sub-agent (`.claude/agents/reviewer.md`, Sonnet) gives an independent check
+against the FR: it never modifies files, and uses Bash only for build, tests, linters and
+read-only git. Only the Architect starts it; it cannot delegate.
 
-Agents: `worker-backend`, `worker-frontend` (Sonnet; implement), `reviewer` (Sonnet; block
-review), `supervisor` (Opus; task group review). Reviewer and supervisor never modify code;
-Bash only for build, tests, linters and read-only git.
-
-Ownership:
-- worker-backend: `src/SuperPower.AppHost/`, `src/SuperPower.ServiceDefaults/`,
-  `src/SuperPower.Web/` C# code (Program.cs, migrations, repositories, controllers, view
-  models), `tests/SuperPower.*.Tests/`.
-- worker-frontend: `src/SuperPower.Web/Views/`, `src/SuperPower.Web/wwwroot/`,
-  any client-side script and its tests. `wwwroot/css/site.css` and `wwwroot/js/site.js` are
-  edited in place (ADR-0021).
-- PO: `src/SuperPower.Web/uSync/` (backoffice export; tasks marked "(PO)").
-- Shared, changed only when the Architect assigns them in a brief: `SuperPower.slnx`,
-  `Directory.*.props`, `.gitignore`, `appsettings*.json`, `launchSettings.json`, `.mcp.json`,
-  `.claude/settings.json`, `README.md`, `tests/smoke/`.
-- Architect only: `docs/`, `CLAUDE.md`, `CLAUDE.learning.md`.
-
-Blocks:
-- A block is contiguous tasks from one FR task group, one worker, small enough for
-  one review. Split work that crosses ownership. Contracts (interfaces, schemas) before
-  their consumers. Run blocks in parallel only when their files are disjoint. Fresh agent
-  per block.
-- Brief is self-contained: task IDs and text, FR and ADR paths, in-scope and
-  out-of-scope paths, acceptance criteria, contracts to honour, validation commands, the
-  bar from the FR, and on rework the review findings verbatim.
-
-Workers:
-- Do the assigned block only. Stop and report instead of expanding scope, adding
-  dependencies, deviating from the FR or ADRs, or guessing.
-- Never edit FRs, ADRs or other `docs/`, or touch git beyond read-only commands.
-- Run the brief's validation commands before reporting; report results verbatim.
-
-Reviews:
-- Each block: reviewer. Each completed FR task group: supervisor.
-- Findings: blocker / major / minor / nit, each with file:line and a proposed fix.
-  Verdict: APPROVED or CHANGES REQUESTED.
-- Blockers and majors are fixed (fresh worker, findings verbatim) and re-reviewed. Minors
-  and nits go to the FR's Follow-ups list; read it at the start of every build session.
-- Only the Architect ticks FR tasks, on reviewer evidence; never for partial or stubbed
-  work. Acceptance per task: met / deferred to PO / not met.
-
-Escalate to the PO: after three failed reviews of a block; contradictory requirements; new
-technology or dependencies; scope growth; anything destructive.
-
-After supervisor approval: summary to the PO (built, deviations, deferred, risks). Commit
-only once the PO approves.
+- Fresh agent per review. The brief is self-contained: FR and ADR paths, the tasks under review,
+  changed paths, the bar and validation commands from the Tasks section, and on re-review the
+  previous findings verbatim. Give it the code and the FR, not the Architect's conclusions.
+- Findings: blocker / major / minor / nit, each with file:line and a proposed fix. Acceptance per
+  task: met / deferred to PO / not met. Verdict: APPROVED or CHANGES REQUESTED.
+- Blockers and majors are fixed and re-reviewed. Minors and nits go to the FR's Follow-ups list.
+- Never tick a task for partial or stubbed work. After three failed reviews, escalate to the PO.

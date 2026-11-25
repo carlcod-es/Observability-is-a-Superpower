@@ -32,7 +32,7 @@ these items were still open.
    - Keep personal data out of query strings: Development "Request starting" logs record the full query.
    - Do not show `aspire describe` output on screen: it shows the SQL Server sa password.
 7. Through the tunnel, attendees see Umbraco's defaults. Decide whether to replace the default
-   `favicon.ico` and the default 404 page (umbra.co links).
+   404 page (umbra.co links). Favicon: replaced by the duck, FR-0009 (PO 2026-11-25).
 8. Decide whether backoffice page loads (`/umbraco`, `/umbraco/login`) are traced.
 
 ### After the talk
